@@ -15,8 +15,9 @@ Trong phần Backend, bạn sẽ được học cách thiết kế Cơ sở dữ
 
 Trong phần Frontend, bạn sẽ áp dụng ReactJS 19 kết hợp cùng Tailwind CSS để xây dựng giao diện người dùng theo chuẩn Design System hiện đại, tích hợp Axios Interceptor, quản lý trạng thái toàn cục với Context API, xây dựng trình phát bài giảng đa phương tiện và xử lý luồng thi trắc nghiệm trực tuyến tự động chấm điểm và cấp chứng chỉ số UUID.`,
     thumbnailUrl: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800",
-    thumbnail: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800",
     category: { id: 1, name: "Lập trình Web", slug: "lap-trinh-web" },
+    subcategory: { id: "fullstack-dev", name: "Full-stack Development", slug: "full-stack-development" },
+    tags: ["Lập trình Web", "ReactJS", "React Hooks", "Spring Boot", "Full-stack Development", "spring-boot-react", "react-hooks", "jwt-auth", "REST API", "MySQL", "Tailwind CSS"],
     level: "Trung cấp",
     language: "Tiếng Việt",
     status: "PUBLISHED",
@@ -169,8 +170,9 @@ Trong phần Frontend, bạn sẽ áp dụng ReactJS 19 kết hợp cùng Tailwi
 
 Bạn sẽ làm chủ ngôn ngữ Python chuyên dùng cho phân tích dữ liệu, làm chủ các thư viện cốt lõi như NumPy, Pandas, Matplotlib, Seaborn để làm sạch và trực quan hóa dữ liệu. Tiếp theo là việc xây dựng các mô hình Machine Learning cổ điển (Linear Regression, Logistic Regression, Decision Tree, Random Forest, SVM) và mạng nơ-ron tích chập (CNN) cho nhận dạng hình ảnh với PyTorch.`,
     thumbnailUrl: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800",
-    thumbnail: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800",
-    category: { id: 2, name: "Trí tuệ nhân tạo & Data Science", slug: "ai-data-science" },
+    category: { id: 2, name: "Trí tuệ nhân tạo & Machine Learning", slug: "ai-data-science" },
+    subcategory: { id: "machine-learning-core", name: "Machine Learning Căn bản & Nâng cao", slug: "machine-learning-core" },
+    tags: ["ai-data-science", "machine-learning-core", "python-data", "scikit-learn", "deep-learning", "pytorch", "classification", "regression", "Machine Learning", "Python", "Deep Learning", "PyTorch", "Trí tuệ nhân tạo"],
     level: "Cơ bản đến Nâng cao",
     language: "Tiếng Việt",
     status: "PUBLISHED",
@@ -260,8 +262,9 @@ Bạn sẽ làm chủ ngôn ngữ Python chuyên dùng cho phân tích dữ li�
 
 Bạn sẽ làm quen với Expo Workflow hiện đại, các core components (View, Text, FlatList, ScrollView), styling với Flexbox, điều hướng đa màn hình với React Navigation, quản lý state với Redux Toolkit / Zustand và tích hợp các chức năng phần cứng (Camera, GPS, Push Notifications).`,
     thumbnailUrl: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=800",
-    thumbnail: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=800",
-    category: { id: 3, name: "Lập trình Di động", slug: "lap-trinh-di-dong" },
+    category: { id: 3, name: "Lập trình Mobile", slug: "lap-trinh-di-dong" },
+    subcategory: { id: "react-native", name: "React Native & Expo", slug: "react-native-expo" },
+    tags: ["lap-trinh-di-dong", "react-native-expo", "expo", "react-navigation", "react-native-reanimated", "async-storage", "React Native", "Expo", "Mobile", "iOS", "Android", "Redux Toolkit"],
     level: "Trung cấp",
     language: "Tiếng Việt",
     status: "PUBLISHED",
@@ -361,8 +364,9 @@ Bạn sẽ làm quen với Expo Workflow hiện đại, các core components (Vi
 
 Nội dung bao gồm: Phân rã Monolith sang Microservices, giao tiếp đồng bộ (gRPC/REST) và bất đồng bộ (Kafka/RabbitMQ), quản lý API Gateway, bảo mật OAuth2/OpenID Connect, đóng gói Docker Container đa tầng, điều phối cụm Kubernetes (K8s) và triển khai hạ tầng đám mây AWS.`,
     thumbnailUrl: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800",
-    thumbnail: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800",
-    category: { id: 1, name: "Lập trình Web", slug: "lap-trinh-web" },
+    category: { id: 4, name: "DevOps & Cloud Computing", slug: "devops-cloud" },
+    subcategory: { id: "container-k8s", name: "Containerization & Kubernetes", slug: "container-kubernetes" },
+    tags: ["devops-cloud", "container-kubernetes", "docker", "kubernetes", "k8s-cluster", "ci-cd-pipeline", "DevOps", "Docker", "Kubernetes", "AWS", "Microservices", "CI/CD"],
     level: "Nâng cao",
     language: "Tiếng Việt",
     status: "PUBLISHED",
@@ -452,8 +456,9 @@ Nội dung bao gồm: Phân rã Monolith sang Microservices, giao tiếp đồng
 
 Bạn sẽ thực hành từ quy trình nghiên cứu người dùng (User Research), xây dựng chân dung Persona, vẽ luồng người dùng (User Flow), Wireframing đến thiết kế giao diện chi tiết High-Fidelity trong Figma bằng Auto Layout 5.0, Variables, Component Sets và tạo Prototype chuyển động mượt mà.`,
     thumbnailUrl: "https://images.unsplash.com/photo-1581291518655-9523c932edcf?w=800",
-    thumbnail: "https://images.unsplash.com/photo-1581291518655-9523c932edcf?w=800",
-    category: { id: 1, name: "Lập trình Web", slug: "lap-trinh-web" },
+    category: { id: 5, name: "Thiết kế UI/UX & Sản phẩm số", slug: "thiet-ke-ui-ux" },
+    subcategory: { id: "figma-mastery", name: "Figma & Design Systems", slug: "figma-design-systems" },
+    tags: ["thiet-ke-ui-ux", "figma-design-systems", "figma", "design-tokens", "prototype", "UI/UX", "Figma", "Design Systems", "Auto Layout"],
     level: "Cơ bản đến Trung cấp",
     language: "Tiếng Việt",
     status: "PUBLISHED",
@@ -543,8 +548,9 @@ Bạn sẽ thực hành từ quy trình nghiên cứu người dùng (User Resea
 
 Bạn sẽ được thực hành trong môi trường Lab giả lập để phân tích cơ chế hoạt động của các lỗ hổng nguy hiểm theo danh mục OWASP Top 10: SQL Injection, Cross-Site Scripting (XSS), Cross-Site Request Forgery (CSRF), Insecure Direct Object References (IDOR), Broken Authentication, và các phương thức khai thác lỗ hổng Token JWT.`,
     thumbnailUrl: "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=800",
-    thumbnail: "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=800",
-    category: { id: 2, name: "Trí tuệ nhân tạo & Data Science", slug: "ai-data-science" },
+    category: { id: 6, name: "An ninh mạng & Bảo mật Web", slug: "an-ninh-mang" },
+    subcategory: { id: "web-security-owasp", name: "Bảo mật ứng dụng Web (OWASP)", slug: "web-security-owasp" },
+    tags: ["an-ninh-mang", "web-security-owasp", "owasp-top-10", "sql-injection-xss", "jwt-security", "pentest", "Bảo mật", "OWASP", "SQL Injection", "XSS", "JWT"],
     level: "Trung cấp đến Nâng cao",
     language: "Tiếng Việt",
     status: "PUBLISHED",
@@ -624,7 +630,231 @@ Bạn sẽ được thực hành trong môi trường Lab giả lập để phâ
       }
     ],
     reviews: []
+  },
+  {
+    id: 7,
+    title: "Xây dựng Ứng dụng Web Hiệu năng Cao với Next.js 15, TypeScript & GraphQL",
+    slug: "nextjs-15-typescript-graphql-performance",
+    shortDescription: "Tối ưu hóa Server-Side Rendering (SSR), Server Components, SEO nâng cao và quản lý dữ liệu linh hoạt với Apollo GraphQL.",
+    fullDescription: `Khóa học nâng cao dành cho Frontend và Fullstack Engineers muốn đưa trải nghiệm Web lên tầm cao mới với Next.js 15.
+
+Bạn sẽ làm quen với kiến trúc React Server Components (RSC), tối ưu hóa Core Web Vitals, Streaming SSR với Suspense, cấu hình Incremental Static Regeneration (ISR), tích hợp GraphQL Client và triển khai CDN Edge trên Vercel / AWS.`,
+    thumbnailUrl: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800",
+    category: { id: 1, name: "Lập trình Web", slug: "lap-trinh-web" },
+    subcategory: { id: "reactjs-frontend", name: "ReactJS & Frontend Frameworks", slug: "reactjs-frontend" },
+    tags: ["lap-trinh-web", "reactjs-frontend", "nextjs", "typescript-react", "react-hooks", "graphql", "Lập trình Web", "ReactJS", "Next.js", "TypeScript", "GraphQL", "SSR"],
+    level: "Nâng cao",
+    language: "Tiếng Việt",
+    status: "PUBLISHED",
+    rating: 4.93,
+    reviewCount: 520,
+    students: 2800,
+    enrolledCount: 2800,
+    updatedAt: "Tháng 8, 2026",
+    totalDuration: "28 giờ học",
+    totalSections: 2,
+    totalLessons: 4,
+    instructor: {
+      id: 2,
+      fullName: "TS. Nguyễn Văn A",
+      email: "instructor@lms.com",
+      title: "Senior Fullstack Architect",
+      avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200",
+      bio: "Hơn 12 năm kinh nghiệm thiết kế kiến trúc phần mềm doanh nghiệp.",
+      totalCourses: 6,
+      totalStudents: 45200,
+      rating: 4.92,
+    },
+    whatYouWillLearn: [
+      "Làm chủ Next.js 15 App Router, Server Actions và Server Components.",
+      "Tối ưu hóa tốc độ tải trang Core Web Vitals đạt điểm 100/100 Lighthouse.",
+      "Tích hợp GraphQL API với Apollo Client và TypeScript Type-Safety."
+    ],
+    requirements: ["Đã thành thạo React căn bản và JavaScript ES6+."],
+    sections: [
+      {
+        id: 701,
+        title: "Chương 1: Kiến trúc Next.js 15 & Server Components",
+        lessons: [
+          {
+            id: 7001,
+            title: "1.1 Giới thiệu App Router & Rendering Strategies (SSR, SSG, ISR)",
+            contentType: "VIDEO",
+            durationMinutes: 25,
+            startSeconds: 0,
+            contentUrl: "https://www.youtube.com/embed/bMknfKXIFA8",
+            notes: "So sánh Server Components và Client Components trong React 19."
+          },
+          {
+            id: 7002,
+            title: "1.2 Xử lý dữ liệu với Server Actions & Data Caching",
+            contentType: "VIDEO",
+            durationMinutes: 30,
+            startSeconds: 320,
+            contentUrl: "https://www.youtube.com/embed/bMknfKXIFA8",
+            notes: "Cơ chế Fetch Cache, Revalidation và xử lý Mutation không cần REST endpoint."
+          }
+        ]
+      },
+      {
+        id: 702,
+        title: "Chương 2: Tích hợp GraphQL & Triển khai Production",
+        lessons: [
+          {
+            id: 7003,
+            title: "2.1 Cấu hình Apollo Client & Schema Codegen",
+            contentType: "VIDEO",
+            durationMinutes: 35,
+            startSeconds: 650,
+            contentUrl: "https://www.youtube.com/embed/bMknfKXIFA8",
+            notes: "Tự động sinh TypeScript Types từ GraphQL Queries."
+          }
+        ]
+      }
+    ],
+    reviews: []
+  },
+  {
+    id: 8,
+    title: "Xây dựng Hệ thống Xử lý Dữ liệu Lớn với Apache Kafka & Spark",
+    slug: "apache-kafka-spark-big-data-streaming",
+    shortDescription: "Thu thập, xử lý dòng sự kiện thời gian thực (Real-time Stream Processing) và phân tích Big Data quy mô petabyte.",
+    fullDescription: `Khóa học chuyên sâu trang bị kiến trúc Data Pipeline hiện đại cho Data Engineers và Backend Developers.
+
+Nội dung gồm: Cơ chế hoạt động của Distributed Commit Log trong Apache Kafka, quản lý Consumer Groups, Partitioning, Kafka Streams, tích hợp Apache Spark Streaming và lưu trữ vào Data Lakehouse.`,
+    thumbnailUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800",
+    category: { id: 2, name: "Trí tuệ nhân tạo & Machine Learning", slug: "ai-data-science" },
+    subcategory: { id: "data-engineering", name: "Data Engineering & Big Data", slug: "data-engineering" },
+    tags: ["ai-data-science", "data-engineering", "apache-kafka", "spark-streaming", "data-pipeline", "Big Data", "Kafka", "Spark", "Data Engineering", "Real-time"],
+    level: "Nâng cao",
+    language: "Tiếng Việt",
+    status: "PUBLISHED",
+    rating: 4.97,
+    reviewCount: 410,
+    students: 2150,
+    enrolledCount: 2150,
+    updatedAt: "Tháng 8, 2026",
+    totalDuration: "32 giờ học",
+    totalSections: 2,
+    totalLessons: 4,
+    instructor: {
+      id: 3,
+      fullName: "PGS.TS. Lê Hoàng Nam",
+      email: "nam.le@lms.com",
+      title: "Principal Big Data Architect",
+      avatarUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300",
+      bio: "Chuyên gia dữ liệu lớn với hơn 14 năm kinh nghiệm tư vấn giải pháp ngân hàng.",
+      totalCourses: 3,
+      totalStudents: 38400,
+      rating: 4.96,
+    },
+    whatYouWillLearn: [
+      "Thiết kế Event-Driven Architecture chịu tải hàng triệu tin nhắn mỗi giây.",
+      "Xây dựng Real-time Data Streaming Pipeline với Kafka & Spark.",
+      "Giám sát cụm phân tán và tối ưu hóa Consumer Lag."
+    ],
+    requirements: ["Đã nắm vững lập trình Java/Scala hoặc Python."],
+    sections: [
+      {
+        id: 801,
+        title: "Chương 1: Kiến trúc Apache Kafka & Event Streaming",
+        lessons: [
+          {
+            id: 8001,
+            title: "1.1 Tổng quan Kafka Brokers, Topics & Partition Replication",
+            contentType: "VIDEO",
+            durationMinutes: 30,
+            startSeconds: 0,
+            contentUrl: "https://www.youtube.com/embed/mSZCN4wVw0I",
+            notes: "Cơ chế ghi tuần tự Disk I/O và Zero-Copy Network Transfer."
+          }
+        ]
+      }
+    ],
+    reviews: []
   }
+];
+
+// 6 Featured Instructors Data
+export const FEATURED_INSTRUCTORS = [
+  {
+    id: 1,
+    fullName: "TS. Nguyễn Văn A",
+    title: "Senior Fullstack Architect",
+    teachingField: "Lập trình Web & Spring Boot",
+    avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300",
+    totalCourses: 4,
+    totalStudents: 45200,
+    rating: 4.92,
+    bio: "Hơn 12 năm kinh nghiệm kiến trúc phần mềm doanh nghiệp và đào tạo hơn 45.000 học viên."
+  },
+  {
+    id: 2,
+    fullName: "PGS.TS. Lê Hoàng Nam",
+    title: "AI Research Lead & Data Specialist",
+    teachingField: "Trí tuệ nhân tạo & Machine Learning",
+    avatarUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300",
+    totalCourses: 3,
+    totalStudents: 38400,
+    rating: 4.96,
+    bio: "Tác giả của hơn 20 công bố quốc tế về Deep Learning và xử lý dữ liệu lớn thời gian thực."
+  },
+  {
+    id: 3,
+    fullName: "ThS. Trần Thị Mai",
+    title: "Mobile Lead Engineer",
+    teachingField: "Lập trình Di động (React Native & Flutter)",
+    avatarUrl: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300",
+    totalCourses: 2,
+    totalStudents: 29500,
+    rating: 4.88,
+    bio: "8 năm dẫn dắt phát triển các ứng dụng mobile thương mại điện tử hàng triệu lượt tải."
+  },
+  {
+    id: 4,
+    fullName: "Kỹ sư Phạm Quốc Bảo",
+    title: "Principal Cloud & DevOps Architect",
+    teachingField: "DevOps, Docker & Kubernetes (AWS Certified)",
+    avatarUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300",
+    totalCourses: 3,
+    totalStudents: 24100,
+    rating: 4.94,
+    bio: "Chuyên gia chuyển đổi hạ tầng đám mây cho các ngân hàng và tập đoàn tài chính."
+  },
+  {
+    id: 5,
+    fullName: "ThS. Vũ Hoàng Yến",
+    title: "Head of Product Design",
+    teachingField: "Thiết kế UI/UX & Design Systems",
+    avatarUrl: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=300",
+    totalCourses: 2,
+    totalStudents: 32000,
+    rating: 4.91,
+    bio: "10 năm kiến tạo ngôn ngữ thiết kế sản phẩm số cho thị trường Đông Nam Á và Mỹ."
+  },
+  {
+    id: 6,
+    fullName: "TS. Đỗ Minh Khang",
+    title: "Chuyên gia An toàn Thông tin (CISSP, CEH)",
+    teachingField: "An ninh mạng & Bảo mật Web OWASP",
+    avatarUrl: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=300",
+    totalCourses: 2,
+    totalStudents: 18900,
+    rating: 4.95,
+    bio: "Đánh giá an ninh mạng và rà soát lỗ hổng cho các hệ thống thanh toán quốc gia."
+  }
+];
+
+// Popular Categories for Carousel
+export const POPULAR_CATEGORIES = [
+  { id: 1, name: "Lập trình Web & Fullstack", slug: "lap-trinh-web", iconName: "Globe", coursesCount: 4, badge: "Phổ biến" },
+  { id: 2, name: "Trí tuệ nhân tạo & Machine Learning", slug: "ai-data-science", iconName: "Cpu", coursesCount: 3, badge: "Hot" },
+  { id: 3, name: "Lập trình Di động (React Native)", slug: "lap-trinh-di-dong", iconName: "Smartphone", coursesCount: 2, badge: "Xu hướng" },
+  { id: 4, name: "DevOps & Cloud Computing", slug: "devops-cloud", iconName: "Cloud", coursesCount: 2, badge: "Nhu cầu cao" },
+  { id: 5, name: "Thiết kế UI/UX & Figma", slug: "thiet-ke-ui-ux", iconName: "Layout", coursesCount: 2, badge: "Sáng tạo" },
+  { id: 6, name: "An ninh mạng & Web Security", slug: "an-ninh-mang", iconName: "ShieldCheck", coursesCount: 2, badge: "Thiết yếu" },
+  { id: 7, name: "Cơ sở dữ liệu & Tối ưu SQL", slug: "co-so-du-lieu", iconName: "Database", coursesCount: 2, badge: "Cốt lõi" },
+  { id: 8, name: "Khoa học Dữ liệu & Power BI", slug: "khoa-hoc-du-lieu", iconName: "BarChart3", coursesCount: 2, badge: "Thực chiến" }
 ];
 
 // Alias export to maintain backward compatibility

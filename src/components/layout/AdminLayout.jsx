@@ -196,8 +196,8 @@ export const AdminLayout = ({ currentTab, onNavigate, children }) => {
           </div>
         </header>
 
-        {/* Dynamic Admin View */}
-        <main className="flex-1">
+        {/* Dynamic Admin View with Unified Page Transition */}
+        <main key={currentTab} className="flex-1 animate-page-transition">
           {children}
         </main>
 

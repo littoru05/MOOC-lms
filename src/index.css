@@ -1,9 +1,14 @@
 @import "tailwindcss";
 
+@theme {
+  --font-serif: 'Merriweather', 'EB Garamond', 'Be Vietnam Pro', serif;
+  --font-sans: 'Be Vietnam Pro', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
 @layer base {
   :root {
-    --font-serif: 'Arial', Georgia, serif;
-    --font-sans: 'Geist', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-serif: 'Merriweather', 'EB Garamond', 'Be Vietnam Pro', serif;
+    --font-sans: 'Be Vietnam Pro', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     
     --color-canvas: #fafaf8;
     --color-surface: #ffffff;
@@ -21,10 +26,6 @@
     background-color: var(--color-canvas);
     color: var(--color-text-main);
   }
-
-  h1, h2, h3, .font-serif-heading {
-    font-family: var(--font-serif);
-  }
 }
 
 /* Custom scrollbars & smooth transitions */
@@ -41,4 +42,51 @@
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #74777e;
+}
+
+/* Unified Page Transitions Across All Roles & Levels */
+@keyframes unifiedPageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-page-transition {
+  animation: unifiedPageEnter 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: opacity, transform;
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.98) translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes slideDownFade {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-card-entry {
+  animation: fadeInScale 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-banner-entry {
+  animation: slideDownFade 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }

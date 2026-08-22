@@ -22,131 +22,123 @@ export const InstructorLayout = ({ currentTab, onNavigate, onCreateCourse, child
   return (
     <div className="min-h-screen flex bg-[#FAF9FC] text-[#1A1C1E]">
       
-      {/* Fixed Left Sidebar for Instructor (Matching Stitch Design) */}
-      <aside className="w-64 h-screen fixed left-0 top-0 border-r border-[#E4E4E0] bg-white flex flex-col justify-between py-6 z-40">
+      {/* Fixed Left Sidebar for Instructor - Deep Scholarly Navy Theme */}
+      <aside className="w-64 h-screen fixed left-0 top-0 bg-[#001D37] text-white flex flex-col justify-between py-6 z-40 border-r border-[#16324F] shadow-xl">
         <div>
           
           {/* Header Brand */}
           <div className="px-6 mb-8">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[#16324F] text-white flex items-center justify-center font-bold text-lg font-serif">
+              <div className="w-10 h-10 rounded-xl bg-[#16324F] border border-blue-400/30 text-white flex items-center justify-center font-extrabold text-lg font-serif shadow-md">
                 E
               </div>
               <div>
-                <h2 className="font-serif font-bold text-base text-[#001D37]">Instructor Portal</h2>
-                <p className="text-[11px] text-[#5E5E5E]">Academic Management</p>
+                <h2 className="font-serif font-extrabold text-base text-white tracking-wide">Instructor Portal</h2>
+                <p className="text-[10px] text-amber-400 uppercase tracking-widest font-bold">EduMOOC Studio</p>
               </div>
             </div>
           </div>
 
           {/* Nav Items */}
-          <nav className="space-y-1 px-3">
+          <nav className="space-y-1.5 px-3">
+            <div className="px-3 py-1 text-[10px] font-bold text-blue-300/60 uppercase tracking-wider">
+              Quản lý giảng dạy
+            </div>
+
             <button
               onClick={() => onNavigate('instructor-dashboard')}
-              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-xs font-medium transition-colors ${
+              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs transition-all cursor-pointer ${
                 currentTab === 'instructor-dashboard'
-                  ? 'bg-[#16324F] text-white font-semibold'
-                  : 'text-[#5E5E5E] hover:bg-[#FAF9FC] hover:text-[#1A1C1E]'
+                  ? 'bg-[#16324F] text-white font-bold border-l-4 border-amber-400 shadow-md'
+                  : 'text-slate-300 hover:bg-white/10 hover:text-white font-medium'
               }`}
             >
-              <LayoutDashboard className="w-4 h-4" />
+              <LayoutDashboard className="w-4 h-4 text-amber-400" />
               <span>Bảng điều khiển & Khóa học</span>
             </button>
 
             <button
               onClick={() => onNavigate('instructor-create-course')}
-              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-xs font-medium transition-colors ${
+              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs transition-all cursor-pointer ${
                 currentTab === 'instructor-create-course'
-                  ? 'bg-[#16324F] text-white font-semibold'
-                  : 'text-[#5E5E5E] hover:bg-[#FAF9FC] hover:text-[#1A1C1E]'
+                  ? 'bg-[#16324F] text-white font-bold border-l-4 border-emerald-400 shadow-md'
+                  : 'text-slate-300 hover:bg-white/10 hover:text-white font-medium'
               }`}
             >
-              <Plus className="w-4 h-4 text-emerald-600" />
+              <Plus className="w-4 h-4 text-emerald-400" />
               <span>Tạo khóa học mới</span>
             </button>
 
             <button
               onClick={() => onNavigate('instructor-course-editor')}
-              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-xs font-medium transition-colors ${
+              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs transition-all cursor-pointer ${
                 currentTab === 'instructor-course-editor'
-                  ? 'bg-[#16324F] text-white font-semibold'
-                  : 'text-[#5E5E5E] hover:bg-[#FAF9FC] hover:text-[#1A1C1E]'
+                  ? 'bg-[#16324F] text-white font-bold border-l-4 border-blue-400 shadow-md'
+                  : 'text-slate-300 hover:bg-white/10 hover:text-white font-medium'
               }`}
             >
-              <Edit3 className="w-4 h-4" />
+              <Edit3 className="w-4 h-4 text-blue-400" />
               <span>Soạn bài học & Đề cương</span>
             </button>
 
             <button
               onClick={() => onNavigate('instructor-quiz-builder')}
-              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-xs font-medium transition-colors ${
+              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs transition-all cursor-pointer ${
                 currentTab === 'instructor-quiz-builder'
-                  ? 'bg-[#16324F] text-white font-semibold'
-                  : 'text-[#5E5E5E] hover:bg-[#FAF9FC] hover:text-[#1A1C1E]'
+                  ? 'bg-[#16324F] text-white font-bold border-l-4 border-purple-400 shadow-md'
+                  : 'text-slate-300 hover:bg-white/10 hover:text-white font-medium'
               }`}
             >
-              <HelpCircle className="w-4 h-4" />
+              <HelpCircle className="w-4 h-4 text-purple-400" />
               <span>Soạn đề thi Quiz</span>
             </button>
 
             <button
               onClick={() => onNavigate('instructor-student-progress')}
-              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-xs font-medium transition-colors ${
+              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs transition-all cursor-pointer ${
                 currentTab === 'instructor-student-progress'
-                  ? 'bg-[#16324F] text-white font-semibold'
-                  : 'text-[#5E5E5E] hover:bg-[#FAF9FC] hover:text-[#1A1C1E]'
+                  ? 'bg-[#16324F] text-white font-bold border-l-4 border-cyan-400 shadow-md'
+                  : 'text-slate-300 hover:bg-white/10 hover:text-white font-medium'
               }`}
             >
-              <Users className="w-4 h-4" />
+              <Users className="w-4 h-4 text-cyan-400" />
               <span>Tiến độ học viên</span>
             </button>
 
             <button
               onClick={() => onNavigate('instructor-profile')}
-              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-xs font-medium transition-colors ${
+              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs transition-all cursor-pointer ${
                 currentTab === 'instructor-profile'
-                  ? 'bg-[#16324F] text-white font-semibold'
-                  : 'text-[#5E5E5E] hover:bg-[#FAF9FC] hover:text-[#1A1C1E]'
+                  ? 'bg-[#16324F] text-white font-bold border-l-4 border-rose-400 shadow-md'
+                  : 'text-slate-300 hover:bg-white/10 hover:text-white font-medium'
               }`}
             >
-              <User className="w-4 h-4" />
+              <User className="w-4 h-4 text-rose-400" />
               <span>Hồ sơ cá nhân</span>
             </button>
           </nav>
-
-          {/* Create New Course Primary Button */}
-          <div className="px-4 mt-6">
-            <button
-              onClick={onCreateCourse}
-              className="w-full py-2.5 bg-[#16324F] hover:bg-[#001D37] text-white text-xs font-semibold rounded-lg flex items-center justify-center gap-2 transition-colors shadow-xs"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Tạo khóa học mới</span>
-            </button>
-          </div>
-
         </div>
 
         {/* Sidebar Bottom: Instructor Profile & Logout */}
-        <div className="px-4 border-t border-[#E4E4E0] pt-4 space-y-3">
+        <div className="px-4 border-t border-[#16324F] pt-4 space-y-3">
           <button
             onClick={() => onNavigate('instructor-profile')}
-            className="w-full flex items-center gap-3 text-left p-1.5 rounded-lg hover:bg-[#FAF9FC] transition-colors"
+            className="w-full flex items-center gap-3 text-left p-2 rounded-xl bg-[#0A2540] hover:bg-[#16324F] transition-all border border-[#16324F] cursor-pointer"
           >
             <img
               src={user?.avatarUrl || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150'}
               alt={user?.fullName}
-              className="w-9 h-9 rounded-full object-cover border border-[#E4E4E0]"
+              className="w-9 h-9 rounded-full object-cover border-2 border-amber-400"
             />
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-bold text-[#1A1C1E] truncate">{user?.fullName || 'TS. Nguyễn Văn A'}</p>
-              <p className="text-[10px] text-[#16324F] font-semibold">Xem & Đổi hồ sơ →</p>
+              <p className="text-xs font-bold text-white truncate">{user?.fullName || 'TS. Nguyễn Văn A'}</p>
+              <p className="text-[10px] text-amber-300 font-semibold">Giảng viên Chuyên môn →</p>
             </div>
           </button>
 
           <button
             onClick={logout}
-            className="w-full py-1.5 px-3 bg-[#FFDAD6]/50 hover:bg-[#FFDAD6] text-[#BA1A1A] text-xs font-semibold rounded-md flex items-center justify-center gap-1.5 transition-colors"
+            className="w-full py-2 px-3 bg-red-500/20 hover:bg-red-500/30 text-red-300 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition-all border border-red-500/30 cursor-pointer"
           >
             <LogOut className="w-3.5 h-3.5" />
             <span>Đăng xuất</span>
@@ -221,8 +213,8 @@ export const InstructorLayout = ({ currentTab, onNavigate, onCreateCourse, child
           </div>
         </header>
 
-        {/* Dynamic View */}
-        <main className="flex-1">
+        {/* Dynamic View with Unified Page Transition */}
+        <main key={currentTab} className="flex-1 animate-page-transition">
           {children}
         </main>
 

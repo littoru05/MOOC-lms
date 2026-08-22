@@ -10,6 +10,7 @@ import { AdminLayout } from './components/layout/AdminLayout';
 
 // Student Pages
 import { ExplorePage } from './pages/student/ExplorePage';
+import { CourseListingPage } from './pages/student/CourseListingPage';
 import { CourseDetailPage } from './pages/student/CourseDetailPage';
 import { CoursePlayerPage } from './pages/student/CoursePlayerPage';
 import { QuizIntroPage } from './pages/student/QuizIntroPage';
@@ -36,6 +37,7 @@ import { AdminProfilePage } from './pages/admin/AdminProfilePage';
 function AppContent() {
   const { currentRole } = useAuth();
   const [currentTab, setCurrentTab] = useState('student-explore');
+  const [exploreFilterQuery, setExploreFilterQuery] = useState('');
   const [activeCourseSlug, setActiveCourseSlug] = useState('fullstack-spring-boot-reactjs');
   const [activeCourseId, setActiveCourseId] = useState(1);
   const [activeQuizId, setActiveQuizId] = useState(1);
@@ -43,9 +45,9 @@ function AppContent() {
   const [quizResultData, setQuizResultData] = useState(null);
   const [initialCertCode, setInitialCertCode] = useState('');
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [authModalMode, setAuthModalMode] = useState('login');
+  const [authModalMode, setAuthModalMode] = useState('LOGIN');
 
-  const handleOpenAuthModal = (mode = 'login') => {
+  const handleOpenAuthModal = (mode = 'LOGIN') => {
     setAuthModalMode(mode);
     setIsAuthModalOpen(true);
   };
@@ -62,6 +64,24 @@ function AppContent() {
   };
 
   // Student Navigation Handlers
+  const handleStudentNavigate = (tab, filterQuery = '') => {
+    if (tab === 'student-explore') {
+      const q = typeof filterQuery === 'string' ? filterQuery.trim() : '';
+      if (q && q !== 'all') {
+        setExploreFilterQuery(q);
+        setCurrentTab('student-course-listing');
+      } else {
+        setExploreFilterQuery('');
+        setCurrentTab('student-explore');
+      }
+      return;
+    }
+    if (tab === 'student-course-listing') {
+      setExploreFilterQuery(typeof filterQuery === 'string' ? filterQuery : '');
+    }
+    setCurrentTab(tab);
+  };
+
   const handleSelectCourse = (slugOrId) => {
     setActiveCourseSlug(slugOrId);
     setCurrentTab('student-course-detail');
@@ -116,11 +136,21 @@ function AppContent() {
       {isStudentRoute && (
         <StudentLayout
           currentTab={currentTab}
-          onNavigate={(tab) => setCurrentTab(tab)}
+          onNavigate={handleStudentNavigate}
           onOpenAuthModal={handleOpenAuthModal}
         >
           {currentTab === 'student-explore' && (
-            <ExplorePage onSelectCourse={handleSelectCourse} />
+            <ExplorePage
+              onSelectCourse={handleSelectCourse}
+            />
+          )}
+
+          {currentTab === 'student-course-listing' && (
+            <CourseListingPage
+              filterQuery={exploreFilterQuery}
+              onSelectCourse={handleSelectCourse}
+              onNavigate={handleStudentNavigate}
+            />
           )}
 
           {currentTab === 'student-course-detail' && (
