@@ -166,7 +166,7 @@ export const MyCertificatesPage = ({ initialCode }) => {
                 <Printer className="w-3.5 h-3.5" /> In chứng chỉ
               </button>
               <a
-                href={`http://localhost:8080/api/v1/certificates/download/${verifiedCert.certificateCode}`}
+                href={certificateApi.getDownloadUrl(verifiedCert.certificateCode)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="px-4 py-2 bg-[#16324F] hover:bg-[#001D37] text-white text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-colors"

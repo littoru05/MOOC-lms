@@ -1,4 +1,5 @@
 import React from 'react';
+import { certificateApi } from '../../api/certificateApi';
 import { Award, CheckCircle, XCircle, ArrowLeft, Download, ExternalLink, RefreshCw } from 'lucide-react';
 
 export const QuizResultPage = ({ result, onBackToCourse, onRetryQuiz, onViewCertificate }) => {
@@ -23,89 +24,79 @@ export const QuizResultPage = ({ result, onBackToCourse, onRetryQuiz, onViewCert
         {/* Result Card */}
         <div className="bg-white border border-[#E4E4E0] rounded-xl p-8 text-center shadow-xs">
           
-          {/* Status Icon */}
-          <div className="mb-4 inline-flex items-center justify-center">
+          <div className="flex justify-center mb-4">
             {isPassed ? (
-              <div className="w-16 h-16 rounded-full bg-[#22C55E]/10 flex items-center justify-center text-[#22C55E]">
-                <CheckCircle className="w-10 h-10" />
+              <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center border-4 border-emerald-100 animate-in zoom-in">
+                <CheckCircle className="w-8 h-8" />
               </div>
             ) : (
-              <div className="w-16 h-16 rounded-full bg-[#BA1A1A]/10 flex items-center justify-center text-[#BA1A1A]">
-                <XCircle className="w-10 h-10" />
+              <div className="w-16 h-16 bg-rose-50 text-rose-600 rounded-full flex items-center justify-center border-4 border-rose-100 animate-in zoom-in">
+                <XCircle className="w-8 h-8" />
               </div>
             )}
           </div>
 
-          <h2 className="text-2xl font-bold font-serif text-[#001D37]">
-            {isPassed ? 'Chúc mừng! Bạn đã ĐẠT bài kiểm tra' : 'Bạn CHƯA ĐẠT điểm yêu cầu'}
+          <h2 className="text-xl font-bold font-serif text-[#001D37]">
+            {isPassed ? 'Chúc mừng bạn đã vượt qua bài kiểm tra!' : 'Rất tiếc, bạn chưa đạt điểm yêu cầu!'}
           </h2>
-
           <p className="text-xs text-[#5E5E5E] mt-2 max-w-md mx-auto leading-relaxed">
-            {result.message}
+            {result.message || (isPassed
+              ? 'Bạn đã hoàn thành xuất sắc yêu cầu của khóa học và đủ điều kiện nhận chứng chỉ.'
+              : 'Hãy ôn tập lại kiến thức các bài học trước và làm lại bài kiểm tra.')}
           </p>
 
-          {/* Score Counter */}
-          <div className="my-6 py-4 px-6 bg-[#FAF9FC] border border-[#E4E4E0] rounded-xl inline-flex items-center gap-6">
-            <div>
-              <p className="text-[11px] text-[#6B6B6B] uppercase font-semibold">Điểm số của bạn</p>
-              <p className={`text-3xl font-bold font-serif ${isPassed ? 'text-[#22C55E]' : 'text-[#BA1A1A]'}`}>
-                {result.score}%
-              </p>
-            </div>
-            <div className="border-l border-[#E4E4E0] pl-6">
-              <p className="text-[11px] text-[#6B6B6B] uppercase font-semibold">Điểm chuẩn qua môn</p>
-              <p className="text-3xl font-bold font-serif text-[#001D37]">
-                {result.passingScore}%
-              </p>
-            </div>
+          {/* Score Box */}
+          <div className="my-6 p-4 bg-[#FAF9FC] border border-[#E4E4E0] rounded-xl inline-block min-w-[200px]">
+            <p className="text-3xl font-bold font-serif text-[#16324F]">
+              {result.score} / {result.totalScore || 100}
+            </p>
+            <p className="text-xs font-semibold text-[#5E5E5E] mt-1">
+              Điểm số ({result.score}%) • Cần đạt: {result.passingScore}%
+            </p>
           </div>
 
+
           {/* Actions */}
-          <div className="flex items-center justify-center gap-3">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <button
               onClick={onBackToCourse}
-              className="px-4 py-2 bg-white border border-[#E4E4E0] hover:bg-[#FAF9FC] text-[#1A1C1E] text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-colors"
+              className="w-full sm:w-auto px-5 py-2.5 bg-white border border-[#E4E4E0] hover:bg-[#FAF9FC] text-[#1A1C1E] text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-colors"
             >
-              <ArrowLeft className="w-3.5 h-3.5" /> Quay lại bài học
+              <ArrowLeft className="w-3.5 h-3.5" /> Quay về bài học
             </button>
-            {!isPassed && (
+
+            {!isPassed && onRetryQuiz && (
               <button
                 onClick={onRetryQuiz}
-                className="px-4 py-2 bg-[#16324F] hover:bg-[#001D37] text-white text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-colors"
+                className="w-full sm:w-auto px-5 py-2.5 bg-[#16324F] hover:bg-[#001D37] text-white text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-colors"
               >
                 <RefreshCw className="w-3.5 h-3.5" /> Làm lại bài thi
               </button>
             )}
           </div>
-
         </div>
 
-        {/* Certificate Awarded Section */}
-        {cert && (
-          <div className="bg-white border-2 border-[#16324F] rounded-xl p-8 shadow-sm relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-[#16324F]/5 rounded-bl-full pointer-events-none" />
-            
-            <div className="flex items-center gap-2 text-amber-600 text-xs font-bold uppercase tracking-wider mb-2">
-              <Award className="w-4 h-4" />
-              <span>Chứng chỉ số Tốt nghiệp Đã Cấp</span>
+        {/* Certificate Claim Card (If Passed & Issued) */}
+        {isPassed && cert && (
+          <div className="bg-white border-2 border-emerald-200 rounded-xl p-6 shadow-xs animate-in fade-in slide-in-from-bottom-2">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center">
+                <Award className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-serif font-bold text-sm text-[#001D37]">Chứng chỉ hoàn thành khóa học</h3>
+                <p className="text-[11px] text-[#5E5E5E]">Đã được hệ thống xác thực và cấp mã định danh số</p>
+              </div>
             </div>
 
-            <h3 className="text-xl font-bold font-serif text-[#001D37]">
-              Chứng nhận hoàn thành: {cert.courseTitle}
-            </h3>
-
-            <div className="mt-4 p-4 bg-[#FAF9FC] border border-[#E4E4E0] rounded-lg text-xs space-y-2">
+            <div className="p-4 bg-[#FAF9FC] border border-[#E4E4E0] rounded-lg space-y-2 text-xs">
               <div className="flex justify-between">
-                <span className="text-[#5E5E5E]">Học viên:</span>
-                <span className="font-semibold text-[#1A1C1E]">{cert.studentName}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-[#5E5E5E]">Giảng viên:</span>
-                <span className="font-semibold text-[#1A1C1E]">{cert.instructorName}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-[#5E5E5E]">Mã xác thực (UUID):</span>
+                <span className="text-[#5E5E5E]">Mã chứng chỉ (UUID):</span>
                 <span className="font-mono font-bold text-[#16324F]">{cert.certificateCode}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-[#5E5E5E]">Người nhận:</span>
+                <span className="font-semibold text-[#1A1C1E]">{cert.studentName}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-[#5E5E5E]">Ngày cấp:</span>
@@ -121,7 +112,7 @@ export const QuizResultPage = ({ result, onBackToCourse, onRetryQuiz, onViewCert
                 <ExternalLink className="w-3.5 h-3.5" /> Tra cứu & Xem chứng chỉ
               </button>
               <a
-                href={`http://localhost:8080/api/v1/certificates/download/${cert.certificateCode}`}
+                href={certificateApi.getDownloadUrl(cert.certificateCode)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="px-4 py-2.5 bg-white border border-[#E4E4E0] hover:bg-[#FAF9FC] text-[#1A1C1E] text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-colors"
