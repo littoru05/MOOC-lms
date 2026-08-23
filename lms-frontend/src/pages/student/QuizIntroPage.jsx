@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { quizApi } from '../../api/quizApi';
 import { getAllQuizzes, getCourseBySlugOrId } from '../../mocks/courses';
 import { 
@@ -11,11 +12,30 @@ import {
   Play, 
   ShieldCheck, 
   BookOpen, 
-  Sparkles,
-  Check
+  Sparkles, 
+  Check 
 } from 'lucide-react';
 
-export const QuizIntroPage = ({ quizId, enrollmentId, onConfirmStart, onCancel }) => {
+export const QuizIntroPage = ({ quizId: quizIdProp, enrollmentId: enrollmentIdProp, onConfirmStart, onCancel }) => {
+  const { quizId: paramQuizId } = useParams();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+
+  const quizId = quizIdProp || paramQuizId || 1;
+  const enrollmentId = enrollmentIdProp || searchParams.get('enrollmentId');
+
+  const handleCancel = () => {
+    if (onCancel) onCancel();
+    else navigate(-1);
+  };
+
+  const handleConfirm = (qId, enrollId) => {
+    if (onConfirmStart) {
+      onConfirmStart(qId, enrollId);
+    } else {
+      navigate(`/quiz/${qId}/take${enrollId ? `?enrollmentId=${enrollId}` : ''}`);
+    }
+  };
   const [quiz, setQuiz] = useState(null);
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -159,14 +179,14 @@ export const QuizIntroPage = ({ quizId, enrollmentId, onConfirmStart, onCancel }
           {/* Action Confirmation Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-[#E4E4E0]">
             <button
-              onClick={onCancel}
-              className="w-full sm:w-auto px-6 py-2.5 border border-[#E4E4E0] hover:bg-[#FAF9FC] text-[#5E5E5E] text-xs font-semibold rounded-xl transition-colors"
+              onClick={handleCancel}
+              className="w-full sm:w-auto px-6 py-2.5 border border-[#E4E4E0] hover:bg-[#FAF9FC] text-[#5E5E5E] text-xs font-semibold rounded-xl transition-colors cursor-pointer"
             >
               Quay lại ôn tập thêm
             </button>
 
             <button
-              onClick={() => onConfirmStart(quiz.id, enrollmentId)}
+              onClick={() => handleConfirm(quiz.id, enrollmentId)}
               className="w-full sm:w-auto px-8 py-3 bg-[#16324F] hover:bg-[#001D37] text-white text-xs font-semibold rounded-xl transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer hover:gap-3"
             >
               <Play className="w-4 h-4 fill-white" />

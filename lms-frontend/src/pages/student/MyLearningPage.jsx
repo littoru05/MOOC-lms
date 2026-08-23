@@ -1,11 +1,23 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { learningApi } from '../../api/learningApi';
 import { getCourseBySlugOrId } from '../../mocks/courses';
 import { BookOpen, Play, Award, CheckCircle2, Clock } from 'lucide-react';
 
 export const MyLearningPage = ({ onStartLearning, onExplore }) => {
+  const navigate = useNavigate();
   const [enrollments, setEnrollments] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const handleStart = (cid) => {
+    if (onStartLearning) onStartLearning(cid);
+    else navigate(`/learn/${cid}`);
+  };
+
+  const handleExplore = () => {
+    if (onExplore) onExplore();
+    else navigate('/courses');
+  };
 
   const fetchEnrollments = async () => {
     try {
@@ -68,7 +80,7 @@ export const MyLearningPage = ({ onStartLearning, onExplore }) => {
           </div>
 
           <button
-            onClick={onExplore}
+            onClick={handleExplore}
             className="px-5 py-3 bg-amber-500 hover:bg-amber-400 text-[#001D37] text-xs sm:text-sm font-extrabold rounded-xl self-start md:self-auto transition-all shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] cursor-pointer shrink-0"
           >
             Khám phá thêm khóa học
@@ -88,7 +100,7 @@ export const MyLearningPage = ({ onStartLearning, onExplore }) => {
             <h3 className="text-base font-bold font-serif text-[#001D37]">Bạn chưa ghi danh khóa học nào</h3>
             <p className="text-xs text-[#5E5E5E]">Hãy khám phá thư viện khóa học và bắt đầu hành trình nâng cao năng lực ngay hôm nay!</p>
             <button
-              onClick={onExplore}
+              onClick={handleExplore}
               className="mt-2 px-5 py-2.5 bg-[#16324F] hover:bg-[#001D37] text-white text-xs font-bold rounded-xl shadow-xs cursor-pointer"
             >
               Khám phá khóa học ngay
@@ -104,7 +116,7 @@ export const MyLearningPage = ({ onStartLearning, onExplore }) => {
                 <div
                   key={e.id}
                   className="bg-white border border-[#E4E4E0] rounded-2xl overflow-hidden shadow-xs hover:shadow-xl hover:border-[#16324F] hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between group cursor-pointer"
-                  onClick={() => onStartLearning(e.courseId || course?.id)}
+                  onClick={() => handleStart(e.courseId || course?.id)}
                 >
                   <div>
                     <div className="aspect-video w-full bg-[#EFEDF0] relative overflow-hidden">
@@ -151,7 +163,7 @@ export const MyLearningPage = ({ onStartLearning, onExplore }) => {
                     <button
                       onClick={(evt) => {
                         evt.stopPropagation();
-                        onStartLearning(e.courseId || course?.id);
+                        handleStart(e.courseId || course?.id);
                       }}
                       className="w-full py-2.5 bg-[#16324F] hover:bg-[#001D37] text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-all shadow-xs cursor-pointer active:scale-[0.98]"
                     >

@@ -17,15 +17,20 @@ import {
   GraduationCap,
   Tag
 } from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { CourseCardWithPreview } from '../../components/course/CourseCardWithPreview';
 import { COURSES } from '../../mocks/courses';
 import { findCategoryHierarchyBySlug } from '../../data/categoryMenu';
 
 export const CourseListingPage = ({ 
-  filterQuery = '', 
+  filterQuery: filterQueryProp = '', 
   onSelectCourse, 
   onNavigate 
 }) => {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const filterQuery = filterQueryProp || searchParams.get('category') || searchParams.get('q') || '';
+
   // Parsing Category Info from Filter Query
   const categoryInfo = useMemo(() => {
     return findCategoryHierarchyBySlug(filterQuery) || {
@@ -500,7 +505,7 @@ export const CourseListingPage = ({
                   >
                     <CourseCardWithPreview
                       course={course}
-                      onSelectCourse={onSelectCourse}
+                      onSelectCourse={onSelectCourse || ((slug) => navigate(`/courses/${slug}`))}
                     />
                   </div>
                 ))}
@@ -529,7 +534,7 @@ export const CourseListingPage = ({
                     </button>
                   )}
                   <button
-                    onClick={() => onNavigate('student-explore', 'all')}
+                    onClick={() => onNavigate ? onNavigate('student-explore', 'all') : navigate('/courses')}
                     className="px-5 py-2.5 bg-[#16324F] hover:bg-[#001D37] text-white rounded-xl text-xs font-bold transition-all cursor-pointer shadow-md hover:shadow-lg active:scale-95"
                   >
                     Khám phá tất cả khóa học

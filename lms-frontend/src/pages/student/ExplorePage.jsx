@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { courseApi } from '../../api/courseApi';
 import { COURSES, FEATURED_INSTRUCTORS, POPULAR_CATEGORIES } from '../../mocks/courses';
 import { Carousel } from '../../components/common/Carousel';
@@ -114,6 +115,8 @@ export const ExplorePage = ({ onSelectCourse, initialFilterQuery = '' }) => {
       c.instructor?.fullName?.toLowerCase().includes(searchQuery.toLowerCase());
     return matchCat && matchLevel && matchSearch;
   });
+
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen pb-20 space-y-12">
@@ -370,7 +373,7 @@ export const ExplorePage = ({ onSelectCourse, initialFilterQuery = '' }) => {
               <CourseCardWithPreview
                 key={course.id}
                 course={course}
-                onSelectCourse={onSelectCourse}
+                onSelectCourse={onSelectCourse || ((slug) => navigate(`/courses/${slug}`))}
               />
             ))}
           </div>

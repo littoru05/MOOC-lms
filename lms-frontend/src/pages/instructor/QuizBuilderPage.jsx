@@ -1,10 +1,20 @@
 import React, { useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { quizApi } from '../../api/quizApi';
 import { useToast } from '../../context/ToastContext';
 import { saveQuizToStore, getCourseBySlugOrId } from '../../mocks/courses';
 import { ArrowLeft, Plus, Trash2, CheckCircle2, Save, HelpCircle } from 'lucide-react';
 
-export const QuizBuilderPage = ({ courseId, onBack }) => {
+export const QuizBuilderPage = ({ courseId: courseIdProp, onBack }) => {
+  const { courseId: paramCourseId } = useParams();
+  const navigate = useNavigate();
+  const courseId = courseIdProp || paramCourseId || 1;
+
+  const handleBack = () => {
+    if (onBack) onBack();
+    else navigate('/instructor/dashboard');
+  };
+
   const { showToast } = useToast();
   const [title, setTitle] = useState('Bài kiểm tra Đánh giá Năng lực Cuối khóa');
   const [passingScore, setPassingScore] = useState(80);
@@ -122,10 +132,10 @@ export const QuizBuilderPage = ({ courseId, onBack }) => {
       }
 
       showToast('Đã lưu và xuất bản đề thi Quiz thành công! Đề thi đã hiển thị cho cả Học viên và Giảng viên.', 'success');
-      onBack();
+      handleBack();
     } catch (err) {
       showToast('Đã lưu đề thi vào hệ thống!', 'success');
-      onBack();
+      handleBack();
     } finally {
       setSaving(false);
     }
@@ -139,8 +149,8 @@ export const QuizBuilderPage = ({ courseId, onBack }) => {
         <div className="flex items-center justify-between border-b border-[#E4E4E0] pb-4">
           <div className="flex items-center gap-3">
             <button
-              onClick={onBack}
-              className="p-1.5 hover:bg-[#F4F3F6] rounded-md text-[#5E5E5E]"
+              onClick={handleBack}
+              className="p-1.5 hover:bg-[#F4F3F6] rounded-md text-[#5E5E5E] cursor-pointer"
             >
               <ArrowLeft className="w-4 h-4" />
             </button>

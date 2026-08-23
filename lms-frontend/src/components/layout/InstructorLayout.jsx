@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate, useLocation, Link, Outlet } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { 
   BookOpen, 
@@ -15,9 +16,20 @@ import {
   User
 } from 'lucide-react';
 
-export const InstructorLayout = ({ currentTab, onNavigate, onCreateCourse, children }) => {
+export const InstructorLayout = ({ currentTab: currentTabProp, onNavigate, onCreateCourse, children }) => {
   const { user, logout, quickSwitchRole } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [showRoleMenu, setShowRoleMenu] = useState(false);
+
+  const pathname = location.pathname;
+
+  const isDashboard = pathname === '/instructor/dashboard' || pathname === '/instructor';
+  const isCreate = pathname === '/instructor/courses/create';
+  const isEdit = pathname.includes('/edit');
+  const isQuiz = pathname.includes('/quiz-builder');
+  const isStudents = pathname.startsWith('/instructor/students');
+  const isProfile = pathname === '/instructor/profile';
 
   return (
     <div className="min-h-screen flex bg-[#FAF9FC] text-[#1A1C1E]">
@@ -28,7 +40,7 @@ export const InstructorLayout = ({ currentTab, onNavigate, onCreateCourse, child
           
           {/* Header Brand */}
           <div className="px-6 mb-8">
-            <div className="flex items-center gap-3">
+            <Link to="/instructor/dashboard" className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-[#16324F] border border-blue-400/30 text-white flex items-center justify-center font-extrabold text-lg font-serif shadow-md">
                 E
               </div>
@@ -36,7 +48,7 @@ export const InstructorLayout = ({ currentTab, onNavigate, onCreateCourse, child
                 <h2 className="font-serif font-extrabold text-base text-white tracking-wide">Instructor Portal</h2>
                 <p className="text-[10px] text-amber-400 uppercase tracking-widest font-bold">EduMOOC Studio</p>
               </div>
-            </div>
+            </Link>
           </div>
 
           {/* Nav Items */}
@@ -45,84 +57,84 @@ export const InstructorLayout = ({ currentTab, onNavigate, onCreateCourse, child
               Quản lý giảng dạy
             </div>
 
-            <button
-              onClick={() => onNavigate('instructor-dashboard')}
+            <Link
+              to="/instructor/dashboard"
               className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs transition-all cursor-pointer ${
-                currentTab === 'instructor-dashboard'
+                isDashboard
                   ? 'bg-[#16324F] text-white font-bold border-l-4 border-amber-400 shadow-md'
                   : 'text-slate-300 hover:bg-white/10 hover:text-white font-medium'
               }`}
             >
               <LayoutDashboard className="w-4 h-4 text-amber-400" />
               <span>Bảng điều khiển & Khóa học</span>
-            </button>
+            </Link>
 
-            <button
-              onClick={() => onNavigate('instructor-create-course')}
+            <Link
+              to="/instructor/courses/create"
               className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs transition-all cursor-pointer ${
-                currentTab === 'instructor-create-course'
+                isCreate
                   ? 'bg-[#16324F] text-white font-bold border-l-4 border-emerald-400 shadow-md'
                   : 'text-slate-300 hover:bg-white/10 hover:text-white font-medium'
               }`}
             >
               <Plus className="w-4 h-4 text-emerald-400" />
               <span>Tạo khóa học mới</span>
-            </button>
+            </Link>
 
-            <button
-              onClick={() => onNavigate('instructor-course-editor')}
+            <Link
+              to="/instructor/courses/1/edit"
               className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs transition-all cursor-pointer ${
-                currentTab === 'instructor-course-editor'
+                isEdit
                   ? 'bg-[#16324F] text-white font-bold border-l-4 border-blue-400 shadow-md'
                   : 'text-slate-300 hover:bg-white/10 hover:text-white font-medium'
               }`}
             >
               <Edit3 className="w-4 h-4 text-blue-400" />
               <span>Soạn bài học & Đề cương</span>
-            </button>
+            </Link>
 
-            <button
-              onClick={() => onNavigate('instructor-quiz-builder')}
+            <Link
+              to="/instructor/courses/1/quiz-builder"
               className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs transition-all cursor-pointer ${
-                currentTab === 'instructor-quiz-builder'
+                isQuiz
                   ? 'bg-[#16324F] text-white font-bold border-l-4 border-purple-400 shadow-md'
                   : 'text-slate-300 hover:bg-white/10 hover:text-white font-medium'
               }`}
             >
               <HelpCircle className="w-4 h-4 text-purple-400" />
               <span>Soạn đề thi Quiz</span>
-            </button>
+            </Link>
 
-            <button
-              onClick={() => onNavigate('instructor-student-progress')}
+            <Link
+              to="/instructor/students"
               className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs transition-all cursor-pointer ${
-                currentTab === 'instructor-student-progress'
+                isStudents
                   ? 'bg-[#16324F] text-white font-bold border-l-4 border-cyan-400 shadow-md'
                   : 'text-slate-300 hover:bg-white/10 hover:text-white font-medium'
               }`}
             >
               <Users className="w-4 h-4 text-cyan-400" />
               <span>Tiến độ học viên</span>
-            </button>
+            </Link>
 
-            <button
-              onClick={() => onNavigate('instructor-profile')}
+            <Link
+              to="/instructor/profile"
               className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs transition-all cursor-pointer ${
-                currentTab === 'instructor-profile'
+                isProfile
                   ? 'bg-[#16324F] text-white font-bold border-l-4 border-rose-400 shadow-md'
                   : 'text-slate-300 hover:bg-white/10 hover:text-white font-medium'
               }`}
             >
               <User className="w-4 h-4 text-rose-400" />
               <span>Hồ sơ cá nhân</span>
-            </button>
+            </Link>
           </nav>
         </div>
 
         {/* Sidebar Bottom: Instructor Profile & Logout */}
         <div className="px-4 border-t border-[#16324F] pt-4 space-y-3">
-          <button
-            onClick={() => onNavigate('instructor-profile')}
+          <Link
+            to="/instructor/profile"
             className="w-full flex items-center gap-3 text-left p-2 rounded-xl bg-[#0A2540] hover:bg-[#16324F] transition-all border border-[#16324F] cursor-pointer"
           >
             <img
@@ -134,10 +146,13 @@ export const InstructorLayout = ({ currentTab, onNavigate, onCreateCourse, child
               <p className="text-xs font-bold text-white truncate">{user?.fullName || 'TS. Nguyễn Văn A'}</p>
               <p className="text-[10px] text-amber-300 font-semibold">Giảng viên Chuyên môn →</p>
             </div>
-          </button>
+          </Link>
 
           <button
-            onClick={logout}
+            onClick={() => {
+              logout();
+              navigate('/');
+            }}
             className="w-full py-2 px-3 bg-red-500/20 hover:bg-red-500/30 text-red-300 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition-all border border-red-500/30 cursor-pointer"
           >
             <LogOut className="w-3.5 h-3.5" />
@@ -156,13 +171,17 @@ export const InstructorLayout = ({ currentTab, onNavigate, onCreateCourse, child
             <span className="font-semibold text-[#16324F]">EduMOOC Studio</span>
             <ChevronRight className="w-3.5 h-3.5" />
             <span className="capitalize text-[#1A1C1E]">
-              {currentTab === 'instructor-dashboard'
+              {isDashboard
                 ? 'Tổng quan & Khóa học'
-                : currentTab === 'instructor-course-editor'
+                : isCreate
+                ? 'Tạo khóa học mới'
+                : isEdit
                 ? 'Soạn thảo khóa học'
-                : currentTab === 'instructor-quiz-builder'
+                : isQuiz
                 ? 'Biên soạn đề thi'
-                : 'Theo dõi học viên'}
+                : isStudents
+                ? 'Tiến độ học viên'
+                : 'Hồ sơ cá nhân'}
             </span>
           </div>
 
@@ -170,7 +189,7 @@ export const InstructorLayout = ({ currentTab, onNavigate, onCreateCourse, child
           <div className="relative">
             <button
               onClick={() => setShowRoleMenu(!showRoleMenu)}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-[#EFEDF0] border border-[#E4E4E0] text-[#16324F] rounded-md hover:bg-[#E3E2E5] transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-[#EFEDF0] border border-[#E4E4E0] text-[#16324F] rounded-md hover:bg-[#E3E2E5] transition-colors cursor-pointer"
             >
               <Sparkles className="w-3.5 h-3.5 text-amber-600" />
               <span>Portal: Giảng viên</span>
@@ -179,32 +198,32 @@ export const InstructorLayout = ({ currentTab, onNavigate, onCreateCourse, child
             {showRoleMenu && (
               <div className="absolute right-0 mt-1 w-52 bg-white border border-[#E4E4E0] rounded-lg shadow-sm py-1 z-50">
                 <button
-                  onClick={() => {
-                    quickSwitchRole('ROLE_STUDENT');
-                    onNavigate('student-explore');
+                  onClick={async () => {
+                    await quickSwitchRole('ROLE_STUDENT');
+                    navigate('/');
                     setShowRoleMenu(false);
                   }}
-                  className="w-full text-left px-3 py-1.5 text-xs flex items-center gap-2 hover:bg-[#FAF9FC] text-[#1A1C1E]"
+                  className="w-full text-left px-3 py-1.5 text-xs flex items-center gap-2 hover:bg-[#FAF9FC] text-[#1A1C1E] cursor-pointer"
                 >
                   <GraduationCap className="w-3.5 h-3.5" /> Giao diện Học viên
                 </button>
                 <button
-                  onClick={() => {
-                    quickSwitchRole('ROLE_INSTRUCTOR');
-                    onNavigate('instructor-dashboard');
+                  onClick={async () => {
+                    await quickSwitchRole('ROLE_INSTRUCTOR');
+                    navigate('/instructor/dashboard');
                     setShowRoleMenu(false);
                   }}
-                  className="w-full text-left px-3 py-1.5 text-xs flex items-center gap-2 font-bold text-[#16324F] bg-[#F4F3F6]"
+                  className="w-full text-left px-3 py-1.5 text-xs flex items-center gap-2 font-bold text-[#16324F] bg-[#F4F3F6] cursor-pointer"
                 >
                   <LayoutDashboard className="w-3.5 h-3.5 text-blue-600" /> Portal Giảng viên
                 </button>
                 <button
-                  onClick={() => {
-                    quickSwitchRole('ROLE_ADMIN');
-                    onNavigate('admin-overview');
+                  onClick={async () => {
+                    await quickSwitchRole('ROLE_ADMIN');
+                    navigate('/admin/dashboard');
                     setShowRoleMenu(false);
                   }}
-                  className="w-full text-left px-3 py-1.5 text-xs flex items-center gap-2 text-[#1A1C1E] hover:bg-[#FAF9FC]"
+                  className="w-full text-left px-3 py-1.5 text-xs flex items-center gap-2 text-[#1A1C1E] hover:bg-[#FAF9FC] cursor-pointer"
                 >
                   <ShieldCheck className="w-3.5 h-3.5 text-[#16324F]" /> Portal Quản trị viên
                 </button>
@@ -214,8 +233,8 @@ export const InstructorLayout = ({ currentTab, onNavigate, onCreateCourse, child
         </header>
 
         {/* Dynamic View with Unified Page Transition */}
-        <main key={currentTab} className="flex-1 animate-page-transition">
-          {children}
+        <main key={pathname} className="flex-1 animate-page-transition">
+          {children || <Outlet />}
         </main>
 
       </div>

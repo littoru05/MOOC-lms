@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { courseApi } from '../../api/courseApi';
 import { getCourseBySlugOrId } from '../../data/coursesData';
 import { useToast } from '../../context/ToastContext';
@@ -20,7 +21,16 @@ import {
   Check
 } from 'lucide-react';
 
-export const CourseEditorPage = ({ courseId, onBack }) => {
+export const CourseEditorPage = ({ courseId: courseIdProp, onBack }) => {
+  const { courseId: paramCourseId } = useParams();
+  const navigate = useNavigate();
+  const courseId = courseIdProp || paramCourseId || 1;
+
+  const handleBack = () => {
+    if (onBack) onBack();
+    else navigate('/instructor/dashboard');
+  };
+
   const { showToast, confirm } = useToast();
   const [categories, setCategories] = useState([]);
   const [course, setCourse] = useState(null);
@@ -220,8 +230,8 @@ export const CourseEditorPage = ({ courseId, onBack }) => {
       <div className="flex items-center justify-between border-b border-[#E4E4E0] pb-4">
         <div className="flex items-center gap-3">
           <button
-            onClick={onBack}
-            className="p-1.5 hover:bg-[#F4F3F6] rounded-md text-[#5E5E5E]"
+            onClick={handleBack}
+            className="p-1.5 hover:bg-[#F4F3F6] rounded-md text-[#5E5E5E] cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4" />
           </button>

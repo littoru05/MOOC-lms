@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { courseApi } from '../../api/courseApi';
 import { useAuth } from '../../context/AuthContext';
 import { getAllQuizzes } from '../../mocks/courses';
@@ -18,10 +19,26 @@ import {
 import { useToast } from '../../context/ToastContext';
 
 export const InstructorDashboard = ({ onEditCourse, onCreateCourse, onBuildQuiz }) => {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { showToast, confirm } = useToast();
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const handleEdit = (cid) => {
+    if (onEditCourse) onEditCourse(cid);
+    else navigate(`/instructor/courses/${cid}/edit`);
+  };
+
+  const handleCreate = () => {
+    if (onCreateCourse) onCreateCourse();
+    else navigate('/instructor/courses/create');
+  };
+
+  const handleBuild = (cid) => {
+    if (onBuildQuiz) onBuildQuiz(cid);
+    else navigate(`/instructor/courses/${cid || 1}/quiz-builder`);
+  };
 
   const fetchCourses = async () => {
     try {
@@ -108,7 +125,7 @@ export const InstructorDashboard = ({ onEditCourse, onCreateCourse, onBuildQuiz 
         </div>
 
         <button
-          onClick={onCreateCourse}
+          onClick={handleCreate}
           className="px-4 py-2.5 bg-[#16324F] hover:bg-[#001D37] text-white text-xs font-bold rounded-xl self-start md:self-auto transition-all shadow-xs hover:shadow-md active:scale-95 cursor-pointer flex items-center gap-1.5 shrink-0"
         >
           <Plus className="w-4 h-4" />
@@ -151,7 +168,7 @@ export const InstructorDashboard = ({ onEditCourse, onCreateCourse, onBuildQuiz 
             <BookOpen className="w-10 h-10 text-[#5E5E5E] mx-auto mb-2 opacity-50" />
             <p className="text-sm font-bold text-[#1A1C1E]">Bạn chưa có khóa học nào</p>
             <button
-              onClick={onCreateCourse}
+              onClick={handleCreate}
               className="mt-3 px-5 py-2.5 bg-[#16324F] hover:bg-[#001D37] text-white text-xs font-bold rounded-xl inline-flex items-center gap-1.5 shadow-xs cursor-pointer"
             >
               <Plus className="w-4 h-4" /> Bắt đầu tạo khóa học đầu tiên
@@ -186,7 +203,7 @@ export const InstructorDashboard = ({ onEditCourse, onCreateCourse, onBuildQuiz 
                 {/* Actions */}
                 <div className="flex items-center gap-2 self-end md:self-auto shrink-0 flex-wrap">
                   <button
-                    onClick={() => onEditCourse(c.id)}
+                    onClick={() => handleEdit(c.id)}
                     className="px-3.5 py-2 bg-white border border-[#E4E4E0] hover:border-[#16324F] hover:bg-[#F4F3F6] text-[#1A1C1E] text-xs font-bold rounded-xl flex items-center gap-1.5 transition-all shadow-2xs cursor-pointer"
                     title="Chỉnh sửa nội dung & bài học"
                   >
@@ -194,9 +211,9 @@ export const InstructorDashboard = ({ onEditCourse, onCreateCourse, onBuildQuiz 
                   </button>
 
                   <button
-                    onClick={() => onBuildQuiz(c.id)}
-                    className="px-3.5 py-2 bg-white border border-[#E4E4E0] hover:border-amber-500 hover:bg-amber-50/50 text-[#16324F] text-xs font-bold rounded-xl flex items-center gap-1.5 transition-all shadow-2xs cursor-pointer"
-                    title="Soạn đề thi kiểm tra trắc nghiệm"
+                    onClick={() => handleBuild(c.id)}
+                    className="px-3.5 py-2 bg-white border border-[#E4E4E0] hover:border-amber-500 hover:bg-amber-50/50 text-[#1A1C1E] text-xs font-bold rounded-xl flex items-center gap-1.5 transition-all shadow-2xs cursor-pointer"
+                    title="Soạn câu hỏi trắc nghiệm Quiz"
                   >
                     <HelpCircle className="w-3.5 h-3.5 text-amber-600" /> Soạn đề Quiz
                   </button>
@@ -232,8 +249,8 @@ export const InstructorDashboard = ({ onEditCourse, onCreateCourse, onBuildQuiz 
           </div>
 
           <button
-            onClick={() => onBuildQuiz(courses[0]?.id || 1)}
-            className="px-3.5 py-1.5 bg-[#16324F] hover:bg-[#001D37] text-white text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-colors self-start sm:self-auto shadow-xs"
+            onClick={() => handleBuild(courses[0]?.id || 1)}
+            className="px-3.5 py-1.5 bg-[#16324F] hover:bg-[#001D37] text-white text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-colors self-start sm:self-auto shadow-xs cursor-pointer"
           >
             <Plus className="w-3.5 h-3.5" /> Soạn đề Quiz mới
           </button>
@@ -272,8 +289,8 @@ export const InstructorDashboard = ({ onEditCourse, onCreateCourse, onBuildQuiz 
                 </div>
 
                 <button
-                  onClick={() => onBuildQuiz(quiz.courseId)}
-                  className="px-3 py-1.5 bg-white border border-[#E4E4E0] hover:bg-[#F4F3F6] text-[#16324F] text-xs font-semibold rounded-md flex items-center gap-1.5 transition-colors"
+                  onClick={() => handleBuild(quiz.courseId)}
+                  className="px-3.5 py-1.5 bg-white border border-[#E4E4E0] hover:bg-[#F4F3F6] text-[#16324F] text-xs font-semibold rounded-md flex items-center gap-1.5 transition-colors cursor-pointer"
                 >
                   <Edit3 className="w-3.5 h-3.5" /> Chỉnh sửa đề thi
                 </button>

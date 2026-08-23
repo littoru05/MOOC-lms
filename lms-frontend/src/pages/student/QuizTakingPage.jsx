@@ -1,8 +1,28 @@
 import React, { useState, useEffect } from 'react';
+import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { quizApi } from '../../api/quizApi';
 import { Clock, HelpCircle, ArrowLeft, CheckCircle2, AlertCircle } from 'lucide-react';
 
-export const QuizTakingPage = ({ quizId, enrollmentId, onBack, onCompleteQuiz }) => {
+export const QuizTakingPage = ({ quizId: quizIdProp, enrollmentId: enrollmentIdProp, onBack, onCompleteQuiz }) => {
+  const { quizId: paramQuizId } = useParams();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+
+  const quizId = quizIdProp || paramQuizId || 1;
+  const enrollmentId = enrollmentIdProp || searchParams.get('enrollmentId');
+
+  const handleBack = () => {
+    if (onBack) onBack();
+    else navigate(`/quiz/${quizId}`);
+  };
+
+  const handleComplete = (resultData) => {
+    if (onCompleteQuiz) {
+      onCompleteQuiz(resultData);
+    } else {
+      navigate(`/quiz/${quizId}/result`, { state: { result: resultData } });
+    }
+  };
   const [quiz, setQuiz] = useState(null);
   const [selectedAnswers, setSelectedAnswers] = useState({});
   const [timeLeft, setTimeLeft] = useState(900); // 15 mins default
@@ -63,7 +83,7 @@ export const QuizTakingPage = ({ quizId, enrollmentId, onBack, onCompleteQuiz })
         enrollmentId,
         studentAnswers,
       });
-      onCompleteQuiz(res.data);
+      handleComplete(res.data);
     } catch (err) {
       alert(err.response?.data?.message || 'Lỗi khi nộp bài thi!');
     } finally {
@@ -79,7 +99,7 @@ export const QuizTakingPage = ({ quizId, enrollmentId, onBack, onCompleteQuiz })
     return (
       <div className="max-w-2xl mx-auto py-20 text-center">
         <p className="text-sm font-semibold text-[#1A1C1E]">Không tìm thấy thông tin bài thi</p>
-        <button onClick={onBack} className="mt-4 px-4 py-2 text-xs bg-[#16324F] text-white rounded-lg">
+        <button onClick={handleBack} className="mt-4 px-4 py-2 text-xs bg-[#16324F] text-white rounded-lg cursor-pointer">
           Quay lại
         </button>
       </div>
@@ -98,8 +118,8 @@ export const QuizTakingPage = ({ quizId, enrollmentId, onBack, onCompleteQuiz })
       <header className="bg-white border-b border-[#E4E4E0] sticky top-0 z-30 px-6 py-3.5 flex items-center justify-between shadow-xs">
         <div className="flex items-center gap-3">
           <button
-            onClick={onBack}
-            className="p-1.5 hover:bg-[#F4F3F6] rounded text-[#5E5E5E]"
+            onClick={handleBack}
+            className="p-1.5 hover:bg-[#F4F3F6] rounded text-[#5E5E5E] cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4" />
           </button>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { courseApi } from '../../api/courseApi';
 import { learningApi } from '../../api/learningApi';
 import { getCourseBySlugOrId } from '../../mocks/courses';
@@ -14,21 +15,25 @@ import {
   ArrowLeft, 
   Play, 
   ChevronDown, 
-  ChevronRight,
-  Star,
-  Users,
-  Globe,
-  RefreshCw,
-  HelpCircle,
-  ShieldCheck,
-  Check,
-  Sparkles,
-  Smartphone,
-  Infinity as InfinityIcon,
-  AlertCircle
+  ChevronRight, 
+  Star, 
+  Users, 
+  Globe, 
+  RefreshCw, 
+  HelpCircle, 
+  ShieldCheck, 
+  Check, 
+  Sparkles, 
+  Smartphone, 
+  Infinity as InfinityIcon, 
+  AlertCircle 
 } from 'lucide-react';
 
-export const CourseDetailPage = ({ courseSlug, onBack, onStartLearning, onOpenAuthModal }) => {
+export const CourseDetailPage = ({ courseSlug: courseSlugProp, onBack, onStartLearning, onOpenAuthModal }) => {
+  const { slug } = useParams();
+  const navigate = useNavigate();
+  const courseSlug = courseSlugProp || slug || 'fullstack-spring-boot-reactjs';
+
   const { user } = useAuth();
   const { showToast } = useToast();
   const [course, setCourse] = useState(null);
@@ -37,6 +42,30 @@ export const CourseDetailPage = ({ courseSlug, onBack, onStartLearning, onOpenAu
   const [loading, setLoading] = useState(true);
   const [enrolling, setEnrolling] = useState(false);
   const [openSections, setOpenSections] = useState({});
+
+  const handleBack = () => {
+    if (onBack) {
+      onBack();
+    } else {
+      navigate(-1);
+    }
+  };
+
+  const handleStartLearn = (cid) => {
+    if (onStartLearning) {
+      onStartLearning(cid);
+    } else {
+      navigate(`/learn/${cid}`);
+    }
+  };
+
+  const handleAuthModal = () => {
+    if (onOpenAuthModal) {
+      onOpenAuthModal();
+    } else {
+      navigate('/login');
+    }
+  };
 
   useEffect(() => {
     const fetchCourseData = async () => {
@@ -115,7 +144,7 @@ export const CourseDetailPage = ({ courseSlug, onBack, onStartLearning, onOpenAu
 
   const handleEnroll = async () => {
     if (!user) {
-      onOpenAuthModal();
+      handleAuthModal();
       return;
     }
 
@@ -124,11 +153,11 @@ export const CourseDetailPage = ({ courseSlug, onBack, onStartLearning, onOpenAu
       await learningApi.enrollCourse(course.id);
       setIsEnrolled(true);
       showToast('Ghi danh khóa học thành công vào CSDL!', 'success');
-      onStartLearning(course.id);
+      handleStartLearn(course.id);
     } catch (err) {
       setIsEnrolled(true);
       showToast('Đã bắt đầu khóa học!', 'success');
-      onStartLearning(course.id);
+      handleStartLearn(course.id);
     } finally {
       setEnrolling(false);
     }
@@ -158,8 +187,8 @@ export const CourseDetailPage = ({ courseSlug, onBack, onStartLearning, onOpenAu
             </p>
           </div>
           <button
-            onClick={onBack}
-            className="w-full py-2.5 bg-[#16324F] hover:bg-[#001D37] text-white text-xs font-semibold rounded-xl transition-colors shadow-xs"
+            onClick={handleBack}
+            className="w-full py-2.5 bg-[#16324F] hover:bg-[#001D37] text-white text-xs font-semibold rounded-xl transition-colors shadow-xs cursor-pointer"
           >
             Quay lại danh mục khám phá
           </button>
@@ -176,7 +205,7 @@ export const CourseDetailPage = ({ courseSlug, onBack, onStartLearning, onOpenAu
       {/* Top Breadcrumbs */}
       <div className="bg-white border-b border-[#E4E4E0] py-3.5">
         <div className="max-w-[1280px] mx-auto px-6 flex items-center gap-2 text-xs text-[#5E5E5E]">
-          <button onClick={onBack} className="hover:text-[#16324F] flex items-center gap-1 font-medium">
+          <button onClick={handleBack} className="hover:text-[#16324F] flex items-center gap-1 font-medium cursor-pointer">
             <ArrowLeft className="w-3.5 h-3.5" /> Khám phá
           </button>
           <span>/</span>

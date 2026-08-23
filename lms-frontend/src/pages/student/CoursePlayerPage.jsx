@@ -4,6 +4,7 @@ import { learningApi } from '../../api/learningApi';
 import { quizApi } from '../../api/quizApi';
 import { getCourseBySlugOrId, getQuizzesByCourseId } from '../../mocks/courses';
 import { useAuth } from '../../context/AuthContext';
+import { useParams, useNavigate } from 'react-router-dom';
 import { 
   CheckCircle, 
   Circle, 
@@ -14,14 +15,18 @@ import {
   Award, 
   ArrowLeft, 
   ChevronRight, 
-  ChevronLeft,
-  HelpCircle,
-  ExternalLink,
-  BookOpen,
-  Sparkles
+  ChevronLeft, 
+  HelpCircle, 
+  ExternalLink, 
+  BookOpen, 
+  Sparkles 
 } from 'lucide-react';
 
-export const CoursePlayerPage = ({ courseId, onBack, onStartQuiz, onViewCertificate }) => {
+export const CoursePlayerPage = ({ courseId: courseIdProp, onBack, onStartQuiz, onViewCertificate }) => {
+  const { courseId: paramCourseId } = useParams();
+  const navigate = useNavigate();
+  const courseId = courseIdProp || paramCourseId || 1;
+
   const { user } = useAuth();
   const [course, setCourse] = useState(null);
   const [sections, setSections] = useState([]);
@@ -32,6 +37,27 @@ export const CoursePlayerPage = ({ courseId, onBack, onStartQuiz, onViewCertific
   const [progressPercent, setProgressPercent] = useState(0);
   const [loading, setLoading] = useState(true);
   const [completing, setCompleting] = useState(false);
+
+  const handleBack = () => {
+    if (onBack) onBack();
+    else navigate('/my-learning');
+  };
+
+  const handleStartQuiz = (qId, enrollId) => {
+    if (onStartQuiz) {
+      onStartQuiz(qId, enrollId);
+    } else {
+      navigate(`/quiz/${qId}${enrollId ? `?enrollmentId=${enrollId}` : ''}`);
+    }
+  };
+
+  const handleViewCert = (code) => {
+    if (onViewCertificate) {
+      onViewCertificate(code);
+    } else {
+      navigate(`/certificates${code ? `?code=${encodeURIComponent(code)}` : ''}`);
+    }
+  };
 
   useEffect(() => {
     const fetchPlayerData = async () => {
@@ -188,8 +214,8 @@ export const CoursePlayerPage = ({ courseId, onBack, onStartQuiz, onViewCertific
       <header className="bg-white border-b border-[#E4E4E0] h-14 px-6 flex items-center justify-between sticky top-0 z-30 shadow-xs">
         <div className="flex items-center gap-3">
           <button
-            onClick={onBack}
-            className="p-1.5 hover:bg-[#F4F3F6] rounded-md text-[#5E5E5E] hover:text-[#1A1C1E] transition-colors"
+            onClick={handleBack}
+            className="p-1.5 hover:bg-[#F4F3F6] rounded-md text-[#5E5E5E] hover:text-[#1A1C1E] transition-colors cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4" />
           </button>
@@ -215,8 +241,8 @@ export const CoursePlayerPage = ({ courseId, onBack, onStartQuiz, onViewCertific
 
           {quizzes.length > 0 && (
             <button
-              onClick={() => onStartQuiz(quizzes[0].id, enrollment?.id)}
-              className="px-3.5 py-1.5 bg-[#16324F] hover:bg-[#001D37] text-white text-xs font-semibold rounded-md flex items-center gap-1.5 transition-colors shadow-xs"
+              onClick={() => handleStartQuiz(quizzes[0].id, enrollment?.id)}
+              className="px-3.5 py-1.5 bg-[#16324F] hover:bg-[#001D37] text-white text-xs font-semibold rounded-md flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer"
             >
               <HelpCircle className="w-3.5 h-3.5 text-amber-300" />
               <span>Thi trắc nghiệm Quiz</span>
@@ -360,8 +386,8 @@ export const CoursePlayerPage = ({ courseId, onBack, onStartQuiz, onViewCertific
                 </p>
               </div>
               <button
-                onClick={onBack}
-                className="px-5 py-2.5 bg-[#16324F] hover:bg-[#001D37] text-white text-xs font-semibold rounded-xl transition-colors shadow-xs"
+                onClick={handleBack}
+                className="px-5 py-2.5 bg-[#16324F] hover:bg-[#001D37] text-white text-xs font-semibold rounded-xl transition-colors shadow-xs cursor-pointer"
               >
                 Quay lại danh sách khóa học
               </button>

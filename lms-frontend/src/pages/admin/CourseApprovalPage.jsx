@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { adminApi } from '../../api/adminApi';
 import { courseApi } from '../../api/courseApi';
 import { SAMPLE_COURSES } from '../../data/coursesData';
@@ -21,7 +22,13 @@ import {
 import { useToast } from '../../context/ToastContext';
 
 export const CourseApprovalPage = ({ onBack }) => {
+  const navigate = useNavigate();
   const { showToast, confirm } = useToast();
+
+  const handleBack = () => {
+    if (onBack) onBack();
+    else navigate('/admin/dashboard');
+  };
   const [courses, setCourses] = useState([]);
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -131,8 +138,8 @@ export const CourseApprovalPage = ({ onBack }) => {
       <div className="flex items-center justify-between border-b border-[#E4E4E0] pb-4">
         <div className="flex items-center gap-3">
           <button
-            onClick={onBack}
-            className="p-1.5 hover:bg-white rounded-md text-[#5E5E5E]"
+            onClick={handleBack}
+            className="p-1.5 hover:bg-white rounded-md text-[#5E5E5E] cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4" />
           </button>

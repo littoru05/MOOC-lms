@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { courseApi } from '../../api/courseApi';
 import { useToast } from '../../context/ToastContext';
 import { 
@@ -18,7 +19,18 @@ import {
 } from 'lucide-react';
 
 export const CourseCreateWizardPage = ({ onBack, onCourseCreated }) => {
+  const navigate = useNavigate();
   const { showToast } = useToast();
+
+  const handleBack = () => {
+    if (onBack) onBack();
+    else navigate('/instructor/dashboard');
+  };
+
+  const handleCreated = (newId) => {
+    if (onCourseCreated) onCourseCreated(newId);
+    else navigate(`/instructor/courses/${newId}/edit`);
+  };
 
   const [title, setTitle] = useState('');
   const [slug, setSlug] = useState('');
@@ -113,9 +125,7 @@ export const CourseCreateWizardPage = ({ onBack, onCourseCreated }) => {
       }
 
       showToast('Khởi tạo khóa học mới thành công! Đang chuyển sang Soạn đề cương...', 'success');
-      if (onCourseCreated) {
-        onCourseCreated(newCourseId);
-      }
+      handleCreated(newCourseId);
     } catch (err) {
       showToast('Không thể tạo khóa học. Vui lòng thử lại!', 'error');
     } finally {
@@ -131,8 +141,8 @@ export const CourseCreateWizardPage = ({ onBack, onCourseCreated }) => {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <button
-              onClick={onBack}
-              className="p-2 border border-[#E4E4E0] hover:bg-white rounded-xl text-[#5E5E5E] transition-colors"
+              onClick={handleBack}
+              className="p-2 border border-[#E4E4E0] hover:bg-white rounded-xl text-[#5E5E5E] transition-colors cursor-pointer"
             >
               <ArrowLeft className="w-4 h-4" />
             </button>

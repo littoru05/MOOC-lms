@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate, useLocation, Link, Outlet } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Footer } from './Footer';
 import { CategoryMegaMenu } from '../navigation/CategoryMegaMenu';
@@ -17,11 +18,51 @@ import {
   X
 } from 'lucide-react';
 
-export const StudentLayout = ({ currentTab, onNavigate, onOpenAuthModal, children }) => {
+export const StudentLayout = ({ currentTab: currentTabProp, onNavigate, onOpenAuthModal, children }) => {
   const { user, logout, quickSwitchRole, currentRole, isAdmin, isInstructor } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [showRoleMenu, setShowRoleMenu] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+
+  const pathname = location.pathname;
+
+  const handleNav = (tab, query = '') => {
+    if (onNavigate) {
+      onNavigate(tab, query);
+      return;
+    }
+
+    if (tab === 'student-explore' || tab === 'explore') {
+      if (query && query !== 'all') {
+        navigate(`/courses?category=${encodeURIComponent(query)}`);
+      } else {
+        navigate('/');
+      }
+    } else if (tab === 'student-course-listing' || tab === 'course-listing') {
+      if (query) {
+        navigate(`/courses?category=${encodeURIComponent(query)}`);
+      } else {
+        navigate('/courses');
+      }
+    } else if (tab === 'student-my-learning' || tab === 'my-learning') {
+      navigate('/my-learning');
+    } else if (tab === 'student-certificates' || tab === 'certificates') {
+      navigate('/certificates');
+    } else if (tab === 'student-profile' || tab === 'profile') {
+      navigate('/profile');
+    } else if (tab === 'instructor-dashboard') {
+      navigate('/instructor/dashboard');
+    } else if (tab === 'admin-overview') {
+      navigate('/admin/dashboard');
+    } else {
+      navigate('/');
+    }
+  };
+
+  const isMyLearningActive = pathname.startsWith('/my-learning') || pathname.startsWith('/learn');
+  const isCertificatesActive = pathname.startsWith('/certificates');
 
   return (
     <div className="min-h-screen flex flex-col bg-[#FAF9FC] text-[#1A1C1E]">
@@ -32,8 +73,8 @@ export const StudentLayout = ({ currentTab, onNavigate, onOpenAuthModal, childre
           
           {/* Logo & Student Nav */}
           <div className="flex items-center gap-8">
-            <button 
-              onClick={() => onNavigate('student-explore')}
+            <Link 
+              to="/"
               className="flex items-center gap-2 text-left group cursor-pointer"
             >
               <div className="w-9 h-9 bg-[#16324F] text-white rounded-lg flex items-center justify-center font-extrabold text-lg font-serif shadow-xs group-hover:bg-[#001D37] transition-colors">
@@ -47,37 +88,43 @@ export const StudentLayout = ({ currentTab, onNavigate, onOpenAuthModal, childre
                   Học viên
                 </span>
               </div>
-            </button>
+            </Link>
 
             <nav className="hidden md:flex items-center gap-1.5">
               {/* Category Mega Menu (3-tier cascade) */}
               <CategoryMegaMenu 
-                onSelectCategory={(query) => onNavigate('student-explore', query)} 
+                onSelectCategory={(query) => {
+                  if (query && query !== 'all') {
+                    navigate(`/courses?category=${encodeURIComponent(query)}`);
+                  } else {
+                    navigate('/courses');
+                  }
+                }} 
               />
 
               {user && (
-                <button
-                  onClick={() => onNavigate('student-my-learning')}
+                <Link
+                  to="/my-learning"
                   className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
-                    currentTab === 'student-my-learning' || currentTab === 'student-learning'
+                    isMyLearningActive
                       ? 'text-[#16324F] bg-[#F4F3F6] font-bold shadow-2xs'
                       : 'text-[#1A1C1E] hover:text-[#16324F] hover:bg-[#FAF9FC]'
                   }`}
                 >
                   Khóa học của tôi
-                </button>
+                </Link>
               )}
 
-              <button
-                onClick={() => onNavigate('student-certificates')}
+              <Link
+                to="/certificates"
                 className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
-                  currentTab === 'student-certificates'
+                  isCertificatesActive
                     ? 'text-[#16324F] bg-[#F4F3F6] font-bold shadow-2xs'
                     : 'text-[#1A1C1E] hover:text-[#16324F] hover:bg-[#FAF9FC]'
                 }`}
               >
                 Chứng chỉ & Xác thực
-              </button>
+              </Link>
             </nav>
           </div>
 
@@ -111,9 +158,9 @@ export const StudentLayout = ({ currentTab, onNavigate, onOpenAuthModal, childre
                     Chuyển sang Không gian:
                   </div>
                   <button
-                    onClick={() => {
-                      quickSwitchRole('ROLE_STUDENT');
-                      onNavigate('student-explore');
+                    onClick={async () => {
+                      await quickSwitchRole('ROLE_STUDENT');
+                      navigate('/');
                       setShowRoleMenu(false);
                     }}
                     className="w-full text-left px-3 py-1.5 text-xs flex items-center gap-2 font-bold text-[#16324F] bg-[#F4F3F6]"
@@ -121,9 +168,9 @@ export const StudentLayout = ({ currentTab, onNavigate, onOpenAuthModal, childre
                     <GraduationCap className="w-3.5 h-3.5" /> Giao diện Học viên
                   </button>
                   <button
-                    onClick={() => {
-                      quickSwitchRole('ROLE_INSTRUCTOR');
-                      onNavigate('instructor-dashboard');
+                    onClick={async () => {
+                      await quickSwitchRole('ROLE_INSTRUCTOR');
+                      navigate('/instructor/dashboard');
                       setShowRoleMenu(false);
                     }}
                     className="w-full text-left px-3 py-1.5 text-xs flex items-center gap-2 text-[#1A1C1E] hover:bg-[#FAF9FC]"
@@ -131,9 +178,9 @@ export const StudentLayout = ({ currentTab, onNavigate, onOpenAuthModal, childre
                     <LayoutDashboard className="w-3.5 h-3.5 text-blue-600" /> Portal Giảng viên
                   </button>
                   <button
-                    onClick={() => {
-                      quickSwitchRole('ROLE_ADMIN');
-                      onNavigate('admin-overview');
+                    onClick={async () => {
+                      await quickSwitchRole('ROLE_ADMIN');
+                      navigate('/admin/dashboard');
                       setShowRoleMenu(false);
                     }}
                     className="w-full text-left px-3 py-1.5 text-xs flex items-center gap-2 text-[#1A1C1E] hover:bg-[#FAF9FC]"
@@ -149,7 +196,7 @@ export const StudentLayout = ({ currentTab, onNavigate, onOpenAuthModal, childre
               <div className="relative">
                 <button
                   onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="flex items-center gap-2 p-1 rounded-full hover:ring-2 hover:ring-[#E4E4E0] transition-all"
+                  className="flex items-center gap-2 p-1 rounded-full hover:ring-2 hover:ring-[#E4E4E0] transition-all cursor-pointer"
                 >
                   <img
                     src={user.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'}
@@ -166,28 +213,28 @@ export const StudentLayout = ({ currentTab, onNavigate, onOpenAuthModal, childre
                     </div>
                     <button
                       onClick={() => {
-                        onNavigate('student-profile');
+                        navigate('/profile');
                         setShowUserMenu(false);
                       }}
-                      className="w-full text-left px-4 py-2 text-xs text-[#1A1C1E] hover:bg-[#F4F3F6] flex items-center gap-2 font-medium"
+                      className="w-full text-left px-4 py-2 text-xs text-[#1A1C1E] hover:bg-[#F4F3F6] flex items-center gap-2 font-medium cursor-pointer"
                     >
                       <User className="w-3.5 h-3.5 text-[#16324F]" /> Hồ sơ cá nhân
                     </button>
                     <button
                       onClick={() => {
-                        onNavigate('student-my-learning');
+                        navigate('/my-learning');
                         setShowUserMenu(false);
                       }}
-                      className="w-full text-left px-4 py-2 text-xs text-[#1A1C1E] hover:bg-[#F4F3F6] flex items-center gap-2"
+                      className="w-full text-left px-4 py-2 text-xs text-[#1A1C1E] hover:bg-[#F4F3F6] flex items-center gap-2 cursor-pointer"
                     >
                       <BookOpen className="w-3.5 h-3.5" /> Khóa học của tôi
                     </button>
                     <button
                       onClick={() => {
-                        onNavigate('student-certificates');
+                        navigate('/certificates');
                         setShowUserMenu(false);
                       }}
-                      className="w-full text-left px-4 py-2 text-xs text-[#1A1C1E] hover:bg-[#F4F3F6] flex items-center gap-2"
+                      className="w-full text-left px-4 py-2 text-xs text-[#1A1C1E] hover:bg-[#F4F3F6] flex items-center gap-2 cursor-pointer"
                     >
                       <Award className="w-3.5 h-3.5" /> Chứng chỉ của tôi
                     </button>
@@ -196,8 +243,9 @@ export const StudentLayout = ({ currentTab, onNavigate, onOpenAuthModal, childre
                       onClick={() => {
                         logout();
                         setShowUserMenu(false);
+                        navigate('/');
                       }}
-                      className="w-full text-left px-4 py-2 text-xs text-[#BA1A1A] hover:bg-[#FFDAD6] flex items-center gap-2"
+                      className="w-full text-left px-4 py-2 text-xs text-[#BA1A1A] hover:bg-[#FFDAD6] flex items-center gap-2 cursor-pointer"
                     >
                       <LogOut className="w-3.5 h-3.5" /> Đăng xuất
                     </button>
@@ -207,14 +255,14 @@ export const StudentLayout = ({ currentTab, onNavigate, onOpenAuthModal, childre
             ) : (
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => onOpenAuthModal('login')}
-                  className="px-3.5 py-1.5 text-xs font-semibold text-[#16324F] hover:bg-[#FAF9FC] rounded-lg transition-colors border border-[#E4E4E0]"
+                  onClick={() => onOpenAuthModal ? onOpenAuthModal('login') : navigate('/login')}
+                  className="px-3.5 py-1.5 text-xs font-semibold text-[#16324F] hover:bg-[#FAF9FC] rounded-lg transition-colors border border-[#E4E4E0] cursor-pointer"
                 >
                   Đăng nhập
                 </button>
                 <button
-                  onClick={() => onOpenAuthModal('register')}
-                  className="px-3.5 py-1.5 bg-[#16324F] hover:bg-[#001D37] text-white text-xs font-semibold rounded-lg transition-colors shadow-xs"
+                  onClick={() => onOpenAuthModal ? onOpenAuthModal('register') : navigate('/register')}
+                  className="px-3.5 py-1.5 bg-[#16324F] hover:bg-[#001D37] text-white text-xs font-semibold rounded-lg transition-colors shadow-xs cursor-pointer"
                 >
                   Đăng ký
                 </button>
@@ -232,7 +280,7 @@ export const StudentLayout = ({ currentTab, onNavigate, onOpenAuthModal, childre
               {user && (
                 <button
                   onClick={() => {
-                    onNavigate('student-my-learning');
+                    navigate('/my-learning');
                     setMobileDrawerOpen(false);
                   }}
                   className="text-left text-xs font-semibold text-[#16324F] py-1.5 flex items-center gap-2"
@@ -242,7 +290,7 @@ export const StudentLayout = ({ currentTab, onNavigate, onOpenAuthModal, childre
               )}
               <button
                 onClick={() => {
-                  onNavigate('student-certificates');
+                  navigate('/certificates');
                   setMobileDrawerOpen(false);
                 }}
                 className="text-left text-xs font-semibold text-[#16324F] py-1.5 flex items-center gap-2"
@@ -255,7 +303,11 @@ export const StudentLayout = ({ currentTab, onNavigate, onOpenAuthModal, childre
             <CategoryMegaMenu
               isMobile={true}
               onSelectCategory={(query) => {
-                onNavigate('student-explore', query);
+                if (query && query !== 'all') {
+                  navigate(`/courses?category=${encodeURIComponent(query)}`);
+                } else {
+                  navigate('/courses');
+                }
                 setMobileDrawerOpen(false);
               }}
             />
@@ -264,8 +316,8 @@ export const StudentLayout = ({ currentTab, onNavigate, onOpenAuthModal, childre
       </header>
 
       {/* Main Student Content with Unified Page Transition */}
-      <div key={currentTab} className="flex-1 animate-page-transition">
-        {children}
+      <div key={pathname} className="flex-1 animate-page-transition">
+        {children || <Outlet />}
       </div>
 
       {/* Student Footer */}

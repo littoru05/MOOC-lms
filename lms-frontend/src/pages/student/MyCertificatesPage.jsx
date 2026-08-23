@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { certificateApi } from '../../api/certificateApi';
 import { learningApi } from '../../api/learningApi';
 import { useAuth } from '../../context/AuthContext';
 import { Award, Search, CheckCircle, Download, ExternalLink, Printer, ShieldCheck, AlertCircle } from 'lucide-react';
 
-export const MyCertificatesPage = ({ initialCode }) => {
+export const MyCertificatesPage = ({ initialCode: initialCodeProp }) => {
+  const [searchParams] = useSearchParams();
+  const initialCode = initialCodeProp || searchParams.get('code') || '';
   const { user } = useAuth();
   const [searchCode, setSearchCode] = useState(initialCode || '');
   const [verifiedCert, setVerifiedCert] = useState(null);

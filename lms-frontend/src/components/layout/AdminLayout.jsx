@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate, useLocation, Link, Outlet } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { 
   ShieldCheck, 
@@ -16,9 +17,18 @@ import {
   User
 } from 'lucide-react';
 
-export const AdminLayout = ({ currentTab, onNavigate, children }) => {
+export const AdminLayout = ({ currentTab: currentTabProp, onNavigate, children }) => {
   const { user, logout, quickSwitchRole } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [showRoleMenu, setShowRoleMenu] = useState(false);
+
+  const pathname = location.pathname;
+
+  const isOverview = pathname === '/admin/dashboard' || pathname === '/admin/overview' || pathname === '/admin';
+  const isApproval = pathname === '/admin/courses/approval' || pathname === '/admin/course-approval';
+  const isUsers = pathname === '/admin/users' || pathname === '/admin/user-management';
+  const isProfile = pathname === '/admin/profile';
 
   return (
     <div className="min-h-screen flex bg-[#F4F3F6] text-[#1A1C1E]">
@@ -29,7 +39,7 @@ export const AdminLayout = ({ currentTab, onNavigate, children }) => {
           
           {/* Header Brand */}
           <div className="px-6 mb-8">
-            <div className="flex items-center gap-3">
+            <Link to="/admin/dashboard" className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-[#16324F] border border-blue-400/30 text-white flex items-center justify-center font-bold text-lg font-serif shadow-sm">
                 <ShieldCheck className="w-6 h-6 text-blue-300" />
               </div>
@@ -37,7 +47,7 @@ export const AdminLayout = ({ currentTab, onNavigate, children }) => {
                 <h2 className="font-serif font-bold text-base text-white tracking-wide">EduMOOC Admin</h2>
                 <p className="text-[10px] text-blue-200 uppercase tracking-widest">System Control</p>
               </div>
-            </div>
+            </Link>
           </div>
 
           {/* Nav Items */}
@@ -46,53 +56,53 @@ export const AdminLayout = ({ currentTab, onNavigate, children }) => {
               Bảng quản trị
             </div>
 
-            <button
-              onClick={() => onNavigate('admin-overview')}
-              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-xs font-medium transition-all ${
-                currentTab === 'admin-overview'
+            <Link
+              to="/admin/dashboard"
+              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                isOverview
                   ? 'bg-[#16324F] text-white font-semibold border-l-4 border-blue-400 shadow-sm'
                   : 'text-slate-300 hover:bg-white/10 hover:text-white'
               }`}
             >
               <BarChart3 className="w-4 h-4 text-blue-400" />
               <span>Tổng quan hệ thống</span>
-            </button>
+            </Link>
 
-            <button
-              onClick={() => onNavigate('admin-course-approval')}
-              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-xs font-medium transition-all ${
-                currentTab === 'admin-course-approval'
+            <Link
+              to="/admin/courses/approval"
+              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                isApproval
                   ? 'bg-[#16324F] text-white font-semibold border-l-4 border-amber-400 shadow-sm'
                   : 'text-slate-300 hover:bg-white/10 hover:text-white'
               }`}
             >
               <Clock className="w-4 h-4 text-amber-400" />
               <span>Kiểm duyệt khóa học</span>
-            </button>
+            </Link>
 
-            <button
-              onClick={() => onNavigate('admin-user-management')}
-              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-xs font-medium transition-all ${
-                currentTab === 'admin-user-management'
+            <Link
+              to="/admin/users"
+              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                isUsers
                   ? 'bg-[#16324F] text-white font-semibold border-l-4 border-emerald-400 shadow-sm'
                   : 'text-slate-300 hover:bg-white/10 hover:text-white'
               }`}
             >
               <Users className="w-4 h-4 text-emerald-400" />
               <span>Quản lý người dùng</span>
-            </button>
+            </Link>
 
-            <button
-              onClick={() => onNavigate('admin-profile')}
-              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-xs font-medium transition-all ${
-                currentTab === 'admin-profile'
+            <Link
+              to="/admin/profile"
+              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                isProfile
                   ? 'bg-[#16324F] text-white font-semibold border-l-4 border-blue-400 shadow-sm'
                   : 'text-slate-300 hover:bg-white/10 hover:text-white'
               }`}
             >
               <User className="w-4 h-4 text-blue-300" />
               <span>Hồ sơ cá nhân</span>
-            </button>
+            </Link>
           </nav>
 
           {/* System Badge */}
@@ -108,9 +118,9 @@ export const AdminLayout = ({ currentTab, onNavigate, children }) => {
 
         {/* Sidebar Bottom: Admin Profile & Logout */}
         <div className="px-4 border-t border-white/10 pt-4 space-y-3">
-          <button
-            onClick={() => onNavigate('admin-profile')}
-            className="w-full flex items-center gap-3 text-left p-1 rounded-lg hover:bg-white/5 transition-colors"
+          <Link
+            to="/admin/profile"
+            className="w-full flex items-center gap-3 text-left p-1 rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
           >
             <div className="w-9 h-9 rounded-full bg-blue-900 border border-blue-400/40 flex items-center justify-center font-bold text-xs text-white">
               AD
@@ -119,11 +129,14 @@ export const AdminLayout = ({ currentTab, onNavigate, children }) => {
               <p className="text-xs font-bold text-white truncate">{user?.fullName || 'Quản trị viên'}</p>
               <p className="text-[10px] text-blue-300 truncate">Xem & Đổi hồ sơ →</p>
             </div>
-          </button>
+          </Link>
 
           <button
-            onClick={logout}
-            className="w-full py-1.5 px-3 bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/30 text-xs font-semibold rounded-md flex items-center justify-center gap-1.5 transition-colors"
+            onClick={() => {
+              logout();
+              navigate('/');
+            }}
+            className="w-full py-1.5 px-3 bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/30 text-xs font-semibold rounded-md flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
           >
             <LogOut className="w-3.5 h-3.5" />
             <span>Đăng xuất</span>
@@ -141,11 +154,13 @@ export const AdminLayout = ({ currentTab, onNavigate, children }) => {
             <span className="font-semibold text-[#001D37]">EduMOOC Governance</span>
             <ChevronRight className="w-3.5 h-3.5" />
             <span className="capitalize text-[#1A1C1E]">
-              {currentTab === 'admin-overview'
+              {isOverview
                 ? 'Tổng quan hệ thống'
-                : currentTab === 'admin-course-approval'
+                : isApproval
                 ? 'Kiểm duyệt khóa học'
-                : 'Quản lý người dùng'}
+                : isUsers
+                ? 'Quản lý người dùng'
+                : 'Hồ sơ cá nhân'}
             </span>
           </div>
 
@@ -153,7 +168,7 @@ export const AdminLayout = ({ currentTab, onNavigate, children }) => {
           <div className="relative">
             <button
               onClick={() => setShowRoleMenu(!showRoleMenu)}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-[#001D37] text-white rounded-md hover:bg-[#16324F] transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-[#001D37] text-white rounded-md hover:bg-[#16324F] transition-colors cursor-pointer"
             >
               <ShieldCheck className="w-3.5 h-3.5 text-blue-400" />
               <span>Portal: Quản trị viên</span>
@@ -162,32 +177,32 @@ export const AdminLayout = ({ currentTab, onNavigate, children }) => {
             {showRoleMenu && (
               <div className="absolute right-0 mt-1 w-52 bg-white border border-[#E4E4E0] rounded-lg shadow-sm py-1 z-50 text-[#1A1C1E]">
                 <button
-                  onClick={() => {
-                    quickSwitchRole('ROLE_STUDENT');
-                    onNavigate('student-explore');
+                  onClick={async () => {
+                    await quickSwitchRole('ROLE_STUDENT');
+                    navigate('/');
                     setShowRoleMenu(false);
                   }}
-                  className="w-full text-left px-3 py-1.5 text-xs flex items-center gap-2 hover:bg-[#FAF9FC]"
+                  className="w-full text-left px-3 py-1.5 text-xs flex items-center gap-2 hover:bg-[#FAF9FC] cursor-pointer"
                 >
                   <GraduationCap className="w-3.5 h-3.5" /> Giao diện Học viên
                 </button>
                 <button
-                  onClick={() => {
-                    quickSwitchRole('ROLE_INSTRUCTOR');
-                    onNavigate('instructor-dashboard');
+                  onClick={async () => {
+                    await quickSwitchRole('ROLE_INSTRUCTOR');
+                    navigate('/instructor/dashboard');
                     setShowRoleMenu(false);
                   }}
-                  className="w-full text-left px-3 py-1.5 text-xs flex items-center gap-2 hover:bg-[#FAF9FC]"
+                  className="w-full text-left px-3 py-1.5 text-xs flex items-center gap-2 hover:bg-[#FAF9FC] cursor-pointer"
                 >
                   <LayoutDashboard className="w-3.5 h-3.5 text-blue-600" /> Portal Giảng viên
                 </button>
                 <button
-                  onClick={() => {
-                    quickSwitchRole('ROLE_ADMIN');
-                    onNavigate('admin-overview');
+                  onClick={async () => {
+                    await quickSwitchRole('ROLE_ADMIN');
+                    navigate('/admin/dashboard');
                     setShowRoleMenu(false);
                   }}
-                  className="w-full text-left px-3 py-1.5 text-xs flex items-center gap-2 font-bold text-[#16324F] bg-[#F4F3F6]"
+                  className="w-full text-left px-3 py-1.5 text-xs flex items-center gap-2 font-bold text-[#16324F] bg-[#F4F3F6] cursor-pointer"
                 >
                   <ShieldCheck className="w-3.5 h-3.5 text-[#16324F]" /> Portal Quản trị viên
                 </button>
@@ -197,8 +212,8 @@ export const AdminLayout = ({ currentTab, onNavigate, children }) => {
         </header>
 
         {/* Dynamic Admin View with Unified Page Transition */}
-        <main key={currentTab} className="flex-1 animate-page-transition">
-          {children}
+        <main key={pathname} className="flex-1 animate-page-transition">
+          {children || <Outlet />}
         </main>
 
       </div>

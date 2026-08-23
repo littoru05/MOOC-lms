@@ -1,13 +1,35 @@
 import React from 'react';
+import { useLocation, useParams, useNavigate } from 'react-router-dom';
 import { certificateApi } from '../../api/certificateApi';
 import { Award, CheckCircle, XCircle, ArrowLeft, Download, ExternalLink, RefreshCw } from 'lucide-react';
 
-export const QuizResultPage = ({ result, onBackToCourse, onRetryQuiz, onViewCertificate }) => {
+export const QuizResultPage = ({ result: resultProp, onBackToCourse, onRetryQuiz, onViewCertificate }) => {
+  const location = useLocation();
+  const { quizId } = useParams();
+  const navigate = useNavigate();
+
+  const result = resultProp || location.state?.result;
+
+  const handleBackToCourse = () => {
+    if (onBackToCourse) onBackToCourse();
+    else navigate('/my-learning');
+  };
+
+  const handleRetry = () => {
+    if (onRetryQuiz) onRetryQuiz();
+    else navigate(`/quiz/${quizId || 1}`);
+  };
+
+  const handleViewCert = (certCode) => {
+    if (onViewCertificate) onViewCertificate(certCode);
+    else navigate(`/certificates?code=${encodeURIComponent(certCode)}`);
+  };
+
   if (!result) {
     return (
       <div className="max-w-2xl mx-auto py-20 text-center">
         <p className="text-sm font-semibold text-[#1A1C1E]">Chưa có dữ liệu kết quả bài thi.</p>
-        <button onClick={onBackToCourse} className="mt-4 px-4 py-2 text-xs bg-[#16324F] text-white rounded-lg">
+        <button onClick={handleBackToCourse} className="mt-4 px-4 py-2 text-xs bg-[#16324F] text-white rounded-lg cursor-pointer">
           Quay lại khóa học
         </button>
       </div>
@@ -59,16 +81,16 @@ export const QuizResultPage = ({ result, onBackToCourse, onRetryQuiz, onViewCert
           {/* Actions */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <button
-              onClick={onBackToCourse}
-              className="w-full sm:w-auto px-5 py-2.5 bg-white border border-[#E4E4E0] hover:bg-[#FAF9FC] text-[#1A1C1E] text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-colors"
+              onClick={handleBackToCourse}
+              className="w-full sm:w-auto px-5 py-2.5 bg-white border border-[#E4E4E0] hover:bg-[#FAF9FC] text-[#1A1C1E] text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
             >
               <ArrowLeft className="w-3.5 h-3.5" /> Quay về bài học
             </button>
 
-            {!isPassed && onRetryQuiz && (
+            {!isPassed && (
               <button
-                onClick={onRetryQuiz}
-                className="w-full sm:w-auto px-5 py-2.5 bg-[#16324F] hover:bg-[#001D37] text-white text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-colors"
+                onClick={handleRetry}
+                className="w-full sm:w-auto px-5 py-2.5 bg-[#16324F] hover:bg-[#001D37] text-white text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
               >
                 <RefreshCw className="w-3.5 h-3.5" /> Làm lại bài thi
               </button>
@@ -106,8 +128,8 @@ export const QuizResultPage = ({ result, onBackToCourse, onRetryQuiz, onViewCert
 
             <div className="mt-5 flex items-center gap-3">
               <button
-                onClick={() => onViewCertificate(cert.certificateCode)}
-                className="flex-1 py-2.5 bg-[#16324F] hover:bg-[#001D37] text-white text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-colors"
+                onClick={() => handleViewCert(cert.certificateCode)}
+                className="flex-1 py-2.5 bg-[#16324F] hover:bg-[#001D37] text-white text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
               >
                 <ExternalLink className="w-3.5 h-3.5" /> Tra cứu & Xem chứng chỉ
               </button>
@@ -115,7 +137,7 @@ export const QuizResultPage = ({ result, onBackToCourse, onRetryQuiz, onViewCert
                 href={certificateApi.getDownloadUrl(cert.certificateCode)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-4 py-2.5 bg-white border border-[#E4E4E0] hover:bg-[#FAF9FC] text-[#1A1C1E] text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-colors"
+                className="px-4 py-2.5 bg-white border border-[#E4E4E0] hover:bg-[#FAF9FC] text-[#1A1C1E] text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer"
               >
                 <Download className="w-3.5 h-3.5" /> Tải file
               </a>
