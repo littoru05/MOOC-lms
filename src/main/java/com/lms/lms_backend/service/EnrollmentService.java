@@ -21,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class EnrollmentService {
 
     private final EnrollmentRepository enrollmentRepository;

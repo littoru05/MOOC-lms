@@ -1,5 +1,6 @@
 package com.lms.lms_backend.controller;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +21,9 @@ public class CertificateController {
 
     private final CertificateService certificateService;
 
+    @Value("${app.frontend.base-url:http://localhost:5173}")
+    private String frontendBaseUrl;
+
     // Tra cứu và xác thực chứng chỉ số công khai bằng mã băm UUID
     @GetMapping("/verify/{code}")
     public ResponseEntity<CertificateResponse> verifyCertificate(@PathVariable String code) {
@@ -36,6 +40,7 @@ public class CertificateController {
     @GetMapping("/download/{code}")
     public ResponseEntity<byte[]> downloadCertificate(@PathVariable String code) {
         CertificateResponse cert = certificateService.getCertificateByCode(code);
+        String baseUrl = (frontendBaseUrl != null ? frontendBaseUrl : "http://localhost:5173").replaceAll("/+$", "");
         String text = "====================================================\n"
                     + "               CHỨNG NHẬN HOÀN THÀNH               \n"
                     + "          HỆ THỐNG ĐÀO TẠO TRỰC TUYẾN MOOC         \n"
@@ -46,7 +51,7 @@ public class CertificateController {
                     + "Giảng viên hướng dẫn: " + cert.getInstructorName() + "\n\n"
                     + "Mã xác thực duy nhất: " + cert.getCertificateCode() + "\n"
                     + "Ngày cấp: " + cert.getIssuedAt() + "\n\n"
-                    + "Tra cứu xác thực tại: http://localhost:5173/certificates/verify/" + cert.getCertificateCode() + "\n"
+                    + "Tra cứu xác thực tại: " + baseUrl + "/certificates/verify/" + cert.getCertificateCode() + "\n"
                     + "====================================================\n";
 
         byte[] output = text.getBytes(java.nio.charset.StandardCharsets.UTF_8);
@@ -56,3 +61,4 @@ public class CertificateController {
                 .body(output);
     }
 }
+

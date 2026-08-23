@@ -24,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ProgressService {
 
     private final LessonProgressRepository lessonProgressRepository;

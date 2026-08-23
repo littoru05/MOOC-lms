@@ -1,5 +1,6 @@
 package com.lms.lms_backend.config;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,7 +14,9 @@ import com.lms.lms_backend.entity.Category;
 import com.lms.lms_backend.entity.ContentType;
 import com.lms.lms_backend.entity.Course;
 import com.lms.lms_backend.entity.CourseStatus;
+import com.lms.lms_backend.entity.Enrollment;
 import com.lms.lms_backend.entity.Lesson;
+import com.lms.lms_backend.entity.LessonProgress;
 import com.lms.lms_backend.entity.Question;
 import com.lms.lms_backend.entity.Quiz;
 import com.lms.lms_backend.entity.Role;
@@ -21,6 +24,8 @@ import com.lms.lms_backend.entity.Section;
 import com.lms.lms_backend.entity.User;
 import com.lms.lms_backend.repository.CategoryRepository;
 import com.lms.lms_backend.repository.CourseRepository;
+import com.lms.lms_backend.repository.EnrollmentRepository;
+import com.lms.lms_backend.repository.LessonProgressRepository;
 import com.lms.lms_backend.repository.LessonRepository;
 import com.lms.lms_backend.repository.QuizRepository;
 import com.lms.lms_backend.repository.SectionRepository;
@@ -40,6 +45,8 @@ public class DataInitializer implements CommandLineRunner {
     private final SectionRepository sectionRepository;
     private final LessonRepository lessonRepository;
     private final QuizRepository quizRepository;
+    private final EnrollmentRepository enrollmentRepository;
+    private final LessonProgressRepository lessonProgressRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -108,110 +115,123 @@ public class DataInitializer implements CommandLineRunner {
         categoryRepository.saveAll(List.of(catWeb, catAI, catMobile));
         log.info("Đã tạo 3 danh mục đào tạo mẫu.");
 
-        // 3. Tạo Courses mẫu
+        // 3. Tạo 6 Khóa học Mẫu
         Course course1 = Course.builder()
-                .title("Lập trình Web Fullstack với Spring Boot & ReactJS")
+                .title("Lập trình Web Fullstack với Spring Boot 3 & ReactJS 19")
                 .slug("fullstack-spring-boot-reactjs")
-                .description("Khóa học toàn diện từ thiết kế CSDL MySQL, xây dựng RESTful API với Spring Boot 3-Layer Monolithic, đến phát triển Single Page Application giao diện hiện đại với ReactJS.")
-                .thumbnailUrl("https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=600")
+                .description("Làm chủ kiến trúc Monolithic 3-Layer, Spring Security JWT, JPA Hibernate và xây dựng Single Page Application hiện đại với React 19 & Tailwind CSS.")
+                .thumbnailUrl("https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800")
                 .status(CourseStatus.PUBLISHED)
                 .category(catWeb)
                 .instructor(instructor)
                 .build();
 
         Course course2 = Course.builder()
-                .title("Khóa học Nhập môn Python & Machine Learning cơ bản")
+                .title("Trí tuệ nhân tạo & Machine Learning thực chiến với Python")
                 .slug("python-machine-learning-co-ban")
-                .description("Trang bị kiến thức cốt lõi về ngôn ngữ Python, các thư viện NumPy, Pandas, Scikit-learn và các thuật toán học máy phổ biến.")
-                .thumbnailUrl("https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600")
+                .description("Nắm vững toán học học máy, tiền xử lý dữ liệu với Pandas/NumPy và xây dựng các mô hình phân loại, hồi quy, Deep Learning với Scikit-learn & PyTorch.")
+                .thumbnailUrl("https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800")
                 .status(CourseStatus.PUBLISHED)
                 .category(catAI)
                 .instructor(instructor)
                 .build();
 
         Course course3 = Course.builder()
-                .title("Xây dựng ứng dụng đa nền tảng với React Native")
+                .title("Phát triển Ứng dụng Di động Đa nền tảng với React Native & Expo")
                 .slug("react-native-cross-platform")
-                .description("Khóa học đang trong quá trình biên soạn và gửi phê duyệt lên Quản trị viên.")
-                .thumbnailUrl("https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=600")
-                .status(CourseStatus.PENDING)
+                .description("Xây dựng ứng dụng di động iOS và Android từ một codebase duy nhất với React Native, Expo, Redux Toolkit và tích hợp REST API chuyên nghiệp.")
+                .thumbnailUrl("https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=800")
+                .status(CourseStatus.PUBLISHED)
                 .category(catMobile)
                 .instructor(instructor)
                 .build();
 
-        courseRepository.saveAll(List.of(course1, course2, course3));
-        log.info("Đã tạo 3 khóa học mẫu (2 Published, 1 Pending).");
+        Course course4 = Course.builder()
+                .title("Chuyên sâu Microservices & Cloud Native với Docker, Kubernetes & AWS")
+                .slug("microservices-cloud-native-devops")
+                .description("Xây dựng kiến trúc hệ thống phân tán chịu tải cao, triển khai CI/CD tự động và giám sát hệ thống với Prometheus, Grafana trên nền tảng AWS Cloud.")
+                .thumbnailUrl("https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800")
+                .status(CourseStatus.PUBLISHED)
+                .category(catWeb)
+                .instructor(instructor)
+                .build();
+
+        Course course5 = Course.builder()
+                .title("Thiết kế UI/UX Sản phẩm Chuyên nghiệp với Figma & Design Systems")
+                .slug("thiet-ke-ui-ux-figma-design-system")
+                .description("Làm chủ quy trình nghiên cứu người dùng, thiết kế wireframe, prototype tương tác cao và xây dựng Design System quy chuẩn cho Web & Mobile.")
+                .thumbnailUrl("https://images.unsplash.com/photo-1581291518655-9523c932edcf?w=800")
+                .status(CourseStatus.PUBLISHED)
+                .category(catWeb)
+                .instructor(instructor)
+                .build();
+
+        Course course6 = Course.builder()
+                .title("An toàn Thông tin & Bảo mật Ứng dụng Web (OWASP Top 10)")
+                .slug("an-toan-thong-tin-web-security-owasp")
+                .description("Phân tích và phòng chống các lỗ hổng bảo mật nghiêm trọng (SQL Injection, XSS, CSRF, SSRF, JWT Attacks) và bảo vệ hệ thống trước các cuộc tấn công mạng.")
+                .thumbnailUrl("https://images.unsplash.com/photo-1563986768609-322da13575f3?w=800")
+                .status(CourseStatus.PUBLISHED)
+                .category(catAI)
+                .instructor(instructor)
+                .build();
+
+        courseRepository.saveAll(List.of(course1, course2, course3, course4, course5, course6));
+        log.info("Đã tạo 6 khóa học mẫu chuẩn hóa.");
 
         // 4. Tạo Sections & Lessons cho Course 1
-        Section sec1 = Section.builder()
-                .title("Chương 1: Tổng quan & Thiết lập môi trường")
-                .orderIndex(1)
-                .course(course1)
-                .build();
+        Section sec1_1 = Section.builder().title("Tổng quan Kiến trúc & Thiết lập Môi trường").orderIndex(1).course(course1).build();
+        Section sec1_2 = Section.builder().title("Phát triển Backend 3-Layer với Spring Boot 3").orderIndex(2).course(course1).build();
+        Section sec1_3 = Section.builder().title("Nghiệp vụ Nâng cao (Tiến độ, Khảo thí & Chứng chỉ)").orderIndex(3).course(course1).build();
+        Section sec1_4 = Section.builder().title("Phát triển Frontend React 19 & Tích hợp").orderIndex(4).course(course1).build();
+        sectionRepository.saveAll(List.of(sec1_1, sec1_2, sec1_3, sec1_4));
 
-        Section sec2 = Section.builder()
-                .title("Chương 2: Phát triển Backend Spring Boot 3-Layer")
-                .orderIndex(2)
-                .course(course1)
-                .build();
+        Lesson les1_1 = Lesson.builder().title("1.1 Giới thiệu kiến trúc hệ thống E-Learning MOOC").contentType(ContentType.VIDEO).contentUrl("https://www.youtube.com/embed/9SGDpanrc8U").durationMinutes(18).orderIndex(1).section(sec1_1).build();
+        Lesson les1_2 = Lesson.builder().title("1.2 Hướng dẫn cài đặt Java 21, MySQL 8.0 & Spring Boot").contentType(ContentType.DOCUMENT).contentUrl("https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf").durationMinutes(20).orderIndex(2).section(sec1_1).build();
+        Lesson les1_3 = Lesson.builder().title("1.3 Phân tích nghiệp vụ 6 phân hệ và 11 Bảng CSDL").contentType(ContentType.VIDEO).contentUrl("https://www.youtube.com/embed/7S_tz1z_5bA").durationMinutes(25).orderIndex(3).section(sec1_1).build();
+        Lesson les1_4 = Lesson.builder().title("2.1 Định nghĩa 11 JPA Entities và thiết lập mối quan hệ").contentType(ContentType.VIDEO).contentUrl("https://www.youtube.com/embed/31KTdfRH6nY").durationMinutes(30).orderIndex(1).section(sec1_2).build();
+        Lesson les1_5 = Lesson.builder().title("2.2 Cấu hình Spring Security 6 & Bộ lọc xác thực JWT").contentType(ContentType.VIDEO).contentUrl("https://www.youtube.com/embed/KxqlJblhzfI").durationMinutes(40).orderIndex(2).section(sec1_2).build();
+        Lesson les1_6 = Lesson.builder().title("3.1 Thuật toán tính % tiến độ học tập thời gian thực").contentType(ContentType.VIDEO).contentUrl("https://www.youtube.com/embed/31KTdfRH6nY").durationMinutes(25).orderIndex(1).section(sec1_3).build();
+        Lesson les1_7 = Lesson.builder().title("4.1 Khởi tạo dự án Vite, Tailwind CSS & Cấu hình Theme").contentType(ContentType.VIDEO).contentUrl("https://www.youtube.com/embed/bMknfKXIFA8").durationMinutes(25).orderIndex(1).section(sec1_4).build();
+        lessonRepository.saveAll(List.of(les1_1, les1_2, les1_3, les1_4, les1_5, les1_6, les1_7));
 
-        Section sec3 = Section.builder()
-                .title("Chương 3: Phát triển Frontend ReactJS & Course Player")
-                .orderIndex(3)
-                .course(course1)
-                .build();
+        // 5. Tạo Sections & Lessons cho Course 2
+        Section sec2_1 = Section.builder().title("Nền tảng Python & Khoa học Dữ liệu").orderIndex(1).course(course2).build();
+        Section sec2_2 = Section.builder().title("Các thuật toán Machine Learning Cốt lõi").orderIndex(2).course(course2).build();
+        sectionRepository.saveAll(List.of(sec2_1, sec2_2));
 
-        sectionRepository.saveAll(List.of(sec1, sec2, sec3));
+        Lesson les2_1 = Lesson.builder().title("1.1 Giới thiệu hệ sinh thái AI và Python cho Data Science").contentType(ContentType.VIDEO).contentUrl("https://www.youtube.com/embed/rfscVS0vtbw").durationMinutes(20).orderIndex(1).section(sec2_1).build();
+        Lesson les2_2 = Lesson.builder().title("1.2 Thao tác mảng đa chiều hiệu năng cao với NumPy").contentType(ContentType.VIDEO).contentUrl("https://www.youtube.com/embed/rfscVS0vtbw").durationMinutes(25).orderIndex(2).section(sec2_1).build();
+        Lesson les2_3 = Lesson.builder().title("2.1 Thuật toán Hồi quy tuyến tính (Linear Regression)").contentType(ContentType.VIDEO).contentUrl("https://www.youtube.com/embed/7eh4d6sabA0").durationMinutes(30).orderIndex(1).section(sec2_2).build();
+        Lesson les2_4 = Lesson.builder().title("2.2 Deep Learning với PyTorch & Neural Networks").contentType(ContentType.VIDEO).contentUrl("https://www.youtube.com/embed/V_xro1bcAuA").durationMinutes(35).orderIndex(2).section(sec2_2).build();
+        lessonRepository.saveAll(List.of(les2_1, les2_2, les2_3, les2_4));
 
-        Lesson les1 = Lesson.builder()
-                .title("1.1 Giới thiệu kiến trúc hệ thống MOOC")
-                .contentType(ContentType.VIDEO)
-                .contentUrl("https://www.w3schools.com/html/mov_bbb.mp4")
-                .durationMinutes(10)
-                .orderIndex(1)
-                .section(sec1)
-                .build();
+        // 6. Tạo Sections & Lessons cho Course 3
+        Section sec3_1 = Section.builder().title("Thiết lập Expo & React Native Core").orderIndex(1).course(course3).build();
+        sectionRepository.save(sec3_1);
+        Lesson les3_1 = Lesson.builder().title("1.1 Cài đặt Expo CLI và chạy app trên thiết bị thật").contentType(ContentType.VIDEO).contentUrl("https://www.youtube.com/embed/0-S5a0eXPoc").durationMinutes(20).orderIndex(1).section(sec3_1).build();
+        Lesson les3_2 = Lesson.builder().title("1.2 Sử dụng View, Text, FlatList & Flexbox Layout").contentType(ContentType.VIDEO).contentUrl("https://www.youtube.com/embed/0-S5a0eXPoc").durationMinutes(25).orderIndex(2).section(sec3_1).build();
+        lessonRepository.saveAll(List.of(les3_1, les3_2));
 
-        Lesson les2 = Lesson.builder()
-                .title("1.2 Hướng dẫn cài đặt Java 21, MySQL & Công cụ lập trình")
-                .contentType(ContentType.DOCUMENT)
-                .contentUrl("https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf")
-                .durationMinutes(15)
-                .orderIndex(2)
-                .section(sec1)
-                .build();
+        // 7. Tạo Sections & Lessons cho Course 4
+        Section sec4_1 = Section.builder().title("Kiến trúc Microservices & Phân rã Dịch vụ").orderIndex(1).course(course4).build();
+        sectionRepository.save(sec4_1);
+        Lesson les4_1 = Lesson.builder().title("1.1 So sánh Monolithic vs Microservices & Spring Cloud").contentType(ContentType.VIDEO).contentUrl("https://www.youtube.com/embed/mSZCN4wVw0I").durationMinutes(30).orderIndex(1).section(sec4_1).build();
+        lessonRepository.save(les4_1);
 
-        Lesson les3 = Lesson.builder()
-                .title("2.1 Thiết kế 11 Bảng CSDL và các JPA Entity")
-                .contentType(ContentType.VIDEO)
-                .contentUrl("https://www.w3schools.com/html/mov_bbb.mp4")
-                .durationMinutes(25)
-                .orderIndex(1)
-                .section(sec2)
-                .build();
+        // 8. Tạo Sections & Lessons cho Course 5
+        Section sec5_1 = Section.builder().title("Nguyên lý Thiết kế Giao diện & Làm chủ Figma").orderIndex(1).course(course5).build();
+        sectionRepository.save(sec5_1);
+        Lesson les5_1 = Lesson.builder().title("1.1 Bố cục thị giác, 8pt Grid & Auto Layout 5.0 trong Figma").contentType(ContentType.VIDEO).contentUrl("https://www.youtube.com/embed/FTFaQWZBqQ8").durationMinutes(25).orderIndex(1).section(sec5_1).build();
+        lessonRepository.save(les5_1);
 
-        Lesson les4 = Lesson.builder()
-                .title("2.2 Hiện thực RESTful API & Bảo mật JWT Bearer")
-                .contentType(ContentType.VIDEO)
-                .contentUrl("https://www.w3schools.com/html/mov_bbb.mp4")
-                .durationMinutes(30)
-                .orderIndex(2)
-                .section(sec2)
-                .build();
+        // 9. Tạo Sections & Lessons cho Course 6
+        Section sec6_1 = Section.builder().title("Tổng quan An ninh Mạng & OWASP Top 10").orderIndex(1).course(course6).build();
+        sectionRepository.save(sec6_1);
+        Lesson les6_1 = Lesson.builder().title("1.1 Giới thiệu mô hình phòng thủ & Phân tích lỗ hổng SQL Injection").contentType(ContentType.VIDEO).contentUrl("https://www.youtube.com/embed/2_lswM1S264").durationMinutes(25).orderIndex(1).section(sec6_1).build();
+        lessonRepository.save(les6_1);
 
-        Lesson les5 = Lesson.builder()
-                .title("3.1 Xây dựng Trình phát bài giảng Course Player & Tiến độ")
-                .contentType(ContentType.VIDEO)
-                .contentUrl("https://www.w3schools.com/html/mov_bbb.mp4")
-                .durationMinutes(20)
-                .orderIndex(1)
-                .section(sec3)
-                .build();
-
-        lessonRepository.saveAll(List.of(les1, les2, les3, les4, les5));
-        log.info("Đã tạo các chương và bài giảng đa phương tiện mẫu.");
-
-        // 5. Tạo Quiz mẫu cho Course 1
+        // 10. Tạo Quiz mẫu cho Course 1
         Quiz quiz = Quiz.builder()
                 .course(course1)
                 .title("Bài kiểm tra Đánh giá Năng lực Cuối khóa (Final Assessment)")
@@ -219,7 +239,6 @@ public class DataInitializer implements CommandLineRunner {
                 .durationMinutes(15)
                 .build();
 
-        // Câu hỏi 1
         Question q1 = Question.builder()
                 .quiz(quiz)
                 .questionText("Kiến trúc Monolithic 3-Layer trong hệ thống bao gồm 3 tầng chính nào?")
@@ -232,7 +251,6 @@ public class DataInitializer implements CommandLineRunner {
         Answer a1_4 = Answer.builder().question(q1).answerText("Model, View, Template").isCorrect(false).build();
         q1.setAnswers(List.of(a1_1, a1_2, a1_3, a1_4));
 
-        // Câu hỏi 2
         Question q2 = Question.builder()
                 .quiz(quiz)
                 .questionText("Điều kiện để học viên được hệ thống tự động cấp Chứng chỉ số tốt nghiệp (Certificate) là gì?")
@@ -245,7 +263,6 @@ public class DataInitializer implements CommandLineRunner {
         Answer a2_4 = Answer.builder().question(q2).answerText("Chờ quản trị viên duyệt thủ công").isCorrect(false).build();
         q2.setAnswers(List.of(a2_1, a2_2, a2_3, a2_4));
 
-        // Câu hỏi 3
         Question q3 = Question.builder()
                 .quiz(quiz)
                 .questionText("Định dạng xác thực chuẩn của token JWT truyền trong HTTP Header là gì?")
@@ -260,8 +277,28 @@ public class DataInitializer implements CommandLineRunner {
 
         quiz.setQuestions(List.of(q1, q2, q3));
         quizRepository.save(quiz);
-        log.info("Đã tạo bài Quiz kiểm tra đánh giá năng lực mẫu kèm câu hỏi & đáp án.");
 
-        log.info("Khởi tạo dữ liệu mẫu hoàn tất thành công!");
+        // 11. Tạo sẵn 1 Lượt Ghi danh cho student@lms.com vào Course 1
+        Enrollment studentEnrollment = Enrollment.builder()
+                .user(student)
+                .course(course1)
+                .progressPercent(BigDecimal.valueOf(28))
+                .isCompleted(false)
+                .build();
+        enrollmentRepository.save(studentEnrollment);
+
+        LessonProgress prog1 = LessonProgress.builder()
+                .enrollment(studentEnrollment)
+                .lesson(les1_1)
+                .isCompleted(true)
+                .build();
+        LessonProgress prog2 = LessonProgress.builder()
+                .enrollment(studentEnrollment)
+                .lesson(les1_2)
+                .isCompleted(true)
+                .build();
+        lessonProgressRepository.saveAll(List.of(prog1, prog2));
+
+        log.info("Khởi tạo dữ liệu mẫu 6 khóa học, toàn bộ bài học và lượt ghi danh thực tế hoàn tất thành công!");
     }
 }

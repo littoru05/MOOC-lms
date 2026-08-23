@@ -22,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class CourseService {
 
     private final CourseRepository courseRepository;
