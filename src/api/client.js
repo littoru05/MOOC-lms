@@ -21,16 +21,29 @@ client.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response interceptor để xử lý lỗi xác thực 401
+// Response interceptor để xử lý lỗi xác thực 401 / 403
 client.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response && error.response.status === 401) {
-      // Có thể xóa token nếu hết hạn
-      console.warn('Phiên đăng nhập đã hết hạn hoặc không hợp lệ.');
+    if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+      const hadToken = !!localStorage.getItem('token');
+      localStorage.removeItem('token');
+      localStorage.removeItem('user_cache');
+      if (hadToken) {
+        console.warn(`Phiên đăng nhập hết hạn hoặc bị từ chối truy cập (HTTP ${error.response.status}).`);
+        window.dispatchEvent(
+          new CustomEvent('auth:expired', {
+            detail: {
+              status: error.response.status,
+              message: 'Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại.',
+            },
+          })
+        );
+      }
     }
     return Promise.reject(error);
   }
 );
 
 export default client;
+

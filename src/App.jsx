@@ -47,10 +47,23 @@ function AppContent() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authModalMode, setAuthModalMode] = useState('LOGIN');
 
+  // When session expires, redirect to explore tab and prompt login modal
+  React.useEffect(() => {
+    const handleAuthExpired = () => {
+      setCurrentTab('student-explore');
+      setAuthModalMode('LOGIN');
+      setIsAuthModalOpen(true);
+    };
+
+    window.addEventListener('auth:expired', handleAuthExpired);
+    return () => window.removeEventListener('auth:expired', handleAuthExpired);
+  }, []);
+
   const handleOpenAuthModal = (mode = 'LOGIN') => {
     setAuthModalMode(mode);
     setIsAuthModalOpen(true);
   };
+
 
   const handleAuthSuccess = (targetRole) => {
     setIsAuthModalOpen(false);
@@ -312,10 +325,11 @@ function AppContent() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <ToastProvider>
+    <ToastProvider>
+      <AuthProvider>
         <AppContent />
-      </ToastProvider>
-    </AuthProvider>
+      </AuthProvider>
+    </ToastProvider>
   );
 }
+

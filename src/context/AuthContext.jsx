@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { authApi } from '../api/authApi';
+import { useToast } from './ToastContext';
 
 const AuthContext = createContext();
 
@@ -7,8 +8,16 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem('token') || null);
   const [loading, setLoading] = useState(true);
+  const { showToast } = useToast();
 
-  // Load user profile on startup; auto-authenticate with default student if no session exists
+  const clearAuth = useCallback(() => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user_cache');
+    setToken(null);
+    setUser(null);
+  }, []);
+
+  // Load user profile on startup if token exists; clear and notify if expired
   useEffect(() => {
     const initAuth = async () => {
       const storedToken = localStorage.getItem('token');
@@ -16,37 +25,37 @@ export const AuthProvider = ({ children }) => {
         try {
           const res = await authApi.getMe();
           setUser(res.data);
-          setLoading(false);
-          return;
+          setToken(storedToken);
         } catch (err) {
-          console.warn('Phiên cũ hết hạn, đang đăng nhập lại tài khoản mặc định...');
+          console.warn('Phiên đăng nhập đã hết hạn hoặc không hợp lệ:', err);
+          clearAuth();
+          showToast?.('Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại.', 'error');
+          window.dispatchEvent(
+            new CustomEvent('auth:expired', {
+              detail: { message: 'Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại.' },
+            })
+          );
         }
+      } else {
+        clearAuth();
       }
-
-      // Auto-login with default student account so all API calls have a valid Bearer JWT
-      try {
-        const res = await authApi.login({
-          email: 'student@lms.com',
-          password: 'student123',
-        });
-        const { token: newToken, ...userData } = res.data;
-        localStorage.setItem('token', newToken);
-        localStorage.setItem('user_cache', JSON.stringify(userData));
-        setToken(newToken);
-        setUser(userData);
-      } catch (e) {
-        console.warn('Backend chưa sẵn sàng, dùng cache local');
-        const storedUser = localStorage.getItem('user_cache');
-        if (storedUser) {
-          setUser(JSON.parse(storedUser));
-        }
-      } finally {
-        setLoading(false);
-      }
+      setLoading(false);
     };
 
     initAuth();
-  }, []);
+  }, [clearAuth, showToast]);
+
+  // Listen for global auth expiration events (e.g. from Axios interceptors)
+  useEffect(() => {
+    const handleAuthExpired = (event) => {
+      clearAuth();
+      const message = event.detail?.message || 'Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại.';
+      showToast?.(message, 'error');
+    };
+
+    window.addEventListener('auth:expired', handleAuthExpired);
+    return () => window.removeEventListener('auth:expired', handleAuthExpired);
+  }, [clearAuth, showToast]);
 
   const login = async (email, password) => {
     const res = await authApi.login({ email, password });
@@ -69,13 +78,11 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user_cache');
-    setToken(null);
-    setUser(null);
+    clearAuth();
+    showToast?.('Đã đăng xuất khỏi tài khoản thành công.', 'info');
   };
 
-  // Quick switch role for instant evaluation / demo
+  // Quick switch role for testing with legitimate backend credentials
   const quickSwitchRole = async (targetRole) => {
     let email = 'student@lms.com';
     let pass = 'student123';
@@ -87,25 +94,13 @@ export const AuthProvider = ({ children }) => {
       pass = 'admin123';
     }
 
-    try {
-      await login(email, pass);
-    } catch (err) {
-      console.warn('Lỗi khi quick switch backend:', err);
-      const mockUser = {
-        id: targetRole === 'ROLE_ADMIN' ? 1 : targetRole === 'ROLE_INSTRUCTOR' ? 2 : 3,
-        email,
-        fullName: targetRole === 'ROLE_ADMIN' ? 'Quản trị viên Hệ thống' : targetRole === 'ROLE_INSTRUCTOR' ? 'TS. Nguyễn Văn A' : 'Trần Văn Học Viên',
-        role: targetRole,
-      };
-      setUser(mockUser);
-      localStorage.setItem('user_cache', JSON.stringify(mockUser));
-    }
+    await login(email, pass);
   };
 
-  const currentRole = user?.role || 'ROLE_STUDENT';
-  const isStudent = currentRole === 'ROLE_STUDENT';
-  const isInstructor = currentRole === 'ROLE_INSTRUCTOR';
-  const isAdmin = currentRole === 'ROLE_ADMIN';
+  const currentRole = user?.role || null;
+  const isStudent = user?.role === 'ROLE_STUDENT';
+  const isInstructor = user?.role === 'ROLE_INSTRUCTOR';
+  const isAdmin = user?.role === 'ROLE_ADMIN';
 
   return (
     <AuthContext.Provider
@@ -116,6 +111,7 @@ export const AuthProvider = ({ children }) => {
         login,
         register,
         logout,
+        clearAuth,
         quickSwitchRole,
         currentRole,
         isStudent,
@@ -129,3 +125,4 @@ export const AuthProvider = ({ children }) => {
 };
 
 export const useAuth = () => useContext(AuthContext);
+
