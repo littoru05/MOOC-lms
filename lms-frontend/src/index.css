@@ -1,0 +1,92 @@
+@import "tailwindcss";
+
+@theme {
+  --font-serif: 'Merriweather', 'EB Garamond', 'Be Vietnam Pro', serif;
+  --font-sans: 'Be Vietnam Pro', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+@layer base {
+  :root {
+    --font-serif: 'Merriweather', 'EB Garamond', 'Be Vietnam Pro', serif;
+    --font-sans: 'Be Vietnam Pro', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    
+    --color-canvas: #fafaf8;
+    --color-surface: #ffffff;
+    --color-primary: #16324f;
+    --color-primary-dark: #001d37;
+    --color-stroke: #e4e4e0;
+    --color-text-main: #1a1c1e;
+    --color-text-muted: #5e5e5e;
+    --color-success: #22c55e;
+    --color-danger: #ba1a1a;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: var(--color-canvas);
+    color: var(--color-text-main);
+  }
+}
+
+/* Custom scrollbars & smooth transitions */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #c3c6ce;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #74777e;
+}
+
+/* Unified Page Transitions Across All Roles & Levels */
+@keyframes unifiedPageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-page-transition {
+  animation: unifiedPageEnter 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: opacity, transform;
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.98) translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes slideDownFade {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-card-entry {
+  animation: fadeInScale 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-banner-entry {
+  animation: slideDownFade 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
