@@ -1,0 +1,1220 @@
+openapi: 3.0.3
+info:
+  title: MOOC Learning Platform API
+  description: >
+    Đặc tả API cho nền tảng học tập trực tuyến theo mô hình MOOC.
+    Bao gồm 3 nhóm tác nhân: Student (Học viên), Instructor (Giảng viên), Admin (Quản trị viên).
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080/api
+    description: Local dev server
+
+tags:
+  - name: Auth
+    description: Đăng ký, đăng nhập, JWT - dùng chung cho mọi vai trò
+  - name: User
+    description: Hồ sơ cá nhân người dùng
+  - name: Category
+    description: Danh mục khóa học (đọc công khai, ghi bởi Admin)
+  - name: Course - Public
+    description: Xem/tìm kiếm khóa học (Student, khách vãng lai)
+  - name: Course - Instructor
+    description: Quản lý khóa học, chương, bài học (Instructor)
+  - name: Course - Admin
+    description: Kiểm duyệt khóa học (Admin)
+  - name: Enrollment
+    description: Ghi danh và theo dõi tiến độ học (Student)
+  - name: Lesson Progress
+    description: Đánh dấu hoàn thành bài học (Student)
+  - name: Quiz - Instructor
+    description: Biên soạn ngân hàng câu hỏi, đề thi (Instructor)
+  - name: Quiz - Student
+    description: Làm bài kiểm tra, xem kết quả (Student)
+  - name: Certificate
+    description: Chứng chỉ hoàn thành khóa học
+  - name: Admin - User Management
+    description: Quản lý tài khoản người dùng (Admin)
+  - name: Admin - Dashboard
+    description: Thống kê tổng quan hệ thống (Admin)
+
+security:
+  - bearerAuth: []
+
+paths:
+  # ==========================================================
+  # AUTH - dùng chung cho Student / Instructor / Admin
+  # ==========================================================
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: Đăng ký tài khoản mới (mặc định role Student)
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, email, password, fullName]
+              properties:
+                username: { type: string, example: anhlinh23 }
+                email: { type: string, format: email }
+                password: { type: string, format: password, minLength: 6 }
+                fullName: { type: string }
+      responses:
+        '201':
+          description: Đăng ký thành công
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UserResponse' }
+        '400':
+          description: Username hoặc email đã tồn tại
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Đăng nhập, trả về access token và refresh token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string, format: password }
+      responses:
+        '200':
+          description: Đăng nhập thành công
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuthResponse' }
+        '401':
+          description: Sai email hoặc mật khẩu
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  /auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Cấp lại access token mới từ refresh token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refreshToken]
+              properties:
+                refreshToken: { type: string }
+      responses:
+        '200':
+          description: Token mới được cấp
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuthResponse' }
+        '401':
+          description: Refresh token không hợp lệ hoặc hết hạn
+
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Đăng xuất, thu hồi refresh token
+      responses:
+        '204':
+          description: Đăng xuất thành công
+
+  # ==========================================================
+  # USER - hồ sơ cá nhân (mọi vai trò đã đăng nhập)
+  # ==========================================================
+  /users/me:
+    get:
+      tags: [User]
+      summary: Lấy thông tin hồ sơ của người dùng hiện tại
+      responses:
+        '200':
+          description: Thông tin người dùng
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UserResponse' }
+    put:
+      tags: [User]
+      summary: Cập nhật hồ sơ cá nhân (họ tên, avatar)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fullName: { type: string }
+                avatarUrl: { type: string }
+      responses:
+        '200':
+          description: Cập nhật thành công
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UserResponse' }
+
+  /users/me/password:
+    put:
+      tags: [User]
+      summary: Đổi mật khẩu
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [oldPassword, newPassword]
+              properties:
+                oldPassword: { type: string, format: password }
+                newPassword: { type: string, format: password, minLength: 6 }
+      responses:
+        '204':
+          description: Đổi mật khẩu thành công
+        '400':
+          description: Mật khẩu cũ không đúng
+
+  # ==========================================================
+  # CATEGORY
+  # ==========================================================
+  /categories:
+    get:
+      tags: [Category]
+      summary: Danh sách danh mục khóa học (công khai)
+      security: []
+      responses:
+        '200':
+          description: Danh sách danh mục
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/CategoryResponse' }
+    post:
+      tags: [Category]
+      summary: Tạo danh mục mới (chỉ Admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, slug]
+              properties:
+                name: { type: string }
+                slug: { type: string }
+                description: { type: string }
+      responses:
+        '201':
+          description: Tạo thành công
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CategoryResponse' }
+
+  /categories/{id}:
+    put:
+      tags: [Category]
+      summary: Cập nhật danh mục (chỉ Admin)
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                slug: { type: string }
+                description: { type: string }
+      responses:
+        '200':
+          description: Cập nhật thành công
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CategoryResponse' }
+    delete:
+      tags: [Category]
+      summary: Xóa danh mục (chỉ Admin)
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '204':
+          description: Xóa thành công
+
+  # ==========================================================
+  # COURSE - PUBLIC (Student / khách)
+  # ==========================================================
+  /courses:
+    get:
+      tags: [Course - Public]
+      summary: Tìm kiếm, lọc, phân trang khóa học đã xuất bản
+      security: []
+      parameters:
+        - name: category
+          in: query
+          schema: { type: string }
+          description: Lọc theo slug danh mục
+        - name: keyword
+          in: query
+          schema: { type: string }
+          description: Tìm theo tên khóa học
+        - name: page
+          in: query
+          schema: { type: integer, default: 0 }
+        - name: size
+          in: query
+          schema: { type: integer, default: 12 }
+      responses:
+        '200':
+          description: Danh sách khóa học (phân trang)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CoursePageResponse' }
+
+  /courses/{id}:
+    get:
+      tags: [Course - Public]
+      summary: Xem chi tiết khóa học (bao gồm danh sách chương/bài)
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: Chi tiết khóa học
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CourseDetailResponse' }
+        '404':
+          description: Không tìm thấy khóa học
+
+  # ==========================================================
+  # COURSE - INSTRUCTOR (quản lý khóa học, chương, bài học)
+  # ==========================================================
+  /instructor/courses:
+    get:
+      tags: [Course - Instructor]
+      summary: Danh sách khóa học của giảng viên hiện tại (mọi trạng thái)
+      responses:
+        '200':
+          description: Danh sách khóa học
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/CourseResponse' }
+    post:
+      tags: [Course - Instructor]
+      summary: Tạo khóa học mới (trạng thái mặc định Draft)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CourseCreateRequest' }
+      responses:
+        '201':
+          description: Tạo thành công
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CourseResponse' }
+
+  /instructor/courses/{id}:
+    put:
+      tags: [Course - Instructor]
+      summary: Cập nhật thông tin khóa học (chỉ chủ sở hữu)
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CourseCreateRequest' }
+      responses:
+        '200':
+          description: Cập nhật thành công
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CourseResponse' }
+    delete:
+      tags: [Course - Instructor]
+      summary: Xóa khóa học (chỉ khi ở trạng thái Draft)
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '204':
+          description: Xóa thành công
+
+  /instructor/courses/{id}/submit:
+    put:
+      tags: [Course - Instructor]
+      summary: Gửi khóa học để Admin kiểm duyệt (Draft → Pending)
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: Đã chuyển sang trạng thái chờ duyệt
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CourseResponse' }
+
+  /instructor/courses/{courseId}/enrollments:
+    get:
+      tags: [Course - Instructor]
+      summary: Danh sách học viên ghi danh và tiến độ học từng người
+      parameters:
+        - name: courseId
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Danh sách ghi danh
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/EnrollmentResponse' }
+
+  /courses/{courseId}/sections:
+    post:
+      tags: [Course - Instructor]
+      summary: Thêm chương học mới vào khóa học
+      parameters:
+        - name: courseId
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title]
+              properties:
+                title: { type: string }
+                orderIndex: { type: integer, default: 1 }
+      responses:
+        '201':
+          description: Tạo chương thành công
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SectionResponse' }
+
+  /sections/{id}:
+    put:
+      tags: [Course - Instructor]
+      summary: Cập nhật chương học
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title: { type: string }
+                orderIndex: { type: integer }
+      responses:
+        '200':
+          description: Cập nhật thành công
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SectionResponse' }
+    delete:
+      tags: [Course - Instructor]
+      summary: Xóa chương học
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '204':
+          description: Xóa thành công
+
+  /sections/{sectionId}/lessons:
+    post:
+      tags: [Course - Instructor]
+      summary: Thêm bài học mới vào chương
+      parameters:
+        - name: sectionId
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LessonCreateRequest' }
+      responses:
+        '201':
+          description: Tạo bài học thành công
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/LessonResponse' }
+
+  /lessons/{id}:
+    put:
+      tags: [Course - Instructor]
+      summary: Cập nhật bài học
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LessonCreateRequest' }
+      responses:
+        '200':
+          description: Cập nhật thành công
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/LessonResponse' }
+    delete:
+      tags: [Course - Instructor]
+      summary: Xóa bài học
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '204':
+          description: Xóa thành công
+
+  # ==========================================================
+  # COURSE - ADMIN (kiểm duyệt)
+  # ==========================================================
+  /admin/courses/pending:
+    get:
+      tags: [Course - Admin]
+      summary: Danh sách khóa học đang chờ duyệt
+      responses:
+        '200':
+          description: Danh sách khóa học chờ duyệt
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/CourseResponse' }
+
+  /admin/courses/{id}/approve:
+    put:
+      tags: [Course - Admin]
+      summary: Duyệt và xuất bản khóa học (Pending → Published)
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: Duyệt thành công
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CourseResponse' }
+
+  /admin/courses/{id}/reject:
+    put:
+      tags: [Course - Admin]
+      summary: Từ chối khóa học (Pending → Rejected)
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason: { type: string, description: Lý do từ chối }
+      responses:
+        '200':
+          description: Từ chối thành công
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CourseResponse' }
+
+  # ==========================================================
+  # ENROLLMENT - Student
+  # ==========================================================
+  /courses/{courseId}/enroll:
+    post:
+      tags: [Enrollment]
+      summary: Ghi danh tham gia khóa học
+      parameters:
+        - name: courseId
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '201':
+          description: Ghi danh thành công
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EnrollmentResponse' }
+        '409':
+          description: Đã ghi danh khóa học này trước đó
+
+  /students/me/enrollments:
+    get:
+      tags: [Enrollment]
+      summary: Danh sách khóa học đã ghi danh của học viên hiện tại
+      responses:
+        '200':
+          description: Danh sách ghi danh
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/EnrollmentResponse' }
+
+  /enrollments/{id}:
+    get:
+      tags: [Enrollment]
+      summary: Chi tiết tiến độ học của một lượt ghi danh
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: Chi tiết tiến độ
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EnrollmentDetailResponse' }
+
+  # ==========================================================
+  # LESSON PROGRESS - Student
+  # ==========================================================
+  /lessons/{lessonId}/complete:
+    put:
+      tags: [Lesson Progress]
+      summary: Đánh dấu bài học đã hoàn thành, tự động cập nhật % tiến độ khóa học
+      parameters:
+        - name: lessonId
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Cập nhật tiến độ thành công
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/LessonProgressResponse' }
+
+  # ==========================================================
+  # QUIZ - Instructor (biên soạn)
+  # ==========================================================
+  /courses/{courseId}/quizzes:
+    get:
+      tags: [Quiz - Instructor]
+      summary: Danh sách bài kiểm tra của khóa học (kèm đáp án đúng, dành cho giảng viên)
+      parameters:
+        - name: courseId
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Danh sách quiz
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/QuizResponse' }
+    post:
+      tags: [Quiz - Instructor]
+      summary: Tạo bài kiểm tra mới cho khóa học
+      parameters:
+        - name: courseId
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title]
+              properties:
+                title: { type: string }
+                passingScore: { type: integer, default: 80 }
+                durationMinutes: { type: integer, default: 15 }
+      responses:
+        '201':
+          description: Tạo thành công
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/QuizResponse' }
+
+  /quizzes/{id}:
+    put:
+      tags: [Quiz - Instructor]
+      summary: Cập nhật thông tin bài kiểm tra
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title: { type: string }
+                passingScore: { type: integer }
+                durationMinutes: { type: integer }
+      responses:
+        '200':
+          description: Cập nhật thành công
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/QuizResponse' }
+    delete:
+      tags: [Quiz - Instructor]
+      summary: Xóa bài kiểm tra
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '204':
+          description: Xóa thành công
+
+  /quizzes/{quizId}/questions:
+    post:
+      tags: [Quiz - Instructor]
+      summary: Thêm câu hỏi trắc nghiệm vào đề thi (kèm danh sách đáp án)
+      parameters:
+        - name: quizId
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/QuestionCreateRequest' }
+      responses:
+        '201':
+          description: Tạo câu hỏi thành công
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/QuestionResponse' }
+
+  /questions/{id}:
+    put:
+      tags: [Quiz - Instructor]
+      summary: Cập nhật nội dung câu hỏi
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                questionText: { type: string }
+                point: { type: integer }
+      responses:
+        '200':
+          description: Cập nhật thành công
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/QuestionResponse' }
+    delete:
+      tags: [Quiz - Instructor]
+      summary: Xóa câu hỏi
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '204':
+          description: Xóa thành công
+
+  /questions/{questionId}/answers:
+    post:
+      tags: [Quiz - Instructor]
+      summary: Thêm đáp án lựa chọn cho câu hỏi
+      parameters:
+        - name: questionId
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [answerText, isCorrect]
+              properties:
+                answerText: { type: string }
+                isCorrect: { type: boolean }
+      responses:
+        '201':
+          description: Tạo đáp án thành công
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AnswerResponse' }
+
+  /answers/{id}:
+    put:
+      tags: [Quiz - Instructor]
+      summary: Cập nhật đáp án
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                answerText: { type: string }
+                isCorrect: { type: boolean }
+      responses:
+        '200':
+          description: Cập nhật thành công
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AnswerResponse' }
+    delete:
+      tags: [Quiz - Instructor]
+      summary: Xóa đáp án
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '204':
+          description: Xóa thành công
+
+  # ==========================================================
+  # QUIZ - Student (làm bài)
+  # ==========================================================
+  /quizzes/{id}/attempt:
+    get:
+      tags: [Quiz - Student]
+      summary: Lấy đề thi để làm bài (không kèm đáp án đúng)
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: Đề thi cho học viên
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/QuizAttemptResponse' }
+
+  /quizzes/{id}/submit:
+    post:
+      tags: [Quiz - Student]
+      summary: Nộp bài kiểm tra, hệ thống tự động chấm điểm
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [answers]
+              properties:
+                answers:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      questionId: { type: integer }
+                      selectedAnswerId: { type: integer }
+      responses:
+        '200':
+          description: Kết quả chấm điểm tức thì
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/QuizResultResponse' }
+
+  # ==========================================================
+  # CERTIFICATE
+  # ==========================================================
+  /students/me/certificates:
+    get:
+      tags: [Certificate]
+      summary: Danh sách chứng chỉ đã đạt được của học viên hiện tại
+      responses:
+        '200':
+          description: Danh sách chứng chỉ
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/CertificateResponse' }
+
+  /certificates/{id}/download:
+    get:
+      tags: [Certificate]
+      summary: Tải file PDF chứng chỉ
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: File PDF chứng chỉ
+          content:
+            application/pdf:
+              schema: { type: string, format: binary }
+
+  /certificates/verify/{certificateCode}:
+    get:
+      tags: [Certificate]
+      summary: Tra cứu, xác thực chứng chỉ công khai bằng mã code
+      security: []
+      parameters:
+        - name: certificateCode
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Thông tin chứng chỉ hợp lệ
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CertificateResponse' }
+        '404':
+          description: Mã chứng chỉ không tồn tại
+
+  # ==========================================================
+  # ADMIN - Quản lý người dùng
+  # ==========================================================
+  /admin/users:
+    get:
+      tags: [Admin - User Management]
+      summary: Danh sách tất cả người dùng (lọc theo role, trạng thái)
+      parameters:
+        - name: role
+          in: query
+          schema: { type: string, enum: [Admin, Instructor, Student] }
+        - name: keyword
+          in: query
+          schema: { type: string }
+        - name: page
+          in: query
+          schema: { type: integer, default: 0 }
+      responses:
+        '200':
+          description: Danh sách người dùng
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/UserResponse' }
+
+  /admin/users/{id}/lock:
+    put:
+      tags: [Admin - User Management]
+      summary: Khóa tài khoản người dùng
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: Đã khóa tài khoản
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UserResponse' }
+
+  /admin/users/{id}/unlock:
+    put:
+      tags: [Admin - User Management]
+      summary: Mở khóa tài khoản người dùng
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: Đã mở khóa tài khoản
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UserResponse' }
+
+  /admin/users/{id}/role:
+    put:
+      tags: [Admin - User Management]
+      summary: Thay đổi vai trò người dùng
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [role]
+              properties:
+                role: { type: string, enum: [Admin, Instructor, Student] }
+      responses:
+        '200':
+          description: Đã cập nhật vai trò
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UserResponse' }
+
+  # ==========================================================
+  # ADMIN - Dashboard thống kê
+  # ==========================================================
+  /admin/dashboard/stats:
+    get:
+      tags: [Admin - Dashboard]
+      summary: Thống kê tổng quan hệ thống
+      responses:
+        '200':
+          description: Số liệu thống kê
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DashboardStatsResponse' }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    IdPathParam:
+      name: id
+      in: path
+      required: true
+      schema: { type: integer }
+
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        timestamp: { type: string, format: date-time }
+        status: { type: integer }
+        message: { type: string }
+
+    AuthResponse:
+      type: object
+      properties:
+        accessToken: { type: string }
+        refreshToken: { type: string }
+        user: { $ref: '#/components/schemas/UserResponse' }
+
+    UserResponse:
+      type: object
+      properties:
+        id: { type: integer }
+        username: { type: string }
+        email: { type: string }
+        fullName: { type: string }
+        avatarUrl: { type: string }
+        role: { type: string, enum: [Admin, Instructor, Student] }
+        isActive: { type: boolean }
+        createdAt: { type: string, format: date-time }
+
+    CategoryResponse:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        slug: { type: string }
+        description: { type: string }
+
+    CourseCreateRequest:
+      type: object
+      required: [title, categoryId]
+      properties:
+        title: { type: string }
+        description: { type: string }
+        thumbnailUrl: { type: string }
+        categoryId: { type: integer }
+
+    CourseResponse:
+      type: object
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        slug: { type: string }
+        description: { type: string }
+        thumbnailUrl: { type: string }
+        categoryName: { type: string }
+        instructorName: { type: string }
+        status: { type: string, enum: [Draft, Pending, Published, Rejected] }
+        createdAt: { type: string, format: date-time }
+
+    CoursePageResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items: { $ref: '#/components/schemas/CourseResponse' }
+        page: { type: integer }
+        totalPages: { type: integer }
+        totalElements: { type: integer }
+
+    CourseDetailResponse:
+      allOf:
+        - $ref: '#/components/schemas/CourseResponse'
+        - type: object
+          properties:
+            sections:
+              type: array
+              items: { $ref: '#/components/schemas/SectionResponse' }
+
+    SectionResponse:
+      type: object
+      properties:
+        id: { type: integer }
+        courseId: { type: integer }
+        title: { type: string }
+        orderIndex: { type: integer }
+        lessons:
+          type: array
+          items: { $ref: '#/components/schemas/LessonResponse' }
+
+    LessonCreateRequest:
+      type: object
+      required: [title, contentType]
+      properties:
+        title: { type: string }
+        contentType: { type: string, enum: [Video, Document, Text] }
+        contentUrl: { type: string }
+        durationMinutes: { type: integer, default: 0 }
+        orderIndex: { type: integer }
+
+    LessonResponse:
+      type: object
+      properties:
+        id: { type: integer }
+        sectionId: { type: integer }
+        title: { type: string }
+        contentType: { type: string, enum: [Video, Document, Text] }
+        contentUrl: { type: string }
+        durationMinutes: { type: integer }
+        orderIndex: { type: integer }
+
+    EnrollmentResponse:
+      type: object
+      properties:
+        id: { type: integer }
+        courseId: { type: integer }
+        courseTitle: { type: string }
+        studentName: { type: string }
+        enrolledAt: { type: string, format: date-time }
+        progressPercent: { type: number, format: float }
+        isCompleted: { type: boolean }
+
+    EnrollmentDetailResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnrollmentResponse'
+        - type: object
+          properties:
+            lessonProgress:
+              type: array
+              items: { $ref: '#/components/schemas/LessonProgressResponse' }
+
+    LessonProgressResponse:
+      type: object
+      properties:
+        id: { type: integer }
+        lessonId: { type: integer }
+        isCompleted: { type: boolean }
+        completedAt: { type: string, format: date-time }
+        courseProgressPercent:
+          type: number
+          format: float
+          description: Tỷ lệ % tiến độ khóa học sau khi cập nhật
+
+    QuizResponse:
+      type: object
+      properties:
+        id: { type: integer }
+        courseId: { type: integer }
+        title: { type: string }
+        passingScore: { type: integer }
+        durationMinutes: { type: integer }
+        questions:
+          type: array
+          items: { $ref: '#/components/schemas/QuestionResponse' }
+
+    QuestionCreateRequest:
+      type: object
+      required: [questionText, answers]
+      properties:
+        questionText: { type: string }
+        point: { type: integer, default: 1 }
+        answers:
+          type: array
+          items:
+            type: object
+            properties:
+              answerText: { type: string }
+              isCorrect: { type: boolean }
+
+    QuestionResponse:
+      type: object
+      properties:
+        id: { type: integer }
+        quizId: { type: integer }
+        questionText: { type: string }
+        point: { type: integer }
+        answers:
+          type: array
+          items: { $ref: '#/components/schemas/AnswerResponse' }
+
+    AnswerResponse:
+      type: object
+      properties:
+        id: { type: integer }
+        questionId: { type: integer }
+        answerText: { type: string }
+        isCorrect:
+          type: boolean
+          description: Chỉ trả về cho Instructor/Admin, ẩn với Student khi làm bài
+
+    QuizAttemptResponse:
+      type: object
+      description: Đề thi trả về cho học viên - KHÔNG chứa trường isCorrect
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        durationMinutes: { type: integer }
+        questions:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: integer }
+              questionText: { type: string }
+              answers:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id: { type: integer }
+                    answerText: { type: string }
+
+    QuizResultResponse:
+      type: object
+      properties:
+        quizId: { type: integer }
+        score: { type: number, format: float }
+        passingScore: { type: integer }
+        isPassed: { type: boolean }
+        correctCount: { type: integer }
+        totalQuestions: { type: integer }
+
+    CertificateResponse:
+      type: object
+      properties:
+        id: { type: integer }
+        enrollmentId: { type: integer }
+        courseTitle: { type: string }
+        certificateCode: { type: string }
+        issuedAt: { type: string, format: date-time }
+        pdfUrl: { type: string }
+
+    DashboardStatsResponse:
+      type: object
+      properties:
+        totalUsers: { type: integer }
+        newUsersThisMonth: { type: integer }
+        totalActiveCourses: { type: integer }
+        totalEnrollments: { type: integer }
+        averageCompletionRate: { type: number, format: float }
