@@ -85,7 +85,7 @@ export const StudentLayout = ({ currentTab: currentTabProp, onNavigate, onOpenAu
                   EduMOOC
                 </span>
                 <span className="hidden sm:inline-block ml-2.5 text-[10px] uppercase font-bold text-[#16324F] bg-[#EFEDF0] border border-[#E4E4E0] px-2 py-0.5 rounded-md">
-                  Học viên
+                  {isAdmin ? 'Quản trị viên' : isInstructor ? 'Giảng viên' : 'Học viên'}
                 </span>
               </div>
             </Link>
@@ -125,6 +125,27 @@ export const StudentLayout = ({ currentTab: currentTabProp, onNavigate, onOpenAu
               >
                 Chứng chỉ & Xác thực
               </Link>
+
+              {/* Quick Links for Instructor / Admin */}
+              {(isInstructor || isAdmin) && (
+                <Link
+                  to="/instructor/dashboard"
+                  className="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-[#16324F] bg-blue-50 border border-blue-200 hover:bg-blue-100 transition-colors flex items-center gap-1.5 font-bold cursor-pointer"
+                >
+                  <LayoutDashboard className="w-3.5 h-3.5 text-[#16324F]" />
+                  <span>Giảng dạy</span>
+                </Link>
+              )}
+
+              {isAdmin && (
+                <Link
+                  to="/admin/dashboard"
+                  className="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-[#16324F] bg-amber-50 border border-amber-200 hover:bg-amber-100 transition-colors flex items-center gap-1.5 font-bold cursor-pointer"
+                >
+                  <ShieldCheck className="w-3.5 h-3.5 text-[#16324F]" />
+                  <span>Quản trị</span>
+                </Link>
+              )}
             </nav>
           </div>
 
@@ -148,7 +169,13 @@ export const StudentLayout = ({ currentTab: currentTabProp, onNavigate, onOpenAu
                 title="Chuyển đổi giao diện vai trò"
               >
                 <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-                <span>Portal: Học viên</span>
+                <span>
+                  {currentRole === 'ROLE_ADMIN'
+                    ? 'Portal: Admin'
+                    : currentRole === 'ROLE_INSTRUCTOR'
+                    ? 'Portal: Giảng viên'
+                    : 'Portal: Học viên'}
+                </span>
                 <ChevronDown className="w-3 h-3 text-[#16324F]" />
               </button>
 
@@ -163,7 +190,9 @@ export const StudentLayout = ({ currentTab: currentTabProp, onNavigate, onOpenAu
                       navigate('/');
                       setShowRoleMenu(false);
                     }}
-                    className="w-full text-left px-3 py-1.5 text-xs flex items-center gap-2 font-bold text-[#16324F] bg-[#F4F3F6]"
+                    className={`w-full text-left px-3 py-1.5 text-xs flex items-center gap-2 ${
+                      currentRole === 'ROLE_STUDENT' ? 'font-bold text-[#16324F] bg-[#F4F3F6]' : 'text-[#1A1C1E] hover:bg-[#FAF9FC]'
+                    }`}
                   >
                     <GraduationCap className="w-3.5 h-3.5" /> Giao diện Học viên
                   </button>
@@ -173,7 +202,9 @@ export const StudentLayout = ({ currentTab: currentTabProp, onNavigate, onOpenAu
                       navigate('/instructor/dashboard');
                       setShowRoleMenu(false);
                     }}
-                    className="w-full text-left px-3 py-1.5 text-xs flex items-center gap-2 text-[#1A1C1E] hover:bg-[#FAF9FC]"
+                    className={`w-full text-left px-3 py-1.5 text-xs flex items-center gap-2 ${
+                      currentRole === 'ROLE_INSTRUCTOR' ? 'font-bold text-[#16324F] bg-[#F4F3F6]' : 'text-[#1A1C1E] hover:bg-[#FAF9FC]'
+                    }`}
                   >
                     <LayoutDashboard className="w-3.5 h-3.5 text-blue-600" /> Portal Giảng viên
                   </button>
@@ -183,7 +214,9 @@ export const StudentLayout = ({ currentTab: currentTabProp, onNavigate, onOpenAu
                       navigate('/admin/dashboard');
                       setShowRoleMenu(false);
                     }}
-                    className="w-full text-left px-3 py-1.5 text-xs flex items-center gap-2 text-[#1A1C1E] hover:bg-[#FAF9FC]"
+                    className={`w-full text-left px-3 py-1.5 text-xs flex items-center gap-2 ${
+                      currentRole === 'ROLE_ADMIN' ? 'font-bold text-[#16324F] bg-[#F4F3F6]' : 'text-[#1A1C1E] hover:bg-[#FAF9FC]'
+                    }`}
                   >
                     <ShieldCheck className="w-3.5 h-3.5 text-[#16324F]" /> Portal Quản trị viên
                   </button>
@@ -199,18 +232,46 @@ export const StudentLayout = ({ currentTab: currentTabProp, onNavigate, onOpenAu
                   className="flex items-center gap-2 p-1 rounded-full hover:ring-2 hover:ring-[#E4E4E0] transition-all cursor-pointer"
                 >
                   <img
-                    src={user.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'}
+                    src={user.avatarUrl || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150'}
                     alt={user.fullName || user.email}
                     className="w-8 h-8 rounded-full object-cover border border-[#E4E4E0]"
                   />
                 </button>
 
                 {showUserMenu && (
-                  <div className="absolute right-0 mt-1 w-52 bg-white border border-[#E4E4E0] rounded-lg shadow-sm py-2 z-50">
+                  <div className="absolute right-0 mt-1 w-56 bg-white border border-[#E4E4E0] rounded-lg shadow-md py-2 z-50">
                     <div className="px-4 py-2 border-b border-[#E4E4E0]">
-                      <p className="text-xs font-semibold text-[#1A1C1E] truncate">{user.fullName || 'Học viên'}</p>
+                      <p className="text-xs font-semibold text-[#1A1C1E] truncate">{user.fullName || 'Người dùng'}</p>
                       <p className="text-[11px] text-[#6B6B6B] truncate">{user.email}</p>
+                      <span className="inline-block mt-1 text-[10px] font-bold px-2 py-0.5 rounded bg-blue-50 text-blue-700">
+                        {isAdmin ? 'Quản trị viên' : isInstructor ? 'Giảng viên Chuyên môn' : 'Học viên'}
+                      </span>
                     </div>
+
+                    {(isInstructor || isAdmin) && (
+                      <button
+                        onClick={() => {
+                          navigate('/instructor/dashboard');
+                          setShowUserMenu(false);
+                        }}
+                        className="w-full text-left px-4 py-2 text-xs text-[#16324F] bg-blue-50/50 hover:bg-blue-100/70 flex items-center gap-2 font-bold cursor-pointer"
+                      >
+                        <LayoutDashboard className="w-3.5 h-3.5 text-blue-700" /> Bảng điều khiển Giảng viên
+                      </button>
+                    )}
+
+                    {isAdmin && (
+                      <button
+                        onClick={() => {
+                          navigate('/admin/dashboard');
+                          setShowUserMenu(false);
+                        }}
+                        className="w-full text-left px-4 py-2 text-xs text-[#16324F] bg-amber-50/50 hover:bg-amber-100/70 flex items-center gap-2 font-bold cursor-pointer"
+                      >
+                        <ShieldCheck className="w-3.5 h-3.5 text-amber-700" /> Trang Quản trị Admin
+                      </button>
+                    )}
+
                     <button
                       onClick={() => {
                         navigate('/profile');

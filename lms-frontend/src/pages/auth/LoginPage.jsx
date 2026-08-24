@@ -11,14 +11,16 @@ export const LoginPage = ({ initialMode = 'LOGIN' }) => {
 
   const handleAuthSuccess = (targetRole) => {
     setIsOpen(false);
-    if (location.state?.from?.pathname) {
-      navigate(location.state.from.pathname, { replace: true });
+    const targetPath = location.state?.from?.pathname;
+
+    if (targetPath && targetPath !== '/' && targetPath !== '/login' && targetPath !== '/register') {
+      navigate(targetPath, { replace: true });
       return;
     }
 
-    if (targetRole === 'ROLE_INSTRUCTOR') {
+    if (targetRole === 'ROLE_INSTRUCTOR' || targetRole === 'INSTRUCTOR') {
       navigate('/instructor/dashboard', { replace: true });
-    } else if (targetRole === 'ROLE_ADMIN') {
+    } else if (targetRole === 'ROLE_ADMIN' || targetRole === 'ADMIN') {
       navigate('/admin/dashboard', { replace: true });
     } else {
       navigate('/my-learning', { replace: true });

@@ -128,6 +128,16 @@ export const InstructorLayout = ({ currentTab: currentTabProp, onNavigate, onCre
               <User className="w-4 h-4 text-rose-400" />
               <span>Hồ sơ cá nhân</span>
             </Link>
+
+            <div className="pt-2">
+              <Link
+                to="/"
+                className="w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs text-blue-200/80 hover:bg-white/10 hover:text-white transition-all cursor-pointer"
+              >
+                <GraduationCap className="w-4 h-4 text-blue-300" />
+                <span>Về Giao diện Khám phá</span>
+              </Link>
+            </div>
           </nav>
         </div>
 
