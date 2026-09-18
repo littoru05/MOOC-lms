@@ -82,6 +82,19 @@ export const AuthProvider = ({ children }) => {
     showToast?.('Đã đăng xuất khỏi tài khoản thành công.', 'info');
   };
 
+  const updateProfile = async (profileData) => {
+    const res = await authApi.updateProfile(profileData);
+    const updatedUser = res.data;
+    setUser(updatedUser);
+    localStorage.setItem('user_cache', JSON.stringify(updatedUser));
+    return updatedUser;
+  };
+
+  const changePassword = async (passData) => {
+    const res = await authApi.changePassword(passData);
+    return res.data;
+  };
+
   // Quick switch role for testing with legitimate backend credentials
   const quickSwitchRole = async (targetRole) => {
     let email = 'student@lms.com';
@@ -111,6 +124,8 @@ export const AuthProvider = ({ children }) => {
         login,
         register,
         logout,
+        updateProfile,
+        changePassword,
         clearAuth,
         quickSwitchRole,
         currentRole,
