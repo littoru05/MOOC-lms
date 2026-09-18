@@ -5,20 +5,25 @@ import { describe, expect, it } from 'vitest';
 import { AuthProvider } from '../../context/AuthContext';
 import { ToastProvider } from '../../context/ToastContext';
 import { ExplorePage } from '../../pages/student/ExplorePage';
+import { createTestQueryClient } from '../test-utils';
+import { QueryClientProvider } from '@tanstack/react-query';
 
 const renderExplorePage = () => {
+  const queryClient = createTestQueryClient();
   return render(
-    <BrowserRouter>
-      <ToastProvider>
-        <AuthProvider>
-          <ExplorePage />
-        </AuthProvider>
-      </ToastProvider>
-    </BrowserRouter>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <ToastProvider>
+          <AuthProvider>
+            <ExplorePage />
+          </AuthProvider>
+        </ToastProvider>
+      </BrowserRouter>
+    </QueryClientProvider>
   );
 };
 
-describe('ExplorePage Component with MSW', () => {
+describe('ExplorePage Component with React Query and MSW', () => {
   it('tải và hiển thị danh sách khóa học từ Mock API MSW', async () => {
     renderExplorePage();
 
