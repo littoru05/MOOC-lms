@@ -7,3 +7,5 @@ dist/
 coverage/
 *.exe
 ngrok.yml
+lms-backend/uploads/*
+!lms-backend/uploads/.gitkeep
