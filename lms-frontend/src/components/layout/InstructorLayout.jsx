@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation, Link, Outlet } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { getImageUrl } from '../../utils/imageUrl';
+import { UserMenuDropdown } from '../common/UserMenuDropdown';
 import { 
   BookOpen, 
   Plus, 
@@ -26,7 +28,7 @@ export const InstructorLayout = ({ currentTab: currentTabProp, onNavigate, onCre
 
   const isDashboard = pathname === '/instructor/dashboard' || pathname === '/instructor';
   const isCreate = pathname === '/instructor/courses/create';
-  const isEdit = pathname.includes('/edit');
+  const isEdit = pathname.includes('/editor');
   const isQuiz = pathname.includes('/quiz-builder');
   const isStudents = pathname.startsWith('/instructor/students');
   const isProfile = pathname === '/instructor/profile';
@@ -82,7 +84,7 @@ export const InstructorLayout = ({ currentTab: currentTabProp, onNavigate, onCre
             </Link>
 
             <Link
-              to="/instructor/courses/1/edit"
+              to="/instructor/courses/editor"
               className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs transition-all cursor-pointer ${
                 isEdit
                   ? 'bg-[#16324F] text-white font-bold border-l-4 border-blue-400 shadow-md'
@@ -94,7 +96,7 @@ export const InstructorLayout = ({ currentTab: currentTabProp, onNavigate, onCre
             </Link>
 
             <Link
-              to="/instructor/courses/1/quiz-builder"
+              to="/instructor/courses/quiz-builder"
               className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs transition-all cursor-pointer ${
                 isQuiz
                   ? 'bg-[#16324F] text-white font-bold border-l-4 border-purple-400 shadow-md'
@@ -128,16 +130,6 @@ export const InstructorLayout = ({ currentTab: currentTabProp, onNavigate, onCre
               <User className="w-4 h-4 text-rose-400" />
               <span>Hồ sơ cá nhân</span>
             </Link>
-
-            <div className="pt-2">
-              <Link
-                to="/"
-                className="w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs text-blue-200/80 hover:bg-white/10 hover:text-white transition-all cursor-pointer"
-              >
-                <GraduationCap className="w-4 h-4 text-blue-300" />
-                <span>Về Giao diện Khám phá</span>
-              </Link>
-            </div>
           </nav>
         </div>
 
@@ -148,7 +140,7 @@ export const InstructorLayout = ({ currentTab: currentTabProp, onNavigate, onCre
             className="w-full flex items-center gap-3 text-left p-2 rounded-xl bg-[#0A2540] hover:bg-[#16324F] transition-all border border-[#16324F] cursor-pointer"
           >
             <img
-              src={user?.avatarUrl || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150'}
+              src={getImageUrl(user?.avatarUrl, 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150')}
               alt={user?.fullName}
               className="w-9 h-9 rounded-full object-cover border-2 border-amber-400"
             />
@@ -195,50 +187,14 @@ export const InstructorLayout = ({ currentTab: currentTabProp, onNavigate, onCre
             </span>
           </div>
 
-          {/* Quick Demo Switcher */}
-          <div className="relative">
-            <button
-              onClick={() => setShowRoleMenu(!showRoleMenu)}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-[#EFEDF0] border border-[#E4E4E0] text-[#16324F] rounded-md hover:bg-[#E3E2E5] transition-colors cursor-pointer"
-            >
+          {/* Right Header: Role Badge & User Menu */}
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-[#EFEDF0] border border-[#E4E4E0] text-[#16324F] rounded-md">
               <Sparkles className="w-3.5 h-3.5 text-amber-600" />
               <span>Portal: Giảng viên</span>
-            </button>
+            </div>
 
-            {showRoleMenu && (
-              <div className="absolute right-0 mt-1 w-52 bg-white border border-[#E4E4E0] rounded-lg shadow-sm py-1 z-50">
-                <button
-                  onClick={async () => {
-                    await quickSwitchRole('ROLE_STUDENT');
-                    navigate('/');
-                    setShowRoleMenu(false);
-                  }}
-                  className="w-full text-left px-3 py-1.5 text-xs flex items-center gap-2 hover:bg-[#FAF9FC] text-[#1A1C1E] cursor-pointer"
-                >
-                  <GraduationCap className="w-3.5 h-3.5" /> Giao diện Học viên
-                </button>
-                <button
-                  onClick={async () => {
-                    await quickSwitchRole('ROLE_INSTRUCTOR');
-                    navigate('/instructor/dashboard');
-                    setShowRoleMenu(false);
-                  }}
-                  className="w-full text-left px-3 py-1.5 text-xs flex items-center gap-2 font-bold text-[#16324F] bg-[#F4F3F6] cursor-pointer"
-                >
-                  <LayoutDashboard className="w-3.5 h-3.5 text-blue-600" /> Portal Giảng viên
-                </button>
-                <button
-                  onClick={async () => {
-                    await quickSwitchRole('ROLE_ADMIN');
-                    navigate('/admin/dashboard');
-                    setShowRoleMenu(false);
-                  }}
-                  className="w-full text-left px-3 py-1.5 text-xs flex items-center gap-2 text-[#1A1C1E] hover:bg-[#FAF9FC] cursor-pointer"
-                >
-                  <ShieldCheck className="w-3.5 h-3.5 text-[#16324F]" /> Portal Quản trị viên
-                </button>
-              </div>
-            )}
+            <UserMenuDropdown />
           </div>
         </header>
 

@@ -23,7 +23,12 @@ import { CoursePlayerPage } from '../pages/student/CoursePlayerPage';
 import { QuizIntroPage } from '../pages/student/QuizIntroPage';
 import { QuizTakingPage } from '../pages/student/QuizTakingPage';
 import { QuizResultPage } from '../pages/student/QuizResultPage';
-import { StudentProfilePage } from '../pages/student/StudentProfilePage';
+import { CartPage } from '../pages/student/CartPage';
+import { CheckoutPage } from '../pages/student/CheckoutPage';
+import { ConfirmPaymentPage } from '../pages/student/ConfirmPaymentPage';
+import { OrdersHistoryPage } from '../pages/student/OrdersHistoryPage';
+import { OrderSuccessPage } from '../pages/student/OrderSuccessPage';
+import { ProfileRouteDispatcher } from './ProfileRouteDispatcher';
 
 // Instructor Pages
 import { InstructorDashboard } from '../pages/instructor/InstructorDashboard';
@@ -42,9 +47,10 @@ import { AdminProfilePage } from '../pages/admin/AdminProfilePage';
 export const AppRoutes = () => {
   return (
     <Routes>
-      {/* Public Auth Routes */}
+      {/* Public Auth & Payment Confirmation Routes */}
       <Route path="/login" element={<LoginPage initialMode="login" />} />
       <Route path="/register" element={<LoginPage initialMode="register" />} />
+      <Route path="/checkout/confirm/:token" element={<ConfirmPaymentPage />} />
 
       {/* Standalone Player & Quiz Routes (Cover full screen) */}
       <Route
@@ -90,6 +96,38 @@ export const AppRoutes = () => {
 
         {/* Protected Student Routes */}
         <Route
+          path="/cart"
+          element={
+            <ProtectedRoute>
+              <CartPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/checkout"
+          element={
+            <ProtectedRoute>
+              <CheckoutPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/orders"
+          element={
+            <ProtectedRoute>
+              <OrdersHistoryPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/orders/success"
+          element={
+            <ProtectedRoute>
+              <OrderSuccessPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/my-learning"
           element={
             <ProtectedRoute>
@@ -101,7 +139,7 @@ export const AppRoutes = () => {
           path="/profile"
           element={
             <ProtectedRoute>
-              <StudentProfilePage />
+              <ProfileRouteDispatcher />
             </ProtectedRoute>
           }
         />
@@ -111,7 +149,7 @@ export const AppRoutes = () => {
       <Route
         element={
           <ProtectedRoute>
-            <RoleProtectedRoute allowedRoles={['ROLE_INSTRUCTOR', 'ROLE_ADMIN', 'INSTRUCTOR', 'ADMIN']}>
+            <RoleProtectedRoute allowedRoles={['ROLE_INSTRUCTOR', 'INSTRUCTOR']}>
               <InstructorLayout />
             </RoleProtectedRoute>
           </ProtectedRoute>
@@ -120,8 +158,8 @@ export const AppRoutes = () => {
         <Route path="/instructor" element={<Navigate to="/instructor/dashboard" replace />} />
         <Route path="/instructor/dashboard" element={<InstructorDashboard />} />
         <Route path="/instructor/courses/create" element={<CourseCreateWizardPage />} />
-        <Route path="/instructor/courses/:courseId/edit" element={<CourseEditorPage />} />
-        <Route path="/instructor/courses/:courseId/quiz-builder" element={<QuizBuilderPage />} />
+        <Route path="/instructor/courses/editor" element={<CourseEditorPage />} />
+        <Route path="/instructor/courses/quiz-builder" element={<QuizBuilderPage />} />
         <Route path="/instructor/students" element={<StudentProgressPage />} />
         <Route path="/instructor/profile" element={<InstructorProfilePage />} />
       </Route>
