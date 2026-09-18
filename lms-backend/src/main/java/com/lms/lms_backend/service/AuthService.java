@@ -85,6 +85,12 @@ public class AuthService {
                 .email(user.getEmail())
                 .fullName(user.getFullName())
                 .avatarUrl(user.getAvatarUrl())
+                .phone(user.getPhone())
+                .dateOfBirth(user.getDateOfBirth())
+                .gender(user.getGender())
+                .title(user.getTitle())
+                .bio(user.getBio())
+                .teachingField(user.getTeachingField())
                 .role(user.getRole())
                 .isActive(user.getIsActive())
                 .createdAt(user.getCreatedAt())
@@ -99,6 +105,24 @@ public class AuthService {
         user.setFullName(req.getFullName());
         if (req.getAvatarUrl() != null) {
             user.setAvatarUrl(req.getAvatarUrl());
+        }
+        if (req.getPhone() != null) {
+            user.setPhone(req.getPhone());
+        }
+        if (req.getDateOfBirth() != null) {
+            user.setDateOfBirth(req.getDateOfBirth());
+        }
+        if (req.getGender() != null) {
+            user.setGender(req.getGender());
+        }
+        if (req.getTitle() != null) {
+            user.setTitle(req.getTitle());
+        }
+        if (req.getBio() != null) {
+            user.setBio(req.getBio());
+        }
+        if (req.getTeachingField() != null) {
+            user.setTeachingField(req.getTeachingField());
         }
 
         User saved = userRepository.save(user);

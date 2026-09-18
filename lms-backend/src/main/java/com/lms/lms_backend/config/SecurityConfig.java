@@ -51,6 +51,9 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(AbstractHttpConfigurer::disable)
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .headers(headers -> headers
+                .frameOptions(org.springframework.security.config.annotation.web.configurers.HeadersConfigurer.FrameOptionsConfig::disable)
+            )
             .exceptionHandling(ex -> ex
                 .authenticationEntryPoint((request, response, authException) -> {
                     response.setContentType("application/json;charset=UTF-8");
@@ -80,6 +83,12 @@ public class SecurityConfig {
                     "/api/certificates/verify/**",
                     "/api/v1/certificates/download/**",
                     "/api/certificates/download/**",
+                    "/api/v1/certificates/preview/**",
+                    "/api/certificates/preview/**",
+                    "/api/v1/payment-sessions/*/status",
+                    "/api/v1/payment-sessions/*/confirm",
+                    "/api/v1/files/**",
+                    "/api/files/**",
                     "/error"
                 ).permitAll()
                 .anyRequest().authenticated()
@@ -92,9 +101,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(allowedOrigins != null && !allowedOrigins.isEmpty() 
-            ? allowedOrigins 
-            : List.of("http://localhost:5173", "http://localhost:3000"));
+        config.setAllowedOriginPatterns(List.of("*"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);

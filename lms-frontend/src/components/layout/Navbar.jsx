@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { getImageUrl } from '../../utils/imageUrl';
 import { 
   BookOpen, 
   GraduationCap, 
@@ -178,7 +179,7 @@ export const Navbar = ({ currentTab, onNavigate, onOpenAuthModal }) => {
                 className="flex items-center gap-2 p-1 rounded-full hover:ring-2 hover:ring-[#E4E4E0] transition-all"
               >
                 <img
-                  src={user.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'}
+                  src={getImageUrl(user.avatarUrl, 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150')}
                   alt={user.fullName || user.email}
                   className="w-8 h-8 rounded-full object-cover border border-[#E4E4E0]"
                 />

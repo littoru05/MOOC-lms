@@ -1,5 +1,6 @@
 package com.lms.lms_backend.dto.auth;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import com.lms.lms_backend.entity.Role;
@@ -19,6 +20,12 @@ public class UserProfileResponse {
     private String email;
     private String fullName;
     private String avatarUrl;
+    private String phone;
+    private LocalDate dateOfBirth;
+    private String gender;
+    private String title;
+    private String bio;
+    private String teachingField;
     private Role role;
     private Boolean isActive;
     private LocalDateTime createdAt;

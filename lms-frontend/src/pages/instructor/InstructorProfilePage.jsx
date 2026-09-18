@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
+import { ImageUploadInput } from '../../components/common/ImageUploadInput';
+import { getImageUrl } from '../../utils/imageUrl';
 import { 
   User, 
   Mail, 
@@ -19,23 +21,20 @@ import {
 } from 'lucide-react';
 
 export const InstructorProfilePage = () => {
-  const { user } = useAuth();
+  const { user, updateProfile, changePassword } = useAuth();
   const { showToast } = useToast();
 
   // Instructor Info State
-  const [fullName, setFullName] = useState(user?.fullName || 'TS. Nguyễn Văn A');
-  const [email] = useState(user?.email || 'instructor@lms.com');
-  const [phone, setPhone] = useState('0912345678');
-  const [title, setTitle] = useState('Senior Fullstack Architect & Giảng viên ĐH Bách Khoa');
-  const [teachingField, setTeachingField] = useState('lap-trinh-web');
-  const [bio, setBio] = useState(
-    'Hơn 12 năm kinh nghiệm thiết kế kiến trúc phần mềm doanh nghiệp và đào tạo hơn 45.000 học viên. Từng giữ vị trí Tech Lead tại các tập đoàn công nghệ lớn.'
-  );
+  const [fullName, setFullName] = useState(user?.fullName || '');
+  const [email] = useState(user?.email || '');
+  const [phone, setPhone] = useState(user?.phone || '');
+  const [title, setTitle] = useState(user?.title || '');
+  const [teachingField, setTeachingField] = useState(user?.teachingField || 'lap-trinh-web');
+  const [bio, setBio] = useState(user?.bio || '');
   const [avatarUrl, setAvatarUrl] = useState(
     user?.avatarUrl || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200'
   );
   const [showAvatarInput, setShowAvatarInput] = useState(false);
-  const [avatarInputVal, setAvatarInputVal] = useState('');
 
   // Password Change State
   const [oldPassword, setOldPassword] = useState('');
@@ -45,14 +44,21 @@ export const InstructorProfilePage = () => {
   const [savingInfo, setSavingInfo] = useState(false);
   const [savingPass, setSavingPass] = useState(false);
 
-  const handleSaveInfo = (e) => {
+  useEffect(() => {
+    if (user) {
+      setFullName(user.fullName || '');
+      setPhone(user.phone || '');
+      setTitle(user.title || '');
+      setTeachingField(user.teachingField || 'lap-trinh-web');
+      setBio(user.bio || '');
+      if (user.avatarUrl) setAvatarUrl(user.avatarUrl);
+    }
+  }, [user]);
+
+  const handleSaveInfo = async (e) => {
     e.preventDefault();
     if (!fullName.trim() || fullName.trim().length < 2) {
       showToast('Họ và tên phải có ít nhất 2 ký tự!', 'warning');
-      return;
-    }
-    if (!title.trim()) {
-      showToast('Vui lòng nhập chức danh/học vị giảng dạy!', 'warning');
       return;
     }
     if (phone && !/^[0-9]{9,11}$/.test(phone.replace(/\s+/g, ''))) {
@@ -61,13 +67,25 @@ export const InstructorProfilePage = () => {
     }
 
     setSavingInfo(true);
-    setTimeout(() => {
+    try {
+      await updateProfile({
+        fullName: fullName.trim(),
+        avatarUrl: avatarUrl.trim(),
+        phone: phone.trim() || null,
+        title: title.trim() || null,
+        teachingField: teachingField || null,
+        bio: bio.trim() || null,
+      });
+      showToast('Đã cập nhật hồ sơ giảng viên thành công!', 'success');
+    } catch (err) {
+      console.error('Lỗi khi lưu thông tin giảng viên:', err);
+      showToast(err.response?.data?.message || err.message || 'Lỗi khi lưu thông tin hồ sơ!', 'error');
+    } finally {
       setSavingInfo(false);
-      showToast('Đã cập nhật hồ sơ giảng viên & tiểu sử công khai thành công!', 'success');
-    }, 400);
+    }
   };
 
-  const handleChangePassword = (e) => {
+  const handleChangePassword = async (e) => {
     e.preventDefault();
     if (!oldPassword) {
       showToast('Vui lòng nhập mật khẩu hiện tại!', 'warning');
@@ -83,21 +101,37 @@ export const InstructorProfilePage = () => {
     }
 
     setSavingPass(true);
-    setTimeout(() => {
-      setSavingPass(false);
+    try {
+      await changePassword({
+        oldPassword,
+        newPassword,
+      });
       setOldPassword('');
       setNewPassword('');
       setConfirmNewPassword('');
       showToast('Đổi mật khẩu thành công!', 'success');
-    }, 500);
+    } catch (err) {
+      console.error('Lỗi khi đổi mật khẩu:', err);
+      showToast(err.response?.data?.message || 'Mật khẩu hiện tại không chính xác!', 'error');
+    } finally {
+      setSavingPass(false);
+    }
   };
 
-  const handleUpdateAvatar = () => {
-    if (avatarInputVal.trim()) {
-      setAvatarUrl(avatarInputVal.trim());
-      setShowAvatarInput(false);
-      setAvatarInputVal('');
+  const handleAvatarChange = async (newAvt) => {
+    setAvatarUrl(newAvt);
+    try {
+      await updateProfile({
+        fullName: fullName.trim(),
+        avatarUrl: newAvt,
+        phone: phone.trim() || null,
+        title: title.trim() || null,
+        teachingField: teachingField || null,
+        bio: bio.trim() || null,
+      });
       showToast('Đã cập nhật ảnh đại diện giảng viên!', 'success');
+    } catch (err) {
+      showToast('Đã đổi ảnh đại diện!', 'info');
     }
   };
 
@@ -123,22 +157,22 @@ export const InstructorProfilePage = () => {
 
         {/* Top Profile Card */}
         <div className="bg-white border border-[#E4E4E0] rounded-2xl p-6 shadow-xs flex flex-col md:flex-row items-center gap-6">
-          <div className="relative group">
+          <div className="relative group shrink-0">
             <img
-              src={avatarUrl}
+              src={getImageUrl(avatarUrl, 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200')}
               alt={fullName}
               className="w-24 h-24 rounded-full object-cover border-2 border-[#16324F] shadow-sm"
             />
             <button
               onClick={() => setShowAvatarInput(!showAvatarInput)}
-              className="absolute bottom-0 right-0 p-2 bg-[#16324F] hover:bg-[#001D37] text-white rounded-full shadow-md transition-colors"
+              className="absolute bottom-0 right-0 p-2 bg-[#16324F] hover:bg-[#001D37] text-white rounded-full shadow-md transition-colors cursor-pointer"
               title="Đổi ảnh đại diện"
             >
               <Camera className="w-3.5 h-3.5" />
             </button>
           </div>
 
-          <div className="flex-1 text-center md:text-left space-y-1">
+          <div className="flex-1 text-center md:text-left space-y-1 w-full">
             <h2 className="text-xl font-bold font-serif text-[#001D37]">{fullName}</h2>
             <p className="text-xs font-medium text-[#16324F]">{title}</p>
             <p className="text-xs text-[#5E5E5E]">{email}</p>
@@ -149,20 +183,13 @@ export const InstructorProfilePage = () => {
             </div>
 
             {showAvatarInput && (
-              <div className="mt-3 flex items-center gap-2 max-w-md pt-2">
-                <input
-                  type="url"
-                  value={avatarInputVal}
-                  onChange={(e) => setAvatarInputVal(e.target.value)}
-                  placeholder="Dán link ảnh đại diện (https://...)"
-                  className="flex-1 px-3 py-1.5 text-xs border border-[#E4E4E0] rounded-lg focus:outline-none focus:border-[#16324F] bg-white"
+              <div className="mt-4 pt-3 border-t border-[#E4E4E0] max-w-xl">
+                <ImageUploadInput
+                  value={avatarUrl}
+                  onChange={handleAvatarChange}
+                  label="Cập nhật ảnh đại diện giảng viên"
+                  placeholder="Dán link ảnh hoặc tải file ảnh từ máy..."
                 />
-                <button
-                  onClick={handleUpdateAvatar}
-                  className="px-3 py-1.5 bg-[#16324F] text-white text-xs font-semibold rounded-lg"
-                >
-                  Lưu ảnh
-                </button>
               </div>
             )}
           </div>
