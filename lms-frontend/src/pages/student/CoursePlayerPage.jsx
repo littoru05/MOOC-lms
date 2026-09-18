@@ -475,8 +475,8 @@ export const CoursePlayerPage = ({ courseId: courseIdProp, onBack, onStartQuiz, 
             </p>
             {quizzes.length > 0 && (
               <button
-                onClick={() => onStartQuiz(quizzes[0].id, enrollment?.id)}
-                className="w-full py-2 bg-[#16324F] hover:bg-[#001D37] text-white text-xs font-semibold rounded-lg transition-colors flex items-center justify-center gap-1.5 shadow-xs"
+                onClick={() => handleStartQuiz(quizzes[0].id, enrollment?.id)}
+                className="w-full py-2 bg-[#16324F] hover:bg-[#001D37] text-white text-xs font-semibold rounded-lg transition-colors flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
               >
                 <HelpCircle className="w-3.5 h-3.5 text-amber-300" />
                 <span>Vào làm bài Quiz cuối khóa</span>

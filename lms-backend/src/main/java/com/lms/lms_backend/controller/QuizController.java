@@ -35,16 +35,24 @@ public class QuizController {
         return ResponseEntity.ok(quizService.createFullQuiz(request));
     }
 
-    // Lấy đề thi Quiz theo ID khóa học (cho học viên làm bài -> ẩn is_correct)
+    // Lấy đề thi Quiz theo ID khóa học
     @GetMapping("/course/{courseId}")
-    public ResponseEntity<List<QuizResponse>> getQuizzesByCourse(@PathVariable Long courseId) {
-        return ResponseEntity.ok(quizService.getQuizzesByCourseId(courseId, true));
+    public ResponseEntity<List<QuizResponse>> getQuizzesByCourse(
+            @PathVariable Long courseId,
+            Authentication authentication
+    ) {
+        String email = (authentication != null && authentication.isAuthenticated()) ? authentication.getName() : null;
+        return ResponseEntity.ok(quizService.getQuizzesByCourseId(courseId, email));
     }
 
     // Lấy chi tiết bài Quiz theo ID
     @GetMapping("/{id}")
-    public ResponseEntity<QuizResponse> getQuizById(@PathVariable Long id) {
-        return ResponseEntity.ok(quizService.getQuizById(id, true));
+    public ResponseEntity<QuizResponse> getQuizById(
+            @PathVariable Long id,
+            Authentication authentication
+    ) {
+        String email = (authentication != null && authentication.isAuthenticated()) ? authentication.getName() : null;
+        return ResponseEntity.ok(quizService.getQuizById(id, email));
     }
 
     // Học viên nộp bài thi Quiz -> Tự động chấm điểm & Cấp chứng chỉ nếu đủ điều kiện (SD05)

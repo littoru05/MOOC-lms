@@ -9,10 +9,15 @@ import org.springframework.transaction.annotation.Transactional;
 import com.lms.lms_backend.dto.lesson.LessonRequest;
 import com.lms.lms_backend.dto.lesson.LessonResponse;
 import com.lms.lms_backend.entity.ContentType;
+import com.lms.lms_backend.entity.Course;
+import com.lms.lms_backend.entity.CourseStatus;
 import com.lms.lms_backend.entity.Lesson;
+import com.lms.lms_backend.entity.Role;
 import com.lms.lms_backend.entity.Section;
+import com.lms.lms_backend.entity.User;
 import com.lms.lms_backend.repository.LessonRepository;
 import com.lms.lms_backend.repository.SectionRepository;
+import com.lms.lms_backend.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -22,11 +27,34 @@ public class LessonService {
 
     private final LessonRepository lessonRepository;
     private final SectionRepository sectionRepository;
+    private final UserRepository userRepository;
 
     public List<LessonResponse> getLessonsBySection(Long sectionId) {
         return lessonRepository.findBySectionIdOrderByOrderIndexAsc(sectionId).stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
+    }
+
+    public LessonResponse getLessonById(Long id, String userEmail) {
+        Lesson lesson = getLessonEntityById(id);
+        Course course = lesson.getSection() != null ? lesson.getSection().getCourse() : null;
+
+        if (course != null && course.getStatus() == CourseStatus.PUBLISHED) {
+            return mapToResponse(lesson);
+        }
+
+        if (userEmail == null) {
+            throw new RuntimeException("Bạn không có quyền truy cập bài học chưa xuất bản!");
+        }
+
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại!"));
+
+        if (course != null && !course.getInstructor().getId().equals(user.getId()) && user.getRole() != Role.ROLE_ADMIN) {
+            throw new RuntimeException("Bạn không có quyền xem bài học của giảng viên khác!");
+        }
+
+        return mapToResponse(lesson);
     }
 
     public Lesson getLessonEntityById(Long id) {

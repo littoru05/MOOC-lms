@@ -25,6 +25,7 @@ import com.lms.lms_backend.entity.Course;
 import com.lms.lms_backend.entity.Enrollment;
 import com.lms.lms_backend.entity.Question;
 import com.lms.lms_backend.entity.Quiz;
+import com.lms.lms_backend.entity.Role;
 import com.lms.lms_backend.entity.User;
 import com.lms.lms_backend.repository.AnswerRepository;
 import com.lms.lms_backend.repository.CourseRepository;
@@ -51,6 +52,13 @@ public class QuizService {
     public QuizResponse createFullQuiz(QuizCreateRequest req) {
         Course course = courseRepository.findById(req.getCourseId())
                 .orElseThrow(() -> new RuntimeException("Khóa học không tồn tại!"));
+
+        // Clean up previous quiz version for this course if editing/recreating
+        List<Quiz> existingQuizzes = quizRepository.findByCourseId(req.getCourseId());
+        if (!existingQuizzes.isEmpty()) {
+            quizRepository.deleteAll(existingQuizzes);
+            quizRepository.flush();
+        }
 
         Quiz quiz = Quiz.builder()
                 .course(course)
@@ -87,15 +95,33 @@ public class QuizService {
         return mapToResponse(saved, false);
     }
 
-    public List<QuizResponse> getQuizzesByCourseId(Long courseId, boolean isStudent) {
-        return quizRepository.findByCourseId(courseId).stream()
-                .map(q -> mapToResponse(q, isStudent))
+    public List<QuizResponse> getQuizzesByCourseId(Long courseId, String userEmail) {
+        User user = (userEmail != null) ? userRepository.findByEmail(userEmail).orElse(null) : null;
+        List<Quiz> quizzes = quizRepository.findByCourseId(courseId);
+
+        return quizzes.stream()
+                .map(q -> {
+                    boolean isOwnerOrAdmin = (user != null) && (
+                            user.getRole() == Role.ROLE_ADMIN ||
+                            (q.getCourse() != null && q.getCourse().getInstructor() != null && q.getCourse().getInstructor().getId().equals(user.getId()))
+                    );
+                    boolean isStudent = !isOwnerOrAdmin;
+                    return mapToResponse(q, isStudent);
+                })
                 .collect(Collectors.toList());
     }
 
-    public QuizResponse getQuizById(Long id, boolean isStudent) {
+    public QuizResponse getQuizById(Long id, String userEmail) {
         Quiz quiz = quizRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Bài kiểm tra không tồn tại với ID: " + id));
+
+        User user = (userEmail != null) ? userRepository.findByEmail(userEmail).orElse(null) : null;
+        boolean isOwnerOrAdmin = (user != null) && (
+                user.getRole() == Role.ROLE_ADMIN ||
+                (quiz.getCourse() != null && quiz.getCourse().getInstructor() != null && quiz.getCourse().getInstructor().getId().equals(user.getId()))
+        );
+        boolean isStudent = !isOwnerOrAdmin;
+
         return mapToResponse(quiz, isStudent);
     }
 
@@ -146,7 +172,7 @@ public class QuizService {
             boolean progressCompleted = enrollment.getProgressPercent().compareTo(BigDecimal.valueOf(100.00)) >= 0;
 
             if (progressCompleted) {
-                Certificate certificate = certificateService.issueCertificate(enrollment);
+                Certificate certificate = certificateService.issueCertificate(enrollment, scorePercent);
                 certResponse = certificateService.mapToResponse(certificate);
                 message = "Chúc mừng! Bạn đã hoàn thành xuất sắc bài Quiz (" + scorePercent + "%) và toàn bộ khóa học. Chứng chỉ số của bạn đã được cấp!";
             } else {
