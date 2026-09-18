@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="vi">
+<head>
+<meta charset="UTF-8" />
+<title>EduMOOC Course Certificate</title>
+<style>
+  @page {
+    size: 297mm 210mm; /* A4 Landscape */
+    margin: 0;
+  }
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  body {
+    width: 297mm;
+    height: 210mm;
+    font-family: 'Times New Roman', 'Times', serif;
+    background-color: #FFFFFF;
+    color: #1A202C;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Guilloche Background Watermark Pattern */
+  .watermark-pattern {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 297mm;
+    height: 210mm;
+    z-index: 1;
+  }
+
+  /* Main Container Layout */
+  .certificate-container {
+    position: relative;
+    z-index: 2;
+    width: 297mm;
+    height: 210mm;
+    padding: 16mm 20mm 12mm 22mm;
+  }
+
+  /* Content Column (Left ~72%) */
+  .left-content {
+    width: 195mm;
+    float: left;
+  }
+
+  /* Ribbon Column (Right ~28%) */
+  .right-ribbon-col {
+    width: 60mm;
+    float: right;
+    margin-right: 0mm;
+    position: relative;
+  }
+
+  /* Brand Header */
+  .brand-header {
+    margin-bottom: 7mm;
+  }
+  .brand-logo-table {
+    border-collapse: collapse;
+  }
+  .brand-logo-table td {
+    vertical-align: middle;
+  }
+  .shield-icon {
+    width: 38px;
+    height: 44px;
+    margin-right: 12px;
+  }
+  .brand-title {
+    font-family: 'Times New Roman', 'Times', serif;
+    font-size: 20px;
+    font-weight: bold;
+    letter-spacing: 1.5px;
+    color: #002D72;
+    text-transform: uppercase;
+    line-height: 1.1;
+  }
+  .brand-subtitle {
+    font-family: 'Arial', sans-serif;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: #4A5568;
+    text-transform: uppercase;
+    margin-top: 3px;
+  }
+
+  /* Issue Date */
+  .issue-date {
+    font-family: 'Arial', sans-serif;
+    font-size: 9.5px;
+    font-weight: bold;
+    letter-spacing: 1.2px;
+    color: #4A5568;
+    text-transform: uppercase;
+    margin-bottom: 4mm;
+  }
+
+  /* Recipient Name */
+  .student-name {
+    font-family: 'Times New Roman', 'Times', serif;
+    font-size: 30px;
+    font-weight: bold;
+    color: #1A202C;
+    line-height: 1.2;
+    margin-bottom: 3.5mm;
+  }
+
+  /* Completion Statement */
+  .completion-text {
+    font-family: 'Times New Roman', 'Times', serif;
+    font-size: 13px;
+    font-style: italic;
+    color: #4A5568;
+    margin-bottom: 2.5mm;
+  }
+
+  /* Course Title */
+  .course-title {
+    font-family: 'Times New Roman', 'Times', serif;
+    font-size: 19px;
+    font-weight: bold;
+    color: #002D72;
+    line-height: 1.25;
+    margin-bottom: 3.5mm;
+  }
+
+  /* Course Meta / Description */
+  .course-description {
+    font-family: 'Arial', sans-serif;
+    font-size: 9.5px;
+    line-height: 1.45;
+    color: #718096;
+    max-width: 175mm;
+    margin-bottom: 8mm;
+  }
+
+  /* Signatures Area */
+  .signatures-container {
+    margin-top: 6mm;
+  }
+  .sig-table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+  .sig-cell {
+    width: 50%;
+    vertical-align: top;
+    padding-right: 10mm;
+  }
+  .sig-handwritten {
+    font-family: 'AlexBrush', 'DancingScript', cursive;
+    font-size: 26px;
+    color: #1A202C;
+    height: 34px;
+    line-height: 34px;
+    margin-bottom: 2px;
+  }
+  .sig-line {
+    width: 170px;
+    border-bottom: 1px solid #CBD5E0;
+    margin-bottom: 4px;
+  }
+  .sig-name {
+    font-family: 'Arial', sans-serif;
+    font-size: 8.5px;
+    font-weight: bold;
+    color: #4A5568;
+    line-height: 1.3;
+  }
+  .sig-title {
+    font-family: 'Arial', sans-serif;
+    font-size: 7.5px;
+    color: #718096;
+    line-height: 1.3;
+  }
+
+  /* ============================================================ */
+  /* RIGHT RIBBON BANNER (Coursera / Johns Hopkins Style) */
+  /* ============================================================ */
+  .ribbon-wrapper {
+    width: 56mm;
+    background-color: #EEF2F6;
+    border-left: 1px solid #CBD5E0;
+    border-right: 1px solid #CBD5E0;
+    border-top: 1px solid #CBD5E0;
+    padding: 8mm 4mm 10mm 4mm;
+    text-align: center;
+    position: relative;
+    margin: -16mm -20mm 0 0;
+  }
+  .ribbon-v-cut {
+    width: 0;
+    height: 0;
+    border-left: 28mm solid transparent;
+    border-right: 28mm solid transparent;
+    border-top: 14mm solid #EEF2F6;
+    margin: 0 -4mm;
+  }
+  .ribbon-main-text {
+    font-family: 'Arial', sans-serif;
+    font-size: 13px;
+    font-weight: bold;
+    letter-spacing: 2.2px;
+    color: #1A202C;
+    text-transform: uppercase;
+    line-height: 1.35;
+    margin-bottom: 4mm;
+  }
+
+  /* Distinction Badge */
+  .distinction-badge {
+    background-color: #3C5A80;
+    color: #FFFFFF;
+    font-family: 'Arial', sans-serif;
+    font-size: 7.5px;
+    font-weight: bold;
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    margin: 0 auto 6mm auto;
+    width: 82%;
+    border-radius: 2px;
+  }
+
+  /* Circular Seal / Stamp */
+  .seal-container {
+    width: 105px;
+    height: 105px;
+    margin: 2mm auto 0 auto;
+    position: relative;
+  }
+  .seal-outer-circle {
+    width: 105px;
+    height: 105px;
+    border: 2px dashed #4A5568;
+    border-radius: 50%;
+    padding: 4px;
+  }
+  .seal-inner-circle {
+    width: 93px;
+    height: 93px;
+    border: 1px solid #718096;
+    border-radius: 50%;
+    text-align: center;
+    padding-top: 12px;
+  }
+  .seal-text-top {
+    font-family: 'Arial', sans-serif;
+    font-size: 6.5px;
+    font-weight: bold;
+    letter-spacing: 0.8px;
+    color: #4A5568;
+    text-transform: uppercase;
+  }
+  .seal-brand-name {
+    font-family: 'Times New Roman', 'Times', serif;
+    font-size: 14px;
+    font-weight: bold;
+    color: #002D72;
+    margin: 4px 0 2px 0;
+    letter-spacing: 0.5px;
+  }
+  .seal-text-bottom {
+    font-family: 'Arial', sans-serif;
+    font-size: 6px;
+    font-weight: bold;
+    letter-spacing: 0.8px;
+    color: #718096;
+    text-transform: uppercase;
+  }
+
+  /* Verification Block (Below Ribbon) */
+  .verification-block {
+    margin-top: 5mm;
+    text-align: right;
+  }
+  .qr-image {
+    width: 62px;
+    height: 62px;
+    float: right;
+    margin-left: 8px;
+    margin-bottom: 4px;
+  }
+  .verify-text-group {
+    font-family: 'Arial', sans-serif;
+    font-size: 7.5px;
+    color: #718096;
+    line-height: 1.35;
+    text-align: right;
+  }
+  .verify-url {
+    font-weight: bold;
+    color: #002D72;
+  }
+
+  /* Bottom Disclaimer Line */
+  .bottom-disclaimer {
+    position: absolute;
+    bottom: 5mm;
+    left: 20mm;
+    width: 257mm;
+    text-align: center;
+    font-family: 'Arial', sans-serif;
+    font-size: 7px;
+    color: #A0AEC0;
+    line-height: 1.2;
+  }
+  .clear-fix {
+    clear: both;
+  }
+</style>
+</head>
+<body>
+
+  <!-- SVG Guilloche Watermark Pattern -->
+  <svg class="watermark-pattern" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1122 793" preserveAspectRatio="none">
+    <g fill="none" stroke="#E2E8F0" stroke-opacity="0.45" stroke-width="0.8">
+      <!-- Outer Elegant Elliptical Waves -->
+      <ellipse cx="561" cy="396" rx="520" ry="360" stroke="#EDF2F7" stroke-width="1.2" />
+      <ellipse cx="561" cy="396" rx="500" ry="340" />
+      <ellipse cx="561" cy="396" rx="480" ry="320" />
+      <ellipse cx="561" cy="396" rx="460" ry="300" />
+      <ellipse cx="561" cy="396" rx="440" ry="280" />
+      <!-- Wave Spirals -->
+      <circle cx="200" cy="500" r="160" stroke="#EDF2F7" />
+      <circle cx="200" cy="500" r="140" />
+      <circle cx="200" cy="500" r="120" />
+      <circle cx="850" cy="250" r="180" stroke="#EDF2F7" />
+      <circle cx="850" cy="250" r="160" />
+      <circle cx="850" cy="250" r="140" />
+      <!-- Radial Guilloche rays -->
+      <line x1="200" y1="500" x2="350" y2="400" stroke="#F7FAFC" />
+      <line x1="200" y1="500" x2="380" y2="520" stroke="#F7FAFC" />
+      <line x1="850" y1="250" x2="700" y2="350" stroke="#F7FAFC" />
+      <line x1="850" y1="250" x2="680" y2="210" stroke="#F7FAFC" />
+    </g>
+  </svg>
+
+  <div class="certificate-container">
+    
+    <!-- LEFT CONTENT AREA -->
+    <div class="left-content">
+      
+      <!-- Logo / University Header -->
+      <div class="brand-header">
+        <table class="brand-logo-table">
+          <tr>
+            <td>
+              <!-- Shield Crest Logo -->
+              <svg class="shield-icon" viewBox="0 0 60 70" xmlns="http://www.w3.org/2000/svg">
+                <path d="M30 2 L56 12 L56 36 C56 54 30 68 30 68 C30 68 4 54 4 36 L4 12 Z" fill="#002D72" stroke="#001D37" stroke-width="2"/>
+                <circle cx="30" cy="26" r="10" fill="#FFFFFF"/>
+                <path d="M26 24 L30 18 L34 24 L30 22 Z" fill="#002D72"/>
+                <path d="M23 28 Q30 33 37 28" stroke="#002D72" stroke-width="2" fill="none"/>
+                <!-- Star at center -->
+                <polygon points="30,37 32,43 38,43 33,47 35,53 30,49 25,53 27,47 22,43 28,43" fill="#D4AF37"/>
+              </svg>
+            </td>
+            <td>
+              <div class="brand-title">EDUMOOC ACADEMY</div>
+              <div class="brand-subtitle">INTERNATIONAL ONLINE LEARNING SYSTEM</div>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- Issued Date -->
+      <div class="issue-date">{{issueDate}}</div>
+
+      <!-- Student Name -->
+      <div class="student-name">{{studentName}}</div>
+
+      <!-- Statement of Completion -->
+      <div class="completion-text">{{completionPhrase}}</div>
+
+      <!-- Course Title -->
+      <div class="course-title">{{courseTitle}}</div>
+
+      <!-- Course Description / Authority -->
+      <div class="course-description">
+        Khóa học trực tuyến {{durationText}} do EduMOOC Academy tổ chức, đánh giá năng lực và cấp chứng nhận hoàn thành chương trình đào tạo.
+      </div>
+
+      <!-- Signatures Area -->
+      <div class="signatures-container">
+        <table class="sig-table">
+          <tr>
+            <!-- Platform Director Signature -->
+            <td class="sig-cell">
+              <div class="sig-handwritten">Nguyen Ngoc Anh Linh</div>
+              <div class="sig-line"></div>
+              <div class="sig-name">Nguyễn Ngọc Anh Linh</div>
+              <div class="sig-title">Giám đốc EduMOOC / Platform Director</div>
+              <div class="sig-title">EduMOOC Higher Education</div>
+            </td>
+
+            <!-- Course Instructor Signature -->
+            <td class="sig-cell">
+              <div class="sig-handwritten">{{instructorSigText}}</div>
+              <div class="sig-line"></div>
+              <div class="sig-name">{{instructorName}}</div>
+              <div class="sig-title">Giảng viên phụ trách / Course Instructor</div>
+              <div class="sig-title">Khoa Công Nghệ &amp; Đào Tạo Trực Tuyến</div>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+    </div>
+
+    <!-- RIGHT RIBBON & VERIFICATION AREA -->
+    <div class="right-ribbon-col">
+      
+      <!-- Hanging Ribbon -->
+      <div class="ribbon-wrapper">
+        <div class="ribbon-main-text">
+          COURSE<br />CERTIFICATE
+        </div>
+
+        <!-- With Distinction Badge (Conditional) -->
+        {{distinctionBadgeHtml}}
+
+        <!-- Circular Stamp / Seal -->
+        <div class="seal-container">
+          <div class="seal-outer-circle">
+            <div class="seal-inner-circle">
+              <div class="seal-text-top">EDUCATION FOR EVERYONE</div>
+              <div class="seal-brand-name">EduMOOC</div>
+              <div class="seal-text-bottom">&#9733; VERIFIED &#9733;</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <!-- Ribbon Pointed Cut -->
+      <div class="ribbon-v-cut"></div>
+
+      <!-- Verification Info with QR Code -->
+      <div class="verification-block">
+        <img class="qr-image" src="{{qrCodeDataUri}}" alt="QR Code" />
+        <div class="verify-text-group">
+          <div>Verify at:</div>
+          <div class="verify-url">{{verifyShortUrl}}</div>
+          <div style="margin-top: 3px; font-size: 6.5px;">
+            Mã xác thực: {{certCode}}<br />
+            EduMOOC has confirmed the identity of this learner and course completion.
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="clear-fix"></div>
+
+    <!-- Bottom Disclaimer Line -->
+    <div class="bottom-disclaimer">
+      Chứng chỉ này ghi nhận hoàn thành khóa học trực tuyến và không thay thế văn bằng chính quy của cơ sở đào tạo • This certificate does not confer academic credit toward a degree or official status at the university.
+    </div>
+
+  </div>
+
+</body>
+</html>

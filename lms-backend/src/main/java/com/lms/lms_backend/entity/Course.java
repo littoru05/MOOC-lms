@@ -63,6 +63,10 @@ public class Course {
     @Builder.Default
     private CourseStatus status = CourseStatus.DRAFT;
 
+    @Column(nullable = false, precision = 12, scale = 0)
+    @Builder.Default
+    private java.math.BigDecimal price = java.math.BigDecimal.ZERO;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

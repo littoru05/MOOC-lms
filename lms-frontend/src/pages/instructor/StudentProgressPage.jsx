@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { learningApi } from '../../api/learningApi';
 import { courseApi } from '../../api/courseApi';
 import { Users, BookOpen, CheckCircle2, Clock, Search, Award } from 'lucide-react';
+import { getImageUrl } from '../../utils/imageUrl';
 
 export const StudentProgressPage = () => {
   const [courses, setCourses] = useState([]);
@@ -115,7 +116,7 @@ export const StudentProgressPage = () => {
               <tr key={s.id} className="hover:bg-[#FAF9FC] transition-colors">
                 <td className="py-4 px-6 flex items-center gap-3">
                   <img
-                    src={s.avatarUrl}
+                    src={getImageUrl(s.avatarUrl, 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150')}
                     alt={s.fullName}
                     className="w-9 h-9 rounded-full object-cover border border-[#E4E4E0]"
                   />

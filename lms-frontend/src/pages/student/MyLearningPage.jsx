@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { learningApi } from '../../api/learningApi';
 import { getCourseBySlugOrId } from '../../mocks/courses';
 import { BookOpen, Play, Award, CheckCircle2, Clock } from 'lucide-react';
+import { getImageUrl } from '../../utils/imageUrl';
 
 export const MyLearningPage = ({ onStartLearning, onExplore }) => {
   const navigate = useNavigate();
@@ -121,7 +122,7 @@ export const MyLearningPage = ({ onStartLearning, onExplore }) => {
                   <div>
                     <div className="aspect-video w-full bg-[#EFEDF0] relative overflow-hidden">
                       <img
-                        src={course?.thumbnailUrl || 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=600'}
+                        src={getImageUrl(course?.thumbnailUrl, 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=600')}
                         alt={course?.title}
                         className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500"
                       />

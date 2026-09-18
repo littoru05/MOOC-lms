@@ -5,6 +5,8 @@ import { describe, expect, it } from 'vitest';
 import { AuthProvider } from '../../context/AuthContext';
 import { ToastProvider } from '../../context/ToastContext';
 import { CourseDetailPage } from '../../pages/student/CourseDetailPage';
+import { createTestQueryClient } from '../test-utils';
+import { QueryClientProvider } from '@tanstack/react-query';
 
 const renderCourseDetailPage = (slug = 'lap-trinh-fullstack-web-react-spring-boot', userMock = null) => {
   if (userMock) {
@@ -12,16 +14,20 @@ const renderCourseDetailPage = (slug = 'lap-trinh-fullstack-web-react-spring-boo
     localStorage.setItem('token', 'valid-test-token');
   }
 
+  const queryClient = createTestQueryClient();
+
   return render(
-    <MemoryRouter initialEntries={[`/courses/${slug}`]}>
-      <ToastProvider>
-        <AuthProvider>
-          <Routes>
-            <Route path="/courses/:slug" element={<CourseDetailPage />} />
-          </Routes>
-        </AuthProvider>
-      </ToastProvider>
-    </MemoryRouter>
+    <QueryClientProvider client={queryClient}>
+      <MemoryRouter initialEntries={[`/courses/${slug}`]}>
+        <ToastProvider>
+          <AuthProvider>
+            <Routes>
+              <Route path="/courses/:slug" element={<CourseDetailPage />} />
+            </Routes>
+          </AuthProvider>
+        </ToastProvider>
+      </MemoryRouter>
+    </QueryClientProvider>
   );
 };
 
@@ -60,6 +66,16 @@ describe('CourseDetailPage Component with MSW', () => {
 
     await waitFor(() => {
       expect(screen.getByRole('button', { name: /Tiếp tục học tập ngay/i })).toBeInTheDocument();
+    });
+  });
+
+  it('hiển thị thông báo Không tìm thấy khóa học khi slug không tồn tại trên hệ thống', async () => {
+    renderCourseDetailPage('khoa-hoc-khong-ton-tai-123456');
+
+    await waitFor(() => {
+      expect(screen.getByText('Không tìm thấy khóa học')).toBeInTheDocument();
+      expect(screen.getByText('khoa-hoc-khong-ton-tai-123456')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Quay lại danh mục khám phá/i })).toBeInTheDocument();
     });
   });
 });

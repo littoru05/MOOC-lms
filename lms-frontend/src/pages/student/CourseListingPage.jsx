@@ -15,11 +15,14 @@ import {
   ChevronDown,
   Layers,
   GraduationCap,
-  Tag
+  Tag,
+  Banknote
 } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { CourseCardWithPreview } from '../../components/course/CourseCardWithPreview';
 import { COURSES } from '../../mocks/courses';
+import { usePublishedCourses, useCategories } from '../../hooks/useCourses';
+import { formatCurrency } from '../../utils/format';
 import { findCategoryHierarchyBySlug } from '../../data/categoryMenu';
 
 export const CourseListingPage = ({ 
@@ -28,8 +31,18 @@ export const CourseListingPage = ({
   onNavigate 
 }) => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const filterQuery = filterQueryProp || searchParams.get('category') || searchParams.get('q') || '';
+  const currentCategorySlug = searchParams.get('category') || (filterQuery !== 'all' ? filterQuery : '') || '';
+
+  // Read Price Filter params from URL query string
+  const priceType = searchParams.get('priceType') || 'all';
+  const minPrice = searchParams.get('minPrice') || '';
+  const maxPrice = searchParams.get('maxPrice') || '';
+
+  // Load published courses and categories from Backend + Mock Cache via React Query
+  const { data: courses = COURSES } = usePublishedCourses();
+  const { data: categories = [] } = useCategories();
 
   // Parsing Category Info from Filter Query
   const categoryInfo = useMemo(() => {
@@ -53,6 +66,52 @@ export const CourseListingPage = ({
   const [searchKeywords, setSearchKeywords] = useState('');
   const [isSidebarOpenMobile, setIsSidebarOpenMobile] = useState(false);
 
+  // Sync / Update Category in URL Search Params
+  const handleCategoryChange = (catSlug) => {
+    const params = new URLSearchParams(searchParams);
+    if (!catSlug || catSlug === 'all') {
+      params.delete('category');
+      params.delete('q');
+    } else {
+      params.set('category', catSlug);
+      params.delete('q');
+    }
+    setSearchParams(params);
+  };
+
+  // Sync / Update Price Filter in URL Search Params
+  const handlePriceTypeChange = (type) => {
+    const params = new URLSearchParams(searchParams);
+    if (type === 'all') {
+      params.delete('priceType');
+      params.delete('minPrice');
+      params.delete('maxPrice');
+    } else if (type === 'free') {
+      params.set('priceType', 'free');
+      params.delete('minPrice');
+      params.delete('maxPrice');
+    } else {
+      params.set('priceType', 'paid');
+    }
+    setSearchParams(params);
+  };
+
+  const handlePriceRangeChange = (min, max) => {
+    const params = new URLSearchParams(searchParams);
+    params.set('priceType', 'paid');
+    if (min !== '' && min !== null && min !== undefined) {
+      params.set('minPrice', String(min));
+    } else {
+      params.delete('minPrice');
+    }
+    if (max !== '' && max !== null && max !== undefined) {
+      params.set('maxPrice', String(max));
+    } else {
+      params.delete('maxPrice');
+    }
+    setSearchParams(params);
+  };
+
   // Reset filters when filterQuery changes
   useEffect(() => {
     setSelectedLevels([]);
@@ -65,7 +124,22 @@ export const CourseListingPage = ({
   const filteredCourses = useMemo(() => {
     const q = (filterQuery || '').toLowerCase().trim();
 
-    return COURSES.filter((course) => {
+    return courses.filter((course) => {
+      // 0. Price Filter
+      let matchesPrice = true;
+      const coursePrice = Number(course.price) || 0;
+      if (priceType === 'free') {
+        matchesPrice = coursePrice === 0;
+      } else if (priceType === 'paid') {
+        matchesPrice = coursePrice > 0;
+        if (minPrice && !isNaN(Number(minPrice))) {
+          matchesPrice = matchesPrice && coursePrice >= Number(minPrice);
+        }
+        if (maxPrice && !isNaN(Number(maxPrice))) {
+          matchesPrice = matchesPrice && coursePrice <= Number(maxPrice);
+        }
+      }
+
       // 1. Hierarchy Category / Tag matching
       let matchesCategory = true;
       if (q && q !== 'all') {
@@ -121,7 +195,7 @@ export const CourseListingPage = ({
           (course.tags && course.tags.some(t => t.toLowerCase().includes(kw)));
       }
 
-      return matchesCategory && matchesLevel && matchesRating && matchesDuration && matchesKeywords;
+      return matchesPrice && matchesCategory && matchesLevel && matchesRating && matchesDuration && matchesKeywords;
     }).sort((a, b) => {
       if (sortBy === 'rating') return (b.rating || 0) - (a.rating || 0);
       if (sortBy === 'students') return (b.enrolledCount || b.students || 0) - (a.enrolledCount || a.students || 0);
@@ -129,16 +203,31 @@ export const CourseListingPage = ({
       // Default: Popular
       return ((b.enrolledCount || 0) * (b.rating || 4.5)) - ((a.enrolledCount || 0) * (a.rating || 4.5));
     });
-  }, [filterQuery, selectedLevels, minRating, selectedDurations, searchKeywords, sortBy]);
+  }, [courses, filterQuery, priceType, minPrice, maxPrice, selectedLevels, minRating, selectedDurations, searchKeywords, sortBy]);
 
   const handleResetFilters = () => {
     setSelectedLevels([]);
     setMinRating(0);
     setSelectedDurations([]);
     setSearchKeywords('');
+    const params = new URLSearchParams(searchParams);
+    params.delete('category');
+    params.delete('q');
+    params.delete('priceType');
+    params.delete('minPrice');
+    params.delete('maxPrice');
+    setSearchParams(params);
   };
 
-  const hasActiveFilters = selectedLevels.length > 0 || minRating > 0 || selectedDurations.length > 0 || searchKeywords !== '';
+  const hasActiveFilters = 
+    selectedLevels.length > 0 || 
+    minRating > 0 || 
+    selectedDurations.length > 0 || 
+    searchKeywords !== '' ||
+    Boolean(searchParams.get('category')) ||
+    priceType !== 'all' ||
+    minPrice !== '' ||
+    maxPrice !== '';
 
   const toggleLevel = (lvl) => {
     setSelectedLevels(prev => 
@@ -175,8 +264,13 @@ export const CourseListingPage = ({
                 ) : (
                   <button 
                     onClick={() => {
-                      if (crumb.slug === 'home') onNavigate('student-explore');
-                      else onNavigate('student-explore', crumb.slug);
+                      if (crumb.slug === 'home') {
+                        if (onNavigate) onNavigate('student-explore');
+                        else navigate('/');
+                      } else {
+                        if (onNavigate) onNavigate('student-explore', crumb.slug);
+                        else navigate(`/courses?category=${encodeURIComponent(crumb.slug)}`);
+                      }
                     }}
                     className="hover:text-white hover:underline cursor-pointer transition-colors"
                   >
@@ -287,8 +381,142 @@ export const CourseListingPage = ({
               </div>
             </div>
 
+            {/* Filter Group: Category (Danh mục đào tạo) */}
+            <div className="space-y-2.5">
+              <div className="flex items-center justify-between">
+                <h4 className="font-extrabold text-xs text-[#001D37] uppercase tracking-wider flex items-center gap-1.5">
+                  <Layers className="w-3.5 h-3.5 text-[#16324F]" />
+                  <span>Danh mục đào tạo</span>
+                </h4>
+                {Boolean(currentCategorySlug) && currentCategorySlug !== 'all' && (
+                  <span className="w-2 h-2 rounded-full bg-amber-500"></span>
+                )}
+              </div>
+
+              {/* Category Dropdown Select */}
+              <div className="relative">
+                <select
+                  aria-label="Chọn danh mục"
+                  value={currentCategorySlug || 'all'}
+                  onChange={(e) => handleCategoryChange(e.target.value)}
+                  className="w-full bg-[#FAF9FC] hover:bg-white border border-[#E4E4E0] focus:border-[#16324F] rounded-xl px-3 py-2 text-xs font-semibold text-[#16324F] appearance-none focus:outline-none focus:ring-1 focus:ring-[#16324F]/20 transition-all cursor-pointer shadow-2xs pr-8"
+                >
+                  <option value="all">Tất cả danh mục</option>
+                  {categories?.map((cat) => (
+                    <option key={cat.id || cat.slug} value={cat.slug}>
+                      {cat.name}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="w-4 h-4 text-[#5E5E5E] absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+              </div>
+            </div>
+
+            {/* Filter Group: Price (Học phí VNĐ) */}
+            <div className="space-y-3 pt-4 border-t border-[#E4E4E0]">
+              <div className="flex items-center justify-between">
+                <h4 className="font-extrabold text-xs text-[#001D37] uppercase tracking-wider flex items-center gap-1.5">
+                  <Banknote className="w-3.5 h-3.5 text-[#16324F]" />
+                  <span>Học phí</span>
+                </h4>
+                {(priceType !== 'all' || minPrice || maxPrice) && (
+                  <span className="w-2 h-2 rounded-full bg-amber-500"></span>
+                )}
+              </div>
+
+              {/* 3 Tabs / Buttons */}
+              <div className="grid grid-cols-3 gap-1 bg-[#F4F3F6] p-1 rounded-xl border border-[#E4E4E0]">
+                {[
+                  { id: 'all', label: 'Tất cả' },
+                  { id: 'free', label: 'Miễn phí' },
+                  { id: 'paid', label: 'Có phí' },
+                ].map((tab) => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => handlePriceTypeChange(tab.id)}
+                    className={`py-1.5 px-2 text-[11px] font-bold rounded-lg transition-all cursor-pointer text-center truncate ${
+                      priceType === tab.id
+                        ? 'bg-white text-[#16324F] shadow-xs'
+                        : 'text-[#5E5E5E] hover:text-[#1A1C1E]'
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Paid Price Range Inputs & Presets */}
+              {priceType === 'paid' && (
+                <div className="space-y-2.5 pt-1 animate-in fade-in slide-in-from-top-1 duration-150">
+                  <div className="bg-[#FAF9FC] p-2.5 rounded-xl border border-[#E4E4E0] space-y-2">
+                    <div className="flex items-center justify-between text-[10px] font-semibold text-[#5E5E5E]">
+                      <span>Khoảng giá:</span>
+                      <span className="text-[#16324F] font-bold">
+                        {minPrice ? formatCurrency(minPrice) : '0₫'} - {maxPrice ? formatCurrency(maxPrice) : 'Tối đa'}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="text-[10px] text-[#5E5E5E] block mb-0.5 font-medium">Từ (₫):</label>
+                        <input
+                          type="number"
+                          min="0"
+                          step="50000"
+                          value={minPrice}
+                          onChange={(e) => handlePriceRangeChange(e.target.value, maxPrice)}
+                          placeholder="0"
+                          className="w-full px-2 py-1 text-xs bg-white border border-[#E4E4E0] rounded-lg focus:outline-none focus:border-[#16324F]"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] text-[#5E5E5E] block mb-0.5 font-medium">Đến (₫):</label>
+                        <input
+                          type="number"
+                          min="0"
+                          step="50000"
+                          value={maxPrice}
+                          onChange={(e) => handlePriceRangeChange(minPrice, e.target.value)}
+                          placeholder="5.000.000"
+                          className="w-full px-2 py-1 text-xs bg-white border border-[#E4E4E0] rounded-lg focus:outline-none focus:border-[#16324F]"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Preset Price Chips */}
+                  <div className="flex flex-wrap gap-1.5">
+                    {[
+                      { label: '< 500k', min: 0, max: 500000 },
+                      { label: '500k - 1tr', min: 500000, max: 1000000 },
+                      { label: '> 1tr', min: 1000000, max: '' },
+                    ].map((preset, idx) => {
+                      const isActive =
+                        String(minPrice) === String(preset.min) &&
+                        String(maxPrice) === String(preset.max);
+                      return (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => handlePriceRangeChange(preset.min, preset.max)}
+                          className={`px-2.5 py-1 rounded-md text-[10px] font-bold border transition-all cursor-pointer ${
+                            isActive
+                              ? 'bg-[#16324F] text-white border-[#16324F]'
+                              : 'bg-white text-[#5E5E5E] border-[#E4E4E0] hover:border-[#16324F] hover:text-[#16324F]'
+                          }`}
+                        >
+                          {preset.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+
             {/* Filter Group 1: Level (Cấp độ) */}
-            <div className="space-y-3">
+            <div className="space-y-3 pt-4 border-t border-[#E4E4E0]">
               <div className="flex items-center justify-between">
                 <h4 className="font-extrabold text-xs text-[#001D37] uppercase tracking-wider">
                   Cấp độ khóa học

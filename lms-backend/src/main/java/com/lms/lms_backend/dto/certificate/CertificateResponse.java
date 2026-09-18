@@ -21,4 +21,6 @@ public class CertificateResponse {
     private String instructorName;
     private LocalDateTime issuedAt;
     private String pdfUrl;
+    private Integer finalScore;
+    private Integer totalDurationMinutes;
 }

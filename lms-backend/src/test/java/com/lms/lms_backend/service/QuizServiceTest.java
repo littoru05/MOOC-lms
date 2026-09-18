@@ -153,7 +153,7 @@ class QuizServiceTest {
                 .pdfUrl("/api/v1/certificates/download/CERT-ABCD-123")
                 .build();
 
-        when(certificateService.issueCertificate(fullEnrollment)).thenReturn(cert);
+        when(certificateService.issueCertificate(fullEnrollment, 100)).thenReturn(cert);
         when(certificateService.mapToResponse(cert)).thenReturn(certRes);
 
         QuizResultResponse result = quizService.submitQuiz(1L, req, "student@lms.com");
@@ -165,7 +165,7 @@ class QuizServiceTest {
         assertEquals("CERT-ABCD-123", result.getCertificate().getCertificateCode());
         assertTrue(result.getMessage().contains("Chứng chỉ số của bạn đã được cấp"));
 
-        verify(certificateService, times(1)).issueCertificate(fullEnrollment);
+        verify(certificateService, times(1)).issueCertificate(fullEnrollment, 100);
     }
 
     @Test

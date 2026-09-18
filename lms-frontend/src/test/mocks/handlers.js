@@ -63,6 +63,29 @@ export const mockCategories = [
   { id: 2, name: 'Trí tuệ nhân tạo', slug: 'tri-tue-nhan-tao' },
 ];
 
+export let mockCartState = {
+  items: [
+    {
+      id: 1,
+      courseId: 2,
+      courseTitle: 'Kiến trúc Vi dịch vụ và Cloud Native',
+      courseSlug: 'kien-truc-vi-dich-vu-cloud-native',
+      thumbnailUrl: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600',
+      instructorName: 'TS. Nguyễn Văn A',
+      price: 499000,
+      addedAt: '2026-08-25T10:00:00',
+    },
+  ],
+  totalPrice: 499000,
+  totalItems: 1,
+};
+
+export let mockPaymentSessionState = {
+  sessionToken: 'mock-session-uuid-1234',
+  status: 'PENDING',
+  expiresAt: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
+};
+
 export const handlers = [
   // 1. Categories
   http.get('*/api/v1/categories', () => {
@@ -82,6 +105,37 @@ export const handlers = [
       return new HttpResponse(JSON.stringify({ message: 'Khóa học không tồn tại!' }), { status: 404 });
     }
     return HttpResponse.json(course);
+  }),
+
+  // 3a. My teaching courses
+  http.get('*/api/v1/courses/my-teaching', () => {
+    return HttpResponse.json(mockCourses);
+  }),
+
+  // 3b. Course detail by ID
+  http.get('*/api/v1/courses/:id', ({ params }) => {
+    const { id } = params;
+    const course = mockCourses.find((c) => String(c.id) === String(id));
+    if (!course) {
+      return HttpResponse.json(mockCourses[0]);
+    }
+    return HttpResponse.json(course);
+  }),
+
+  // 3c. Update Course by ID
+  http.put('*/api/v1/courses/:id', async ({ params, request }) => {
+    const { id } = params;
+    const body = await request.json();
+    const course = mockCourses.find((c) => String(c.id) === String(id)) || mockCourses[0];
+    const updated = { ...course, ...body };
+    return HttpResponse.json(updated);
+  }),
+
+  // 3d. Sections by Course ID
+  http.get('*/api/v1/sections/course/:courseId', ({ params }) => {
+    const { courseId } = params;
+    const course = mockCourses.find((c) => String(c.id) === String(courseId)) || mockCourses[0];
+    return HttpResponse.json(course.sections || []);
   }),
 
   // 4. Auth: Login
@@ -155,12 +209,34 @@ export const handlers = [
       role: 'ROLE_STUDENT',
       avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
       isActive: true,
+      phone: '0987654321',
+      dateOfBirth: '2001-05-15',
+      gender: 'Nam',
     });
   }),
 
-  // 5c. Courses: My teaching
-  http.get('*/api/v1/courses/my-teaching', () => {
-    return HttpResponse.json(mockCourses);
+  // 5c. Auth: Update Profile
+  http.put('*/api/v1/auth/profile', async ({ request }) => {
+    const body = await request.json();
+    return HttpResponse.json({
+      id: 3,
+      email: 'student@lms.com',
+      role: 'ROLE_STUDENT',
+      isActive: true,
+      ...body,
+    });
+  }),
+
+  // 5d. Auth: Change Password
+  http.put('*/api/v1/auth/change-password', async ({ request }) => {
+    const body = await request.json();
+    if (!body.oldPassword) {
+      return new HttpResponse(
+        JSON.stringify({ message: 'Mật khẩu hiện tại không chính xác!' }),
+        { status: 400 }
+      );
+    }
+    return HttpResponse.json({ message: 'Đổi mật khẩu thành công!' });
   }),
 
   // 6. Enrollments: My learning
@@ -215,8 +291,8 @@ export const handlers = [
             questionText: 'Spring Boot sử dụng cổng mặc định nào?',
             point: 1,
             answers: [
-              { id: 101, answerText: '8080' },
-              { id: 102, answerText: '3000' },
+              { id: 101, answerText: '8080', isCorrect: true },
+              { id: 102, answerText: '3000', isCorrect: false },
             ],
           },
           {
@@ -224,8 +300,8 @@ export const handlers = [
             questionText: 'JSX là gì trong React?',
             point: 1,
             answers: [
-              { id: 201, answerText: 'Cú pháp mở rộng JavaScript' },
-              { id: 202, answerText: 'Database Engine' },
+              { id: 201, answerText: 'Cú pháp mở rộng JavaScript', isCorrect: true },
+              { id: 202, answerText: 'Database Engine', isCorrect: false },
             ],
           },
         ],
@@ -280,5 +356,246 @@ export const handlers = [
         pdfUrl: '/api/v1/certificates/download/CERT-12345',
       },
     });
+  }),
+
+  // 10. Create/Update Quiz
+  http.post('*/api/v1/quizzes', async ({ request }) => {
+    const body = await request.json();
+    return HttpResponse.json({
+      id: 1,
+      ...body,
+    });
+  }),
+
+  // 11. Lesson detail, update, delete
+  http.get('*/api/v1/lessons/:id', ({ params }) => {
+    return HttpResponse.json({
+      id: Number(params.id),
+      sectionId: 1,
+      title: 'Bài 1: Giới thiệu hệ sinh thái LMS',
+      contentType: 'VIDEO',
+      contentUrl: 'https://www.w3schools.com/html/mov_bbb.mp4',
+      durationMinutes: 15,
+      orderIndex: 1,
+    });
+  }),
+
+  http.put('*/api/v1/lessons/:id', async ({ params, request }) => {
+    const body = await request.json();
+    return HttpResponse.json({
+      id: Number(params.id),
+      sectionId: 1,
+      ...body,
+    });
+  }),
+
+  http.delete('*/api/v1/lessons/:id', () => {
+    return new HttpResponse(null, { status: 204 });
+  }),
+
+  // 12. Admin Users & Stats
+  http.get('*/api/v1/admin/users', () => {
+    return HttpResponse.json([
+      {
+        id: 1,
+        fullName: 'Quản trị viên Hệ thống',
+        email: 'admin@lms.com',
+        username: 'admin',
+        role: 'ROLE_ADMIN',
+        isActive: true,
+        createdAt: '2026-01-01T00:00:00',
+      },
+      {
+        id: 2,
+        fullName: 'TS. Nguyễn Văn A',
+        email: 'instructor@lms.com',
+        username: 'instructor',
+        role: 'ROLE_INSTRUCTOR',
+        isActive: true,
+        createdAt: '2026-02-15T00:00:00',
+      },
+      {
+        id: 3,
+        fullName: 'Học viên Test',
+        email: 'student@lms.com',
+        username: 'student',
+        role: 'ROLE_STUDENT',
+        isActive: true,
+        createdAt: '2026-03-10T00:00:00',
+      },
+    ]);
+  }),
+
+  http.patch('*/api/v1/admin/users/:id/toggle-active', () => {
+    return HttpResponse.json({
+      message: 'Cập nhật trạng thái thành công',
+    });
+  }),
+
+  http.get('*/api/v1/admin/stats', () => {
+    return HttpResponse.json({
+      totalUsers: 3,
+      totalStudents: 1,
+      totalInstructors: 1,
+      totalCourses: 2,
+      publishedCourses: 2,
+      pendingCourses: 0,
+      totalEnrollments: 42,
+      completedEnrollments: 30,
+      completionRate: 71.4,
+    });
+  }),
+
+  // 13. File Upload
+  http.post('*/api/v1/files/upload', () => {
+    return HttpResponse.json({
+      url: '/api/v1/files/mock-uploaded-image.png',
+      filename: 'mock-uploaded-image.png',
+    });
+  }),
+
+  // 14. Cart Endpoints
+  http.get('*/api/v1/cart', () => {
+    return HttpResponse.json(mockCartState);
+  }),
+
+  http.post('*/api/v1/cart/items', async ({ request }) => {
+    const body = await request.json();
+    const courseId = body.courseId || 2;
+    const existing = mockCartState.items.find(i => i.courseId === courseId);
+    if (!existing) {
+      mockCartState.items.push({
+        id: Date.now(),
+        courseId: courseId,
+        courseTitle: 'Kiến trúc Vi dịch vụ và Cloud Native',
+        courseSlug: 'kien-truc-vi-dich-vu-cloud-native',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600',
+        instructorName: 'TS. Nguyễn Văn A',
+        price: 499000,
+        addedAt: new Date().toISOString(),
+      });
+      mockCartState.totalPrice += 499000;
+      mockCartState.totalItems = mockCartState.items.length;
+    }
+    return HttpResponse.json(mockCartState);
+  }),
+
+  http.delete('*/api/v1/cart/items/:courseId', ({ params }) => {
+    const { courseId } = params;
+    mockCartState.items = mockCartState.items.filter(i => String(i.courseId) !== String(courseId));
+    mockCartState.totalPrice = mockCartState.items.reduce((acc, item) => acc + (item.price || 0), 0);
+    mockCartState.totalItems = mockCartState.items.length;
+    return HttpResponse.json(mockCartState);
+  }),
+
+  // 15. Order Endpoints
+  http.post('*/api/v1/orders/checkout', async ({ request }) => {
+    let body = {};
+    try {
+      body = await request.json();
+    } catch {
+      // no body
+    }
+    const paymentMethod = body?.paymentMethod === 'CARD' ? 'CARD' : 'QR_CODE';
+
+    const purchasedItems = mockCartState.items.map((item, idx) => ({
+      id: idx + 1,
+      courseId: item.courseId,
+      courseTitle: item.courseTitle,
+      courseSlug: item.courseSlug,
+      courseThumbnailUrl: item.thumbnailUrl,
+      price: item.price,
+    }));
+    const total = mockCartState.totalPrice;
+
+    // Reset cart on checkout
+    mockCartState.items = [];
+    mockCartState.totalPrice = 0;
+    mockCartState.totalItems = 0;
+
+    return HttpResponse.json({
+      id: 1,
+      orderCode: 'ORD-MOCK123456',
+      totalAmount: total || 499000,
+      status: 'COMPLETED',
+      paymentMethod: paymentMethod,
+      createdAt: '2026-09-11T08:00:00',
+      paidAt: '2026-09-11T08:00:00',
+      items: purchasedItems.length > 0 ? purchasedItems : [
+        {
+          id: 10,
+          courseId: 2,
+          courseTitle: 'Kiến trúc Vi dịch vụ và Cloud Native',
+          courseSlug: 'kien-truc-vi-dich-vu-cloud-native',
+          courseThumbnailUrl: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600',
+          price: 499000,
+        },
+      ],
+    });
+  }),
+
+  http.get('*/api/v1/orders', () => {
+    return HttpResponse.json([
+      {
+        id: 1,
+        orderCode: 'ORD-MOCK123456',
+        totalAmount: 499000,
+        status: 'COMPLETED',
+        paymentMethod: 'QR_CODE',
+        createdAt: '2026-09-11T08:00:00',
+        paidAt: '2026-09-11T08:00:00',
+        items: [
+          {
+            id: 10,
+            courseId: 2,
+            courseTitle: 'Kiến trúc Vi dịch vụ và Cloud Native',
+            courseSlug: 'kien-truc-vi-dich-vu-cloud-native',
+            courseThumbnailUrl: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600',
+            price: 499000,
+          },
+        ],
+      },
+    ]);
+  }),
+
+  http.get('*/api/v1/orders/:id', () => {
+    return HttpResponse.json({
+      id: 1,
+      orderCode: 'ORD-MOCK123456',
+      totalAmount: 499000,
+      status: 'COMPLETED',
+      paymentMethod: 'MOCK_PAYMENT',
+      createdAt: '2026-09-11T08:00:00',
+      paidAt: '2026-09-11T08:00:00',
+      items: [
+        {
+          id: 10,
+          courseId: 2,
+          courseTitle: 'Kiến trúc Vi dịch vụ và Cloud Native',
+          courseSlug: 'kien-truc-vi-dich-vu-cloud-native',
+          courseThumbnailUrl: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600',
+          price: 499000,
+        },
+      ],
+    });
+  }),
+
+  // 16. Payment Session Endpoints
+  http.post('*/api/v1/payment-sessions', () => {
+    mockPaymentSessionState.sessionToken = 'mock-session-uuid-1234';
+    if (!mockPaymentSessionState.status) {
+      mockPaymentSessionState.status = 'PENDING';
+    }
+    mockPaymentSessionState.expiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString();
+    return HttpResponse.json(mockPaymentSessionState, { status: 201 });
+  }),
+
+  http.get('*/api/v1/payment-sessions/:token/status', () => {
+    return HttpResponse.json(mockPaymentSessionState);
+  }),
+
+  http.post('*/api/v1/payment-sessions/:token/confirm', () => {
+    mockPaymentSessionState.status = 'CONFIRMED';
+    return HttpResponse.json(mockPaymentSessionState);
   }),
 ];

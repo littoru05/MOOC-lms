@@ -12,6 +12,7 @@ import com.lms.lms_backend.entity.Answer;
 @Repository
 public interface AnswerRepository extends JpaRepository<Answer, Long> {
     List<Answer> findByQuestionId(Long questionId);
+    List<Answer> findByQuestionIdIn(List<Long> questionIds);
 
     @Query("SELECT a FROM Answer a WHERE a.question.quiz.id = :quizId AND a.isCorrect = true")
     List<Answer> findCorrectAnswersByQuizId(@Param("quizId") Long quizId);

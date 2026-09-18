@@ -1,8 +1,10 @@
 package com.lms.lms_backend.service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +19,7 @@ import com.lms.lms_backend.entity.User;
 import com.lms.lms_backend.repository.CategoryRepository;
 import com.lms.lms_backend.repository.CourseRepository;
 import com.lms.lms_backend.repository.UserRepository;
+import com.lms.lms_backend.specification.CourseSpecification;
 
 import lombok.RequiredArgsConstructor;
 
@@ -29,6 +32,21 @@ public class CourseService {
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
 
+    public List<CourseResponse> getAllPublishedCourses(
+            String priceType,
+            BigDecimal minPrice,
+            BigDecimal maxPrice,
+            Long categoryId,
+            String search
+    ) {
+        Specification<Course> spec = CourseSpecification.filterPublishedCourses(
+                priceType, minPrice, maxPrice, categoryId, search
+        );
+        return courseRepository.findAll(spec).stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
     public List<CourseResponse> getAllPublishedCourses() {
         return courseRepository.findByStatus(CourseStatus.PUBLISHED).stream()
                 .map(this::mapToResponse)
@@ -38,6 +56,26 @@ public class CourseService {
     public CourseResponse getCourseBySlug(String slug) {
         Course course = courseRepository.findBySlug(slug)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy khóa học!"));
+        return mapToResponse(course);
+    }
+
+    public CourseResponse getCourseById(Long id, String userEmail) {
+        Course course = getCourseEntityById(id);
+        if (course.getStatus() == CourseStatus.PUBLISHED) {
+            return mapToResponse(course);
+        }
+
+        if (userEmail == null) {
+            throw new RuntimeException("Bạn không có quyền truy cập khóa học chưa xuất bản!");
+        }
+
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại!"));
+
+        if (!course.getInstructor().getId().equals(user.getId()) && user.getRole() != Role.ROLE_ADMIN) {
+            throw new RuntimeException("Bạn không có quyền xem chi tiết khóa học này!");
+        }
+
         return mapToResponse(course);
     }
 
@@ -69,11 +107,17 @@ public class CourseService {
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy danh mục với ID: " + req.getCategoryId()));
         }
 
+        java.math.BigDecimal price = req.getPrice() != null ? req.getPrice() : java.math.BigDecimal.ZERO;
+        if (price.compareTo(java.math.BigDecimal.ZERO) < 0) {
+            throw new RuntimeException("Giá khóa học không được âm!");
+        }
+
         Course course = Course.builder()
                 .title(req.getTitle())
                 .slug(req.getSlug())
                 .description(req.getDescription())
                 .thumbnailUrl(req.getThumbnailUrl())
+                .price(price)
                 .status(CourseStatus.DRAFT) // Mặc định là DRAFT
                 .category(category)
                 .instructor(instructor)
@@ -98,6 +142,13 @@ public class CourseService {
         if (req.getCategoryId() != null) {
             category = categoryRepository.findById(req.getCategoryId())
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy danh mục với ID: " + req.getCategoryId()));
+        }
+
+        if (req.getPrice() != null) {
+            if (req.getPrice().compareTo(java.math.BigDecimal.ZERO) < 0) {
+                throw new RuntimeException("Giá khóa học không được âm!");
+            }
+            course.setPrice(req.getPrice());
         }
 
         course.setTitle(req.getTitle());
@@ -143,6 +194,7 @@ public class CourseService {
                 .slug(c.getSlug())
                 .description(c.getDescription())
                 .thumbnailUrl(c.getThumbnailUrl())
+                .price(c.getPrice() != null ? c.getPrice() : java.math.BigDecimal.ZERO)
                 .status(c.getStatus())
                 .categoryId(c.getCategory() != null ? c.getCategory().getId() : null)
                 .categoryName(c.getCategory() != null ? c.getCategory().getName() : null)

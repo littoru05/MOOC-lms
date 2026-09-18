@@ -11,19 +11,13 @@ export const LoginPage = ({ initialMode = 'LOGIN' }) => {
 
   const handleAuthSuccess = (targetRole) => {
     setIsOpen(false);
-    const targetPath = location.state?.from?.pathname;
-
-    if (targetPath && targetPath !== '/' && targetPath !== '/login' && targetPath !== '/register') {
-      navigate(targetPath, { replace: true });
-      return;
-    }
 
     if (targetRole === 'ROLE_INSTRUCTOR' || targetRole === 'INSTRUCTOR') {
       navigate('/instructor/dashboard', { replace: true });
     } else if (targetRole === 'ROLE_ADMIN' || targetRole === 'ADMIN') {
       navigate('/admin/dashboard', { replace: true });
     } else {
-      navigate('/my-learning', { replace: true });
+      navigate('/', { replace: true });
     }
   };
 

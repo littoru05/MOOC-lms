@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { adminApi } from '../../api/adminApi';
-import { courseApi } from '../../api/courseApi';
+import { usePendingCourses, useApproveCourse, useRejectCourse } from '../../hooks/useAdmin';
 import { SAMPLE_COURSES } from '../../data/coursesData';
 import { 
   CheckCircle2, 
@@ -20,6 +19,7 @@ import {
 } from 'lucide-react';
 
 import { useToast } from '../../context/ToastContext';
+import { getImageUrl } from '../../utils/imageUrl';
 
 export const CourseApprovalPage = ({ onBack }) => {
   const navigate = useNavigate();
@@ -29,103 +29,53 @@ export const CourseApprovalPage = ({ onBack }) => {
     if (onBack) onBack();
     else navigate('/admin/dashboard');
   };
-  const [courses, setCourses] = useState([]);
-  const [selectedCourse, setSelectedCourse] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [actionLoading, setActionLoading] = useState(false);
 
-  const fetchPendingCourses = async () => {
-    try {
-      const res = await adminApi.getPendingCourses().catch(() => ({ data: [] }));
-      if (res.data && res.data.length > 0) {
-        setCourses(res.data);
-        setSelectedCourse(res.data[0]);
-      } else {
-        // Sample pending courses for comprehensive inspection
-        const samplePending = [
-          {
-            ...SAMPLE_COURSES[0],
-            id: 901,
-            title: '[Yêu cầu duyệt] Lập trình Web Fullstack với Spring Boot 3 & ReactJS 19',
-            status: 'PENDING',
-            submittedDate: '2026-08-22',
-          },
-          {
-            ...SAMPLE_COURSES[1],
-            id: 902,
-            title: '[Yêu cầu duyệt] Trí tuệ nhân tạo & Machine Learning thực chiến với Python',
-            status: 'PENDING',
-            submittedDate: '2026-08-21',
-          }
-        ];
-        setCourses(samplePending);
-        setSelectedCourse(samplePending[0]);
-      }
-    } catch (err) {
-      console.warn('Lỗi tải khóa học chờ duyệt:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { data: apiPendingCourses = [], isLoading: loading } = usePendingCourses();
+  const approveMutation = useApproveCourse();
+  const rejectMutation = useRejectCourse();
+  const actionLoading = approveMutation.isPending || rejectMutation.isPending;
+
+  const courses = apiPendingCourses;
+  const [selectedCourse, setSelectedCourse] = useState(null);
 
   useEffect(() => {
-    fetchPendingCourses();
-  }, []);
+    if (courses.length > 0) {
+      if (!selectedCourse || !courses.some((c) => c.id === selectedCourse.id)) {
+        setSelectedCourse(courses[0]);
+      }
+    } else {
+      setSelectedCourse(null);
+    }
+  }, [courses, selectedCourse]);
 
-  const handleApprove = async (courseId) => {
+  const handleApprove = (courseId) => {
     confirm({
       title: 'Phê duyệt xuất bản khóa học',
       message: 'Bạn có chắc chắn khóa học đã đạt chuẩn kiểm định chất lượng và sẵn sàng phát hành công khai cho học viên?',
       confirmText: 'Phê duyệt & Xuất bản',
       onConfirm: async () => {
-        setActionLoading(true);
         try {
-          await adminApi.approveCourse(courseId).catch(() => null);
+          await approveMutation.mutateAsync(courseId);
           showToast('Đã phê duyệt và xuất bản khóa học thành công lên trang chủ!', 'success');
-          setCourses((prev) => {
-            const remaining = prev.filter((c) => c.id !== courseId);
-            setSelectedCourse(remaining.length > 0 ? remaining[0] : null);
-            return remaining;
-          });
         } catch (err) {
-          showToast('Đã phê duyệt thành công!', 'success');
-          setCourses((prev) => {
-            const remaining = prev.filter((c) => c.id !== courseId);
-            setSelectedCourse(remaining.length > 0 ? remaining[0] : null);
-            return remaining;
-          });
-        } finally {
-          setActionLoading(false);
+          showToast(err.response?.data?.message || 'Đã phê duyệt thành công!', 'success');
         }
       },
     });
   };
 
-  const handleReject = async (courseId) => {
+  const handleReject = (courseId) => {
     confirm({
       title: 'Từ chối khóa học',
       message: 'Bạn có chắc muốn từ chối yêu cầu xuất bản của khóa học này để giảng viên bổ sung thêm nội dung?',
       confirmText: 'Xác nhận từ chối',
       isDanger: true,
       onConfirm: async () => {
-        setActionLoading(true);
         try {
-          await adminApi.rejectCourse(courseId).catch(() => null);
+          await rejectMutation.mutateAsync(courseId);
           showToast('Đã từ chối khóa học và gửi thông báo phản hồi cho giảng viên.', 'warning');
-          setCourses((prev) => {
-            const remaining = prev.filter((c) => c.id !== courseId);
-            setSelectedCourse(remaining.length > 0 ? remaining[0] : null);
-            return remaining;
-          });
         } catch (err) {
-          showToast('Đã từ chối khóa học!', 'warning');
-          setCourses((prev) => {
-            const remaining = prev.filter((c) => c.id !== courseId);
-            setSelectedCourse(remaining.length > 0 ? remaining[0] : null);
-            return remaining;
-          });
-        } finally {
-          setActionLoading(false);
+          showToast(err.response?.data?.message || 'Đã từ chối khóa học!', 'warning');
         }
       },
     });
@@ -159,7 +109,11 @@ export const CourseApprovalPage = ({ onBack }) => {
         </span>
       </div>
 
-      {courses.length === 0 ? (
+      {loading ? (
+        <div className="text-center py-24 bg-white border border-[#E4E4E0] rounded-xl text-xs text-[#5E5E5E]">
+          Đang tải danh sách khóa học chờ duyệt...
+        </div>
+      ) : courses.length === 0 ? (
         <div className="text-center py-24 bg-white border border-[#E4E4E0] rounded-xl">
           <CheckCircle2 className="w-12 h-12 text-[#22C55E] mx-auto mb-3" />
           <p className="font-serif font-bold text-base text-[#1A1C1E]">
@@ -198,7 +152,7 @@ export const CourseApprovalPage = ({ onBack }) => {
 
                   <div className="flex items-center gap-2 mt-3 pt-2 border-t border-[#E4E4E0] text-[11px] text-[#5E5E5E]">
                     <img
-                      src={course.instructor?.avatarUrl || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100'}
+                      src={getImageUrl(course.instructor?.avatarUrl, 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100')}
                       alt=""
                       className="w-4 h-4 rounded-full"
                     />
@@ -294,7 +248,7 @@ export const CourseApprovalPage = ({ onBack }) => {
               {/* Instructor Bio */}
               <div className="p-4 bg-[#F4F3F6] border border-[#E4E4E0] rounded-lg flex items-center gap-3">
                 <img
-                  src={selectedCourse.instructor?.avatarUrl || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150'}
+                  src={getImageUrl(selectedCourse.instructor?.avatarUrl, 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150')}
                   alt=""
                   className="w-12 h-12 rounded-full object-cover border border-[#E4E4E0]"
                 />

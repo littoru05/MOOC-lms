@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { courseApi } from '../../api/courseApi';
 import { useToast } from '../../context/ToastContext';
+import { ImageUploadInput } from '../../components/common/ImageUploadInput';
+import { getImageUrl } from '../../utils/imageUrl';
 import { 
   Plus, 
   BookOpen, 
@@ -20,6 +23,7 @@ import {
 
 export const CourseCreateWizardPage = ({ onBack, onCourseCreated }) => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { showToast } = useToast();
 
   const handleBack = () => {
@@ -29,7 +33,7 @@ export const CourseCreateWizardPage = ({ onBack, onCourseCreated }) => {
 
   const handleCreated = (newId) => {
     if (onCourseCreated) onCourseCreated(newId);
-    else navigate(`/instructor/courses/${newId}/edit`);
+    else navigate(`/instructor/courses/editor?courseId=${newId}`);
   };
 
   const [title, setTitle] = useState('');
@@ -38,6 +42,7 @@ export const CourseCreateWizardPage = ({ onBack, onCourseCreated }) => {
   const [level, setLevel] = useState('Trung cấp');
   const [language, setLanguage] = useState('Tiếng Việt');
   const [thumbnailUrl, setThumbnailUrl] = useState('https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800');
+  const [price, setPrice] = useState('');
   const [shortDescription, setShortDescription] = useState('');
   const [fullDescription, setFullDescription] = useState('');
   const [learnItems, setLearnItems] = useState([
@@ -112,22 +117,24 @@ export const CourseCreateWizardPage = ({ onBack, onCourseCreated }) => {
         categoryId: Number(categoryId),
         description: shortDescription.trim(),
         thumbnailUrl: thumbnailUrl.trim(),
+        price: price ? Number(price) : 0,
       };
 
-      let newCourseId = Date.now();
-      try {
-        const res = await courseApi.createCourse(payload);
-        if (res.data?.id) {
-          newCourseId = res.data.id;
-        }
-      } catch (apiErr) {
-        console.warn('Tạo khóa học cục bộ:', apiErr);
+      const res = await courseApi.createCourse(payload);
+      if (!res.data?.id) {
+        throw new Error('API không trả về ID khóa học hợp lệ!');
       }
 
-      showToast('Khởi tạo khóa học mới thành công! Đang chuyển sang Soạn đề cương...', 'success');
-      handleCreated(newCourseId);
+      await queryClient.invalidateQueries({ queryKey: ['courses'] });
+
+      showToast(
+        'Khóa học đã được tạo ở dạng Bản nháp. Sau khi soạn xong bài giảng, hãy bấm "Gửi duyệt" để Admin xét duyệt trước khi hiển thị công khai cho học viên.',
+        'success'
+      );
+      handleCreated(res.data.id);
     } catch (err) {
-      showToast('Không thể tạo khóa học. Vui lòng thử lại!', 'error');
+      console.error('Lỗi khi tạo khóa học:', err);
+      showToast(err.response?.data?.message || err.message || 'Không thể tạo khóa học. Vui lòng thử lại!', 'error');
     } finally {
       setSaving(false);
     }
@@ -235,6 +242,25 @@ export const CourseCreateWizardPage = ({ onBack, onCourseCreated }) => {
                 </select>
               </div>
 
+              {/* Học phí */}
+              <div className="space-y-1">
+                <label className="block text-xs font-semibold text-[#1A1C1E] flex items-center justify-between">
+                  <span>Học phí (VNĐ)</span>
+                  <span className="text-[11px] font-semibold text-[#16324F] bg-[#EFEDF0] px-2 py-0.5 rounded">
+                    {price && Number(price) > 0 ? new Intl.NumberFormat('vi-VN').format(Number(price)) + '₫' : 'Miễn phí'}
+                  </span>
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  step="10000"
+                  value={price}
+                  onChange={(e) => setPrice(e.target.value)}
+                  placeholder="0 (Để trống = Miễn phí)"
+                  className="w-full px-3.5 py-2.5 text-xs border border-[#E4E4E0] rounded-xl bg-white focus:outline-none focus:border-[#16324F]"
+                />
+              </div>
+
               {/* Mô tả ngắn */}
               <div className="space-y-1 sm:col-span-2">
                 <label className="block text-xs font-semibold text-[#1A1C1E]">
@@ -282,7 +308,7 @@ export const CourseCreateWizardPage = ({ onBack, onCourseCreated }) => {
             <div className="flex flex-col sm:flex-row items-center gap-6">
               <div className="w-full sm:w-56 aspect-video rounded-xl border border-[#E4E4E0] overflow-hidden bg-[#FAF9FC] shrink-0 shadow-xs">
                 <img
-                  src={thumbnailUrl}
+                  src={getImageUrl(thumbnailUrl, 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800')}
                   alt="Preview"
                   className="w-full h-full object-cover"
                   onError={(e) => {
@@ -292,38 +318,32 @@ export const CourseCreateWizardPage = ({ onBack, onCourseCreated }) => {
               </div>
 
               <div className="flex-1 space-y-3 w-full">
-                <div className="space-y-1">
-                  <label className="block text-xs font-semibold text-[#1A1C1E]">
-                    Dán URL hình ảnh (Unsplash / Cloudinary / AWS S3)
-                  </label>
-                  <input
-                    type="url"
-                    value={thumbnailUrl}
-                    onChange={(e) => setThumbnailUrl(e.target.value)}
-                    placeholder="https://images.unsplash.com/photo-..."
-                    className="w-full px-3.5 py-2 text-xs border border-[#E4E4E0] rounded-xl focus:outline-none focus:border-[#16324F] bg-white font-mono text-[11px]"
-                  />
-                </div>
+                <ImageUploadInput
+                  value={thumbnailUrl}
+                  onChange={(newUrl) => setThumbnailUrl(newUrl)}
+                  label="URL hình ảnh hoặc tải file ảnh lên"
+                  placeholder="https://images.unsplash.com/... hoặc chọn file từ máy"
+                />
                 <div className="flex flex-wrap gap-2 text-[11px]">
                   <span className="text-[#5E5E5E] self-center">Mẫu ảnh gợi ý:</span>
                   <button
                     type="button"
                     onClick={() => setThumbnailUrl('https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800')}
-                    className="px-2 py-0.5 bg-[#FAF9FC] border border-[#E4E4E0] rounded text-[#16324F] hover:border-[#16324F]"
+                    className="px-2 py-0.5 bg-[#FAF9FC] border border-[#E4E4E0] rounded text-[#16324F] hover:border-[#16324F] cursor-pointer"
                   >
                     Web Code
                   </button>
                   <button
                     type="button"
                     onClick={() => setThumbnailUrl('https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800')}
-                    className="px-2 py-0.5 bg-[#FAF9FC] border border-[#E4E4E0] rounded text-[#16324F] hover:border-[#16324F]"
+                    className="px-2 py-0.5 bg-[#FAF9FC] border border-[#E4E4E0] rounded text-[#16324F] hover:border-[#16324F] cursor-pointer"
                   >
                     AI / Python
                   </button>
                   <button
                     type="button"
                     onClick={() => setThumbnailUrl('https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=800')}
-                    className="px-2 py-0.5 bg-[#FAF9FC] border border-[#E4E4E0] rounded text-[#16324F] hover:border-[#16324F]"
+                    className="px-2 py-0.5 bg-[#FAF9FC] border border-[#E4E4E0] rounded text-[#16324F] hover:border-[#16324F] cursor-pointer"
                   >
                     Mobile App
                   </button>
@@ -420,8 +440,8 @@ export const CourseCreateWizardPage = ({ onBack, onCourseCreated }) => {
           <div className="flex flex-col sm:flex-row items-center justify-end gap-3 pt-4">
             <button
               type="button"
-              onClick={onBack}
-              className="w-full sm:w-auto px-6 py-2.5 border border-[#E4E4E0] hover:bg-white text-[#5E5E5E] text-xs font-semibold rounded-xl transition-colors"
+              onClick={handleBack}
+              className="w-full sm:w-auto px-6 py-2.5 border border-[#E4E4E0] hover:bg-white text-[#5E5E5E] text-xs font-semibold rounded-xl transition-colors cursor-pointer"
             >
               Hủy bỏ
             </button>

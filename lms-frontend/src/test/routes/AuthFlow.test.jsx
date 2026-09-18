@@ -6,16 +6,21 @@ import { describe, expect, it } from 'vitest';
 import { AuthProvider } from '../../context/AuthContext';
 import { ToastProvider } from '../../context/ToastContext';
 import { AppRoutes } from '../../routes/AppRoutes';
+import { createTestQueryClient } from '../test-utils';
+import { QueryClientProvider } from '@tanstack/react-query';
 
 const renderAppAt = (initialRoute = '/') => {
+  const queryClient = createTestQueryClient();
   return render(
-    <MemoryRouter initialEntries={[initialRoute]}>
-      <ToastProvider>
-        <AuthProvider>
-          <AppRoutes />
-        </AuthProvider>
-      </ToastProvider>
-    </MemoryRouter>
+    <QueryClientProvider client={queryClient}>
+      <MemoryRouter initialEntries={[initialRoute]}>
+        <ToastProvider>
+          <AuthProvider>
+            <AppRoutes />
+          </AuthProvider>
+        </ToastProvider>
+      </MemoryRouter>
+    </QueryClientProvider>
   );
 };
 
@@ -29,7 +34,7 @@ describe('End-to-End User Auth & Navigation Flow', () => {
     });
   });
 
-  it('luồng đăng nhập học viên thành công và điều hướng vào /my-learning', async () => {
+  it('luồng đăng nhập học viên thành công và điều hướng vào trang chủ /', async () => {
     const user = userEvent.setup();
     renderAppAt('/login');
 
@@ -41,9 +46,9 @@ describe('End-to-End User Auth & Navigation Flow', () => {
     await user.type(passwordInput, 'student123');
     await user.click(submitBtn);
 
-    // Sau khi đăng nhập thành công, điều hướng vào /my-learning
+    // Sau khi đăng nhập thành công, học viên điều hướng vào trang chủ /
     await waitFor(() => {
-      expect(screen.getByRole('heading', { name: /Khóa học đã ghi danh của tôi/i })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: /Khám phá tri thức, làm chủ công nghệ tương lai/i })).toBeInTheDocument();
     });
   });
 
@@ -62,6 +67,24 @@ describe('End-to-End User Auth & Navigation Flow', () => {
     // Sau khi đăng nhập thành công, điều hướng vào Studio Giảng viên
     await waitFor(() => {
       expect(screen.getAllByText(/EduMOOC Studio/i)[0]).toBeInTheDocument();
+    });
+  });
+
+  it('luồng đăng nhập quản trị viên thành công và điều hướng thẳng vào /admin/dashboard', async () => {
+    const user = userEvent.setup();
+    renderAppAt('/login');
+
+    const emailInput = screen.getByPlaceholderText('student@lms.com');
+    const passwordInput = screen.getByPlaceholderText('••••••••');
+    const submitBtn = screen.getByRole('button', { name: /Đăng nhập$/i });
+
+    await user.type(emailInput, 'admin@lms.com');
+    await user.type(passwordInput, 'admin123');
+    await user.click(submitBtn);
+
+    // Sau khi đăng nhập thành công, điều hướng vào Quản trị Admin
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /Tổng quan Hệ sinh thái EduMOOC/i })).toBeInTheDocument();
     });
   });
 });

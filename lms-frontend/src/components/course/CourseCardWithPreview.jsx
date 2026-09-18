@@ -1,5 +1,8 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Star, Users, Clock, ArrowRight } from 'lucide-react';
+import { getImageUrl } from '../../utils/imageUrl';
+import { formatCurrency } from '../../utils/format';
 
 /**
  * CourseCard: Clean, high-performance course card adhering to Paper & Ink Design System.
@@ -10,12 +13,15 @@ export const CourseCardWithPreview = ({
   isEnrolled = false,
   cardClassName = ''
 }) => {
+  const navigate = useNavigate();
   const totalLessons = course.totalLessons || 
     (course.sections?.reduce((acc, s) => acc + (s.lessons?.length || 0), 0) || 15);
 
   const handleCardClick = () => {
     if (onSelectCourse) {
       onSelectCourse(course.slug || course.id);
+    } else {
+      navigate(`/courses/${course.slug || course.id}`);
     }
   };
 
@@ -28,7 +34,7 @@ export const CourseCardWithPreview = ({
         {/* Thumbnail & Badges */}
         <div className="aspect-video w-full overflow-hidden bg-[#EFEDF0] relative">
           <img
-            src={course.thumbnailUrl || course.thumbnail || 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800'}
+            src={getImageUrl(course.thumbnailUrl || course.thumbnail, 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800')}
             alt={course.title}
             className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500 ease-out"
           />
@@ -61,7 +67,7 @@ export const CourseCardWithPreview = ({
           {/* Instructor Info */}
           <div className="flex items-center gap-2 pt-1 text-xs">
             <img
-              src={course.instructor?.avatarUrl || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150'}
+              src={getImageUrl(course.instructor?.avatarUrl, 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150')}
               alt={course.instructor?.fullName}
               className="w-4 h-4 rounded-full object-cover border border-[#E4E4E0]"
             />
@@ -82,9 +88,11 @@ export const CourseCardWithPreview = ({
           </span>
         </div>
 
-        <div className="flex items-center gap-1 text-[#5E5E5E] text-[10px]">
-          <Users className="w-3 h-3 text-[#16324F]" />
-          <span>{(course.enrolledCount || course.students || 4500).toLocaleString()} HV</span>
+        {/* Price Tag */}
+        <div className="text-right">
+          <span className={`text-xs font-bold ${Number(course.price) > 0 ? 'text-[#BA1A1A]' : 'text-emerald-700 font-semibold'}`}>
+            {formatCurrency(course.price)}
+          </span>
         </div>
       </div>
     </div>

@@ -4,3 +4,8 @@ node_modules/
 target/
 build/
 dist/
+coverage/
+*.exe
+ngrok.yml
+lms-backend/uploads/*
+!lms-backend/uploads/.gitkeep

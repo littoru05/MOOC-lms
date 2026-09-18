@@ -1,5 +1,6 @@
 package com.lms.lms_backend.entity;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -45,6 +46,24 @@ public class User {
 
     @Column(name = "avatar_url", length = 255)
     private String avatarUrl;
+
+    @Column(length = 20)
+    private String phone;
+
+    @Column(name = "date_of_birth")
+    private LocalDate dateOfBirth;
+
+    @Column(length = 10)
+    private String gender;
+
+    @Column(length = 150)
+    private String title;
+
+    @Column(columnDefinition = "TEXT")
+    private String bio;
+
+    @Column(name = "teaching_field", length = 100)
+    private String teachingField;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
