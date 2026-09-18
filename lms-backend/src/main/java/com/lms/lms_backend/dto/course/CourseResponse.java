@@ -24,5 +24,6 @@ public class CourseResponse {
     private String categoryName;
     private Long instructorId;
     private String instructorName;
+    private java.math.BigDecimal price;
     private LocalDateTime createdAt;
 }

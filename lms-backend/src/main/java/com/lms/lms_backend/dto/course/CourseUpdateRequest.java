@@ -1,5 +1,7 @@
 package com.lms.lms_backend.dto.course;
 
+import java.math.BigDecimal;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
@@ -11,4 +13,7 @@ public class CourseUpdateRequest {
     private String description;
     private String thumbnailUrl;
     private Long categoryId;
+
+    @Min(value = 0, message = "Giá khóa học không được âm")
+    private BigDecimal price;
 }

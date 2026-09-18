@@ -176,4 +176,48 @@ class CourseServiceTest {
         assertEquals(CourseStatus.REJECTED, res.getStatus());
         assertEquals(CourseStatus.REJECTED, draftCourse.getStatus());
     }
+
+    @Test
+    @DisplayName("Ném ngoại lệ khi tạo khóa học với giá âm")
+    void createCourse_NegativePrice_ThrowsException() {
+        CourseCreateRequest req = new CourseCreateRequest();
+        req.setTitle("Khóa học giá âm");
+        req.setSlug("khoa-hoc-gia-am");
+        req.setPrice(new java.math.BigDecimal("-50000"));
+
+        when(courseRepository.existsBySlug("khoa-hoc-gia-am")).thenReturn(false);
+        when(userRepository.findByEmail("instructor@lms.com")).thenReturn(Optional.of(instructor));
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () ->
+                courseService.createCourse(req, "instructor@lms.com")
+        );
+
+        assertTrue(ex.getMessage().contains("Giá khóa học không được âm"));
+    }
+
+    @Test
+    @DisplayName("Lấy danh sách khóa học public có áp dụng filter Specification")
+    void getAllPublishedCourses_WithFilters_Success() {
+        Course publishedCourse = Course.builder()
+                .id(1L)
+                .title("Khóa học có phí")
+                .slug("khoa-hoc-co-phi")
+                .price(new java.math.BigDecimal("499000"))
+                .status(CourseStatus.PUBLISHED)
+                .instructor(instructor)
+                .category(category)
+                .build();
+
+        when(courseRepository.findAll(any(org.springframework.data.jpa.domain.Specification.class)))
+                .thenReturn(java.util.List.of(publishedCourse));
+
+        java.util.List<CourseResponse> result = courseService.getAllPublishedCourses(
+                "paid", new java.math.BigDecimal("100000"), new java.math.BigDecimal("600000"), 1L, "Khóa học"
+        );
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(new java.math.BigDecimal("499000"), result.get(0).getPrice());
+        verify(courseRepository, times(1)).findAll(any(org.springframework.data.jpa.domain.Specification.class));
+    }
 }

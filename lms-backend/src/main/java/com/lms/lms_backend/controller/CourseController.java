@@ -28,16 +28,32 @@ public class CourseController {
 
     private final CourseService courseService;
 
-    // Xem danh sách khóa học public (đã xuất bản)
+    // Xem danh sách khóa học public (đã xuất bản) có hỗ trợ lọc giá, danh mục, tìm kiếm
     @GetMapping("/public")
-    public ResponseEntity<List<CourseResponse>> getPublishedCourses() {
-        return ResponseEntity.ok(courseService.getAllPublishedCourses());
+    public ResponseEntity<List<CourseResponse>> getPublishedCourses(
+            @org.springframework.web.bind.annotation.RequestParam(required = false, defaultValue = "all") String priceType,
+            @org.springframework.web.bind.annotation.RequestParam(required = false) java.math.BigDecimal minPrice,
+            @org.springframework.web.bind.annotation.RequestParam(required = false) java.math.BigDecimal maxPrice,
+            @org.springframework.web.bind.annotation.RequestParam(required = false) Long categoryId,
+            @org.springframework.web.bind.annotation.RequestParam(required = false) String search
+    ) {
+        return ResponseEntity.ok(courseService.getAllPublishedCourses(priceType, minPrice, maxPrice, categoryId, search));
     }
 
     // Xem chi tiết khóa học bằng slug
     @GetMapping("/public/{slug}")
     public ResponseEntity<CourseResponse> getCourseBySlug(@PathVariable String slug) {
         return ResponseEntity.ok(courseService.getCourseBySlug(slug));
+    }
+
+    // Xem chi tiết khóa học bằng ID (cho Giảng viên soạn bài / Admin / Học viên)
+    @GetMapping("/{id}")
+    public ResponseEntity<CourseResponse> getCourseById(
+            @PathVariable Long id,
+            Authentication authentication
+    ) {
+        String email = authentication != null ? authentication.getName() : null;
+        return ResponseEntity.ok(courseService.getCourseById(id, email));
     }
 
     // Tạo mới khóa học (mặc định DRAFT)

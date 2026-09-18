@@ -157,6 +157,28 @@ class EnrollmentServiceTest {
     }
 
     @Test
+    @DisplayName("Ném ngoại lệ khi ghi danh trực tiếp vào khóa học có phí (price > 0)")
+    void enrollCourse_PaidCourse_ThrowsException() {
+        Course paidCourse = Course.builder()
+                .id(30L)
+                .title("Khóa học Chuyên sâu có phí")
+                .slug("khoa-hoc-co-phi")
+                .status(CourseStatus.PUBLISHED)
+                .price(new BigDecimal("500000"))
+                .build();
+
+        when(userRepository.findByEmail("student@lms.com")).thenReturn(Optional.of(student));
+        when(courseRepository.findById(30L)).thenReturn(Optional.of(paidCourse));
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () ->
+                enrollmentService.enrollCourse("student@lms.com", 30L)
+        );
+
+        assertTrue(exception.getMessage().contains("Khóa học có phí, vui lòng thêm vào giỏ hàng"));
+        verify(enrollmentRepository, never()).save(any());
+    }
+
+    @Test
     @DisplayName("Ném ngoại lệ khi học viên đã đăng ký khóa học này trước đó")
     void enrollCourse_AlreadyEnrolled_ThrowsException() {
         when(userRepository.findByEmail("student@lms.com")).thenReturn(Optional.of(student));
