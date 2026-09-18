@@ -10,4 +10,5 @@ import com.lms.lms_backend.entity.Question;
 @Repository
 public interface QuestionRepository extends JpaRepository<Question, Long> {
     List<Question> findByQuizId(Long quizId);
+    List<Question> findByQuizIdIn(List<Long> quizIds);
 }

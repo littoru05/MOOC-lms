@@ -13,6 +13,11 @@ import com.lms.lms_backend.entity.Lesson;
 public interface LessonRepository extends JpaRepository<Lesson, Long> {
     List<Lesson> findBySectionIdOrderByOrderIndexAsc(Long sectionId);
 
+    List<Lesson> findBySectionIdInOrderByOrderIndexAsc(List<Long> sectionIds);
+
     @Query("SELECT COUNT(l) FROM Lesson l WHERE l.section.course.id = :courseId")
     long countByCourseId(@Param("courseId") Long courseId);
+
+    @Query("SELECT COALESCE(SUM(l.durationMinutes), 0) FROM Lesson l WHERE l.section.course.id = :courseId")
+    Integer sumDurationMinutesByCourseId(@Param("courseId") Long courseId);
 }

@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { courseApi } from '../../api/courseApi';
+import { useTeachingCourses, useSubmitForReview } from '../../hooks/useCourses';
 import { useAuth } from '../../context/AuthContext';
 import { getAllQuizzes } from '../../mocks/courses';
 import {
@@ -17,17 +17,19 @@ import {
 } from 'lucide-react';
 
 import { useToast } from '../../context/ToastContext';
+import { getImageUrl } from '../../utils/imageUrl';
 
 export const InstructorDashboard = ({ onEditCourse, onCreateCourse, onBuildQuiz }) => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { showToast, confirm } = useToast();
-  const [courses, setCourses] = useState([]);
-  const [loading, setLoading] = useState(true);
+
+  const { data: courses = [], isLoading: loading } = useTeachingCourses();
+  const submitReviewMutation = useSubmitForReview();
 
   const handleEdit = (cid) => {
     if (onEditCourse) onEditCourse(cid);
-    else navigate(`/instructor/courses/${cid}/edit`);
+    else navigate(`/instructor/courses/editor?courseId=${cid}`);
   };
 
   const handleCreate = () => {
@@ -37,37 +39,20 @@ export const InstructorDashboard = ({ onEditCourse, onCreateCourse, onBuildQuiz 
 
   const handleBuild = (cid) => {
     if (onBuildQuiz) onBuildQuiz(cid);
-    else navigate(`/instructor/courses/${cid || 1}/quiz-builder`);
+    else navigate(`/instructor/courses/quiz-builder?courseId=${cid}`);
   };
 
-  const fetchCourses = async () => {
-    try {
-      const res = await courseApi.getMyTeachingCourses();
-      setCourses(res.data);
-    } catch (err) {
-      console.warn('Lỗi khi tải khóa học của giảng viên:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchCourses();
-  }, []);
-
-  const handleSubmitReview = async (courseId) => {
+  const handleSubmitReview = (courseId) => {
     confirm({
       title: 'Gửi kiểm duyệt khóa học',
       message: 'Bạn có chắc chắn muốn gửi khóa học này lên Quản trị viên để xét duyệt xuất bản lên hệ thống?',
       confirmText: 'Gửi duyệt ngay',
       onConfirm: async () => {
         try {
-          await courseApi.submitForReview(courseId);
+          await submitReviewMutation.mutateAsync(courseId);
           showToast('Đã gửi yêu cầu kiểm duyệt khóa học thành công lên Quản trị viên!', 'success');
-          fetchCourses();
         } catch (err) {
-          showToast(err.response?.data?.message || 'Đã gửi yêu cầu kiểm duyệt!', 'success');
-          fetchCourses();
+          showToast(err.response?.data?.message || 'Lỗi khi gửi yêu cầu kiểm duyệt!', 'error');
         }
       },
     });
@@ -182,7 +167,7 @@ export const InstructorDashboard = ({ onEditCourse, onCreateCourse, onBuildQuiz 
                 {/* Left info */}
                 <div className="flex items-start gap-4">
                   <img
-                    src={c.thumbnailUrl || 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=600'}
+                    src={getImageUrl(c.thumbnailUrl, 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=600')}
                     alt={c.title}
                     className="w-28 h-18 rounded-xl object-cover border border-[#E4E4E0] shrink-0 shadow-2xs"
                   />
@@ -218,13 +203,13 @@ export const InstructorDashboard = ({ onEditCourse, onCreateCourse, onBuildQuiz 
                     <HelpCircle className="w-3.5 h-3.5 text-amber-600" /> Soạn đề Quiz
                   </button>
 
-                  {c.status === 'DRAFT' && (
+                  {(c.status === 'DRAFT' || c.status === 'REJECTED') && (
                     <button
                       onClick={() => handleSubmitReview(c.id)}
                       className="px-4 py-2 bg-[#16324F] hover:bg-[#001D37] text-white text-xs font-bold rounded-xl flex items-center gap-1.5 transition-all shadow-xs cursor-pointer active:scale-95"
                       title="Gửi lên Admin để phê duyệt xuất bản"
                     >
-                      <Send className="w-3.5 h-3.5" /> Gửi duyệt
+                      <Send className="w-3.5 h-3.5" /> {c.status === 'REJECTED' ? 'Gửi duyệt lại' : 'Gửi duyệt'}
                     </button>
                   )}
                 </div>
