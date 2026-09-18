@@ -4,3 +4,6 @@ node_modules/
 target/
 build/
 dist/
+coverage/
+*.exe
+ngrok.yml
