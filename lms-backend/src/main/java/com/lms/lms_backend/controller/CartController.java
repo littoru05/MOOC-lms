@@ -28,14 +28,14 @@ public class CartController {
 
     // Xem giỏ hàng của học viên hiện tại
     @GetMapping
-    @PreAuthorize("hasRole('ROLE_STUDENT')")
+    @PreAuthorize("hasAnyAuthority('ROLE_STUDENT', 'STUDENT')")
     public ResponseEntity<CartResponse> getCart(Principal principal) {
         return ResponseEntity.ok(cartService.getCart(principal.getName()));
     }
 
     // Thêm khóa học vào giỏ hàng
     @PostMapping("/items")
-    @PreAuthorize("hasRole('ROLE_STUDENT')")
+    @PreAuthorize("hasAnyAuthority('ROLE_STUDENT', 'STUDENT')")
     public ResponseEntity<CartResponse> addToCart(
             @Valid @RequestBody AddToCartRequest request,
             Principal principal
@@ -45,7 +45,7 @@ public class CartController {
 
     // Xóa khóa học khỏi giỏ hàng
     @DeleteMapping("/items/{courseId}")
-    @PreAuthorize("hasRole('ROLE_STUDENT')")
+    @PreAuthorize("hasAnyAuthority('ROLE_STUDENT', 'STUDENT')")
     public ResponseEntity<CartResponse> removeFromCart(
             @PathVariable Long courseId,
             Principal principal
