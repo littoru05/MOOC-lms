@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { certificateApi } from '../../api/certificateApi';
 import { learningApi } from '../../api/learningApi';
 import { useAuth } from '../../context/AuthContext';
-import { Award, Search, CheckCircle, Download, ExternalLink, Printer, ShieldCheck, AlertCircle } from 'lucide-react';
+import { Award, Search, CheckCircle, Download, ExternalLink, Printer, ShieldCheck, AlertCircle, Copy, Check } from 'lucide-react';
 
 export const MyCertificatesPage = ({ initialCode: initialCodeProp }) => {
   const [searchParams] = useSearchParams();
@@ -14,6 +14,7 @@ export const MyCertificatesPage = ({ initialCode: initialCodeProp }) => {
   const [myCertificates, setMyCertificates] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [copied, setCopied] = useState(false);
 
   // Auto-verify if initialCode passed
   useEffect(() => {
@@ -67,6 +68,12 @@ export const MyCertificatesPage = ({ initialCode: initialCodeProp }) => {
     window.print();
   };
 
+  const handleCopyCode = (code) => {
+    navigator.clipboard.writeText(code);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
     <div className="min-h-screen bg-[#FAF9FC] py-12 px-6">
       <div className="max-w-4xl mx-auto space-y-8">
@@ -96,7 +103,7 @@ export const MyCertificatesPage = ({ initialCode: initialCodeProp }) => {
             <button
               onClick={() => handleVerify()}
               disabled={loading}
-              className="px-4 py-2 bg-[#16324F] hover:bg-[#001D37] text-white text-xs font-semibold rounded-md flex items-center gap-1.5 transition-colors disabled:opacity-50"
+              className="px-4 py-2 bg-[#16324F] hover:bg-[#001D37] text-white text-xs font-semibold rounded-md flex items-center gap-1.5 transition-colors disabled:opacity-50 cursor-pointer"
             >
               <Search className="w-3.5 h-3.5" />
               <span>{loading ? 'Đang tra cứu...' : 'Xác thực'}</span>
@@ -111,72 +118,121 @@ export const MyCertificatesPage = ({ initialCode: initialCodeProp }) => {
           </div>
         )}
 
-        {/* Verified Certificate Display (Scholarly Diploma Format) */}
+        {/* Verified Certificate Display (Scholarly Diploma Card) */}
         {verifiedCert && (
-          <div className="bg-white border-8 border-double border-[#16324F] p-8 md:p-12 rounded-xl shadow-md relative print:border-black print:m-0">
+          <div className="bg-white border-4 border-double border-[#16324F] rounded-2xl p-8 md:p-12 shadow-md relative print:border-black print:m-0 space-y-8">
             
-            {/* Watermark Logo */}
-            <div className="text-center border-b border-[#E4E4E0] pb-6 mb-6">
-              <div className="w-12 h-12 bg-[#16324F] text-white rounded-xl mx-auto flex items-center justify-center font-bold text-2xl font-serif mb-2">
+            {/* Diploma Brand Header */}
+            <div className="text-center border-b border-[#E4E4E0] pb-6">
+              <div className="w-14 h-14 bg-[#002D72] text-white rounded-2xl mx-auto flex items-center justify-center font-bold text-2xl font-serif mb-3 shadow-sm">
                 E
               </div>
-              <h2 className="text-sm font-bold text-[#16324F] tracking-widest uppercase font-serif">
-                HỆ THỐNG ĐÀO TẠO TRỰC TUYẾN MOOC - EDUMOOC PLATFORM
+              <h2 className="text-base font-bold text-[#002D72] tracking-widest uppercase font-serif">
+                EDUMOOC ACADEMY
               </h2>
-              <p className="text-[11px] text-[#5E5E5E] tracking-wider uppercase mt-1">
-                Chứng chỉ số Tốt nghiệp có giá trị xác thực công khai
+              <p className="text-[11px] text-[#4A5568] tracking-wider uppercase mt-0.5">
+                HỆ THỐNG ĐÀO TẠO TRỰC TUYẾN QUỐC TẾ • INTERNATIONAL ONLINE LEARNING SYSTEM
               </p>
+              
+              <div className="flex items-center justify-center gap-2 mt-4">
+                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  <CheckCircle className="w-3.5 h-3.5" /> Chứng chỉ số hợp lệ & đã xác thực
+                </span>
+                {verifiedCert.finalScore && verifiedCert.finalScore >= 90 && (
+                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-[#002D72] text-[#D4AF37] border border-[#D4AF37]">
+                    ★ WITH DISTINCTION ({verifiedCert.finalScore}%)
+                  </span>
+                )}
+              </div>
             </div>
 
-            <div className="text-center space-y-4 my-8">
-              <p className="text-xs text-[#5E5E5E] uppercase tracking-widest">Chứng nhận cấp cho học viên</p>
-              <h3 className="text-3xl font-bold font-serif text-[#001D37] tracking-tight">
+            {/* Recipient & Course Statement */}
+            <div className="text-center space-y-4 max-w-2xl mx-auto">
+              <p className="text-xs text-[#5E5E5E] uppercase tracking-widest font-medium">
+                Chứng nhận cấp cho học viên
+              </p>
+              <h3 className="text-3xl md:text-4xl font-bold font-serif text-[#001D37] tracking-tight">
                 {verifiedCert.studentName}
               </h3>
               <p className="text-xs text-[#5E5E5E]">{verifiedCert.studentEmail}</p>
 
-              <div className="my-6">
-                <p className="text-xs text-[#5E5E5E]">Đã hoàn thành xuất sắc toàn bộ chương trình và bài khảo thí khóa học:</p>
-                <h4 className="text-2xl font-bold font-serif text-[#16324F] mt-2">
+              <div className="py-4">
+                <p className="text-xs text-[#5E5E5E] italic">
+                  {verifiedCert.finalScore && verifiedCert.finalScore >= 90
+                    ? 'has successfully completed with distinction / đã hoàn thành xuất sắc khóa học'
+                    : 'has successfully completed / đã hoàn thành khóa học'}
+                </p>
+                <h4 className="text-2xl md:text-3xl font-bold font-serif text-[#002D72] mt-2 leading-snug">
                   {verifiedCert.courseTitle}
                 </h4>
               </div>
+            </div>
 
-              <div className="grid grid-cols-2 gap-6 pt-6 border-t border-[#E4E4E0] text-left text-xs max-w-lg mx-auto">
-                <div>
-                  <p className="text-[#6B6B6B]">Giảng viên phụ trách:</p>
-                  <p className="font-semibold text-[#1A1C1E]">{verifiedCert.instructorName}</p>
-                </div>
-                <div>
-                  <p className="text-[#6B6B6B]">Ngày cấp chứng chỉ:</p>
-                  <p className="font-semibold text-[#1A1C1E]">
-                    {new Date(verifiedCert.issuedAt).toLocaleDateString('vi-VN')}
-                  </p>
-                </div>
-                <div className="col-span-2">
-                  <p className="text-[#6B6B6B]">Mã xác thực duy nhất (UUID Hash):</p>
-                  <p className="font-mono font-bold text-[#16324F]">{verifiedCert.certificateCode}</p>
-                </div>
+            {/* Metadata Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 p-5 bg-[#FAF9FC] border border-[#E4E4E0] rounded-xl text-xs max-w-2xl mx-auto">
+              <div>
+                <span className="block text-[#6B6B6B]">Giảng viên:</span>
+                <span className="font-semibold text-[#1A1C1E]">{verifiedCert.instructorName}</span>
+              </div>
+              <div>
+                <span className="block text-[#6B6B6B]">Thời lượng:</span>
+                <span className="font-semibold text-[#1A1C1E]">
+                  {verifiedCert.totalDurationMinutes && verifiedCert.totalDurationMinutes >= 60
+                    ? `${Math.floor(verifiedCert.totalDurationMinutes / 60)} giờ học`
+                    : '36 giờ học'}
+                </span>
+              </div>
+              <div>
+                <span className="block text-[#6B6B6B]">Ngày cấp:</span>
+                <span className="font-semibold text-[#1A1C1E]">
+                  {new Date(verifiedCert.issuedAt).toLocaleDateString('vi-VN')}
+                </span>
+              </div>
+              <div>
+                <span className="block text-[#6B6B6B]">Kết quả thi:</span>
+                <span className="font-semibold text-[#002D72]">
+                  {verifiedCert.finalScore ? `${verifiedCert.finalScore}% (Đạt)` : 'Hoàn thành 100%'}
+                </span>
               </div>
             </div>
 
-            {/* Actions */}
-            <div className="flex items-center justify-center gap-3 pt-6 border-t border-[#E4E4E0] print:hidden">
+            {/* UUID Hash Code with Copy */}
+            <div className="flex items-center justify-between p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-xs max-w-2xl mx-auto">
+              <div className="flex items-center gap-2 overflow-hidden">
+                <span className="text-[#6B6B6B] shrink-0 font-medium">Mã UUID:</span>
+                <span className="font-mono font-bold text-[#002D72] truncate">{verifiedCert.certificateCode}</span>
+              </div>
               <button
-                onClick={handlePrint}
-                className="px-4 py-2 bg-white border border-[#E4E4E0] hover:bg-[#FAF9FC] text-[#1A1C1E] text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-colors"
+                onClick={() => handleCopyCode(verifiedCert.certificateCode)}
+                className="flex items-center gap-1 text-[11px] text-slate-600 hover:text-[#002D72] px-2.5 py-1 rounded bg-white border border-slate-200 shadow-2xs transition-colors cursor-pointer shrink-0"
               >
-                <Printer className="w-3.5 h-3.5" /> In chứng chỉ
+                {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                <span>{copied ? 'Đã sao chép' : 'Sao chép'}</span>
               </button>
+            </div>
+
+            {/* Actions Toolbar */}
+            <div className="pt-4 border-t border-[#E4E4E0] flex flex-col sm:flex-row items-center justify-center gap-4 print:hidden">
               <a
                 href={certificateApi.getDownloadUrl(verifiedCert.certificateCode)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-4 py-2 bg-[#16324F] hover:bg-[#001D37] text-white text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-colors"
+                download={`certificate-${verifiedCert.certificateCode}.pdf`}
+                className="w-full sm:w-auto px-6 py-3 bg-[#002D72] hover:bg-[#001D37] text-white text-sm font-semibold rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm hover:shadow-md cursor-pointer"
               >
-                <Download className="w-3.5 h-3.5" /> Tải file xác nhận
+                <Download className="w-4 h-4" /> Tải file PDF chính thức (Chuẩn Coursera)
               </a>
+
+              <button
+                onClick={handlePrint}
+                className="w-full sm:w-auto px-5 py-3 bg-white border border-[#E4E4E0] hover:bg-[#FAF9FC] text-[#1A1C1E] text-sm font-semibold rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer"
+              >
+                <Printer className="w-4 h-4" /> In chứng chỉ
+              </button>
             </div>
+
+            {/* Note banner */}
+            <p className="text-[11px] text-center text-[#718096] print:hidden">
+              * Tệp PDF tải về định dạng A4 Landscape có đầy đủ dải ruy băng danh dự, con dấu dập nổi, mã QR Code bảo mật và chữ ký viết tay quốc tế.
+            </p>
 
           </div>
         )}

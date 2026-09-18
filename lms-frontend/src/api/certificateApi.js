@@ -8,7 +8,9 @@ export const certificateApi = {
   getCertificateByEnrollment: (enrollmentId) => client.get(`/api/v1/certificates/enrollment/${enrollmentId}`),
 
   // Lấy URL tải file chứng chỉ (PDF) trực tiếp
-  getDownloadUrl: (code) =>
-    `${API_BASE_URL.replace(/\/+$/, '')}/api/v1/certificates/download/${encodeURIComponent(code || '')}`,
+  getDownloadUrl: (code) => {
+    const base = (import.meta.env.VITE_API_URL || API_BASE_URL || 'http://localhost:8080').replace(/\/+$/, '');
+    return `${base}/api/v1/certificates/download/${encodeURIComponent(code || '')}`;
+  },
 };
 
