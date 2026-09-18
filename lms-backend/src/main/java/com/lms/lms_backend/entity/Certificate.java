@@ -48,4 +48,10 @@ public class Certificate {
 
     @Column(name = "pdf_url", length = 255)
     private String pdfUrl;
+
+    @Column(name = "final_score")
+    private Integer finalScore;
+
+    @Column(name = "total_duration_minutes")
+    private Integer totalDurationMinutes;
 }

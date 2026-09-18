@@ -36,29 +36,24 @@ public class CertificateController {
         return ResponseEntity.ok(certificateService.getCertificateByEnrollment(enrollmentId));
     }
 
-    // Tải thông tin / xuất file chứng chỉ
+    // Tải thông tin / xuất file chứng chỉ định dạng PDF chuẩn quốc tế
     @GetMapping("/download/{code}")
     public ResponseEntity<byte[]> downloadCertificate(@PathVariable String code) {
-        CertificateResponse cert = certificateService.getCertificateByCode(code);
-        String baseUrl = (frontendBaseUrl != null ? frontendBaseUrl : "http://localhost:5173").replaceAll("/+$", "");
-        String text = "====================================================\n"
-                    + "               CHỨNG NHẬN HOÀN THÀNH               \n"
-                    + "          HỆ THỐNG ĐÀO TẠO TRỰC TUYẾN MOOC         \n"
-                    + "====================================================\n\n"
-                    + "Chứng nhận học viên: " + cert.getStudentName() + "\n"
-                    + "Email: " + cert.getStudentEmail() + "\n\n"
-                    + "Đã hoàn thành xuất sắc khóa học: " + cert.getCourseTitle() + "\n"
-                    + "Giảng viên hướng dẫn: " + cert.getInstructorName() + "\n\n"
-                    + "Mã xác thực duy nhất: " + cert.getCertificateCode() + "\n"
-                    + "Ngày cấp: " + cert.getIssuedAt() + "\n\n"
-                    + "Tra cứu xác thực tại: " + baseUrl + "/certificates/verify/" + cert.getCertificateCode() + "\n"
-                    + "====================================================\n";
-
-        byte[] output = text.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        byte[] pdfBytes = certificateService.generateCertificatePdf(code);
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"certificate-" + code + ".txt\"")
-                .contentType(MediaType.TEXT_PLAIN)
-                .body(output);
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"certificate-" + code + ".pdf\"")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdfBytes);
+    }
+
+    // Xem trước trực tiếp chứng chỉ PDF trên web (Content-Disposition: inline)
+    @GetMapping("/preview/{code}")
+    public ResponseEntity<byte[]> previewCertificate(@PathVariable String code) {
+        byte[] pdfBytes = certificateService.generateCertificatePdf(code);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"certificate-" + code + ".pdf\"")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdfBytes);
     }
 }
 
