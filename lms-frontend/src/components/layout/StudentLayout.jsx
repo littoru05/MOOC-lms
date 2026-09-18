@@ -3,6 +3,8 @@ import { useNavigate, useLocation, Link, Outlet } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Footer } from './Footer';
 import { CategoryMegaMenu } from '../navigation/CategoryMegaMenu';
+import { getImageUrl } from '../../utils/imageUrl';
+import { UserMenuDropdown } from '../common/UserMenuDropdown';
 import { 
   BookOpen, 
   Award, 
@@ -226,93 +228,7 @@ export const StudentLayout = ({ currentTab: currentTabProp, onNavigate, onOpenAu
 
             {/* User Account / Login */}
             {user ? (
-              <div className="relative">
-                <button
-                  onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="flex items-center gap-2 p-1 rounded-full hover:ring-2 hover:ring-[#E4E4E0] transition-all cursor-pointer"
-                >
-                  <img
-                    src={user.avatarUrl || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150'}
-                    alt={user.fullName || user.email}
-                    className="w-8 h-8 rounded-full object-cover border border-[#E4E4E0]"
-                  />
-                </button>
-
-                {showUserMenu && (
-                  <div className="absolute right-0 mt-1 w-56 bg-white border border-[#E4E4E0] rounded-lg shadow-md py-2 z-50">
-                    <div className="px-4 py-2 border-b border-[#E4E4E0]">
-                      <p className="text-xs font-semibold text-[#1A1C1E] truncate">{user.fullName || 'Người dùng'}</p>
-                      <p className="text-[11px] text-[#6B6B6B] truncate">{user.email}</p>
-                      <span className="inline-block mt-1 text-[10px] font-bold px-2 py-0.5 rounded bg-blue-50 text-blue-700">
-                        {isAdmin ? 'Quản trị viên' : isInstructor ? 'Giảng viên Chuyên môn' : 'Học viên'}
-                      </span>
-                    </div>
-
-                    {(isInstructor || isAdmin) && (
-                      <button
-                        onClick={() => {
-                          navigate('/instructor/dashboard');
-                          setShowUserMenu(false);
-                        }}
-                        className="w-full text-left px-4 py-2 text-xs text-[#16324F] bg-blue-50/50 hover:bg-blue-100/70 flex items-center gap-2 font-bold cursor-pointer"
-                      >
-                        <LayoutDashboard className="w-3.5 h-3.5 text-blue-700" /> Bảng điều khiển Giảng viên
-                      </button>
-                    )}
-
-                    {isAdmin && (
-                      <button
-                        onClick={() => {
-                          navigate('/admin/dashboard');
-                          setShowUserMenu(false);
-                        }}
-                        className="w-full text-left px-4 py-2 text-xs text-[#16324F] bg-amber-50/50 hover:bg-amber-100/70 flex items-center gap-2 font-bold cursor-pointer"
-                      >
-                        <ShieldCheck className="w-3.5 h-3.5 text-amber-700" /> Trang Quản trị Admin
-                      </button>
-                    )}
-
-                    <button
-                      onClick={() => {
-                        navigate('/profile');
-                        setShowUserMenu(false);
-                      }}
-                      className="w-full text-left px-4 py-2 text-xs text-[#1A1C1E] hover:bg-[#F4F3F6] flex items-center gap-2 font-medium cursor-pointer"
-                    >
-                      <User className="w-3.5 h-3.5 text-[#16324F]" /> Hồ sơ cá nhân
-                    </button>
-                    <button
-                      onClick={() => {
-                        navigate('/my-learning');
-                        setShowUserMenu(false);
-                      }}
-                      className="w-full text-left px-4 py-2 text-xs text-[#1A1C1E] hover:bg-[#F4F3F6] flex items-center gap-2 cursor-pointer"
-                    >
-                      <BookOpen className="w-3.5 h-3.5" /> Khóa học của tôi
-                    </button>
-                    <button
-                      onClick={() => {
-                        navigate('/certificates');
-                        setShowUserMenu(false);
-                      }}
-                      className="w-full text-left px-4 py-2 text-xs text-[#1A1C1E] hover:bg-[#F4F3F6] flex items-center gap-2 cursor-pointer"
-                    >
-                      <Award className="w-3.5 h-3.5" /> Chứng chỉ của tôi
-                    </button>
-                    <div className="border-t border-[#E4E4E0] my-1"></div>
-                    <button
-                      onClick={() => {
-                        logout();
-                        setShowUserMenu(false);
-                        navigate('/');
-                      }}
-                      className="w-full text-left px-4 py-2 text-xs text-[#BA1A1A] hover:bg-[#FFDAD6] flex items-center gap-2 cursor-pointer"
-                    >
-                      <LogOut className="w-3.5 h-3.5" /> Đăng xuất
-                    </button>
-                  </div>
-                )}
-              </div>
+              <UserMenuDropdown />
             ) : (
               <div className="flex items-center gap-2">
                 <button

@@ -25,6 +25,12 @@ export const RoleProtectedRoute = ({ allowedRoles = [], children }) => {
   const isAllowed = allowedRoles.length === 0 || allowedRoles.includes(role);
 
   if (!isAllowed) {
+    if (role === 'ROLE_ADMIN' || role === 'ADMIN') {
+      return <Navigate to="/admin/dashboard" replace />;
+    }
+    if (role === 'ROLE_INSTRUCTOR' || role === 'INSTRUCTOR') {
+      return <Navigate to="/instructor/dashboard" replace />;
+    }
     return <Navigate to="/" replace />;
   }
 

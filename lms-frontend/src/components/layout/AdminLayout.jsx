@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation, Link, Outlet } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { UserMenuDropdown } from '../common/UserMenuDropdown';
 import { 
   ShieldCheck, 
   Clock, 
@@ -104,16 +105,6 @@ export const AdminLayout = ({ currentTab: currentTabProp, onNavigate, children }
               <span>Hồ sơ cá nhân</span>
             </Link>
           </nav>
-
-          {/* System Badge */}
-          <div className="mx-4 mt-8 p-3 bg-white/5 border border-white/10 rounded-lg text-[11px] text-slate-300 space-y-1.5">
-            <div className="flex items-center gap-1.5 text-blue-300 font-semibold text-xs">
-              <Database className="w-3.5 h-3.5" />
-              <span>MySQL 8.0 • Monolithic</span>
-            </div>
-            <p className="text-[10px] text-slate-400">11 Tables & Entities Active</p>
-          </div>
-
         </div>
 
         {/* Sidebar Bottom: Admin Profile & Logout */}
@@ -164,50 +155,14 @@ export const AdminLayout = ({ currentTab: currentTabProp, onNavigate, children }
             </span>
           </div>
 
-          {/* Quick Demo Switcher */}
-          <div className="relative">
-            <button
-              onClick={() => setShowRoleMenu(!showRoleMenu)}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-[#001D37] text-white rounded-md hover:bg-[#16324F] transition-colors cursor-pointer"
-            >
+          {/* Right Header: Role Badge & User Menu */}
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-[#001D37] text-white rounded-md">
               <ShieldCheck className="w-3.5 h-3.5 text-blue-400" />
               <span>Portal: Quản trị viên</span>
-            </button>
+            </div>
 
-            {showRoleMenu && (
-              <div className="absolute right-0 mt-1 w-52 bg-white border border-[#E4E4E0] rounded-lg shadow-sm py-1 z-50 text-[#1A1C1E]">
-                <button
-                  onClick={async () => {
-                    await quickSwitchRole('ROLE_STUDENT');
-                    navigate('/');
-                    setShowRoleMenu(false);
-                  }}
-                  className="w-full text-left px-3 py-1.5 text-xs flex items-center gap-2 hover:bg-[#FAF9FC] cursor-pointer"
-                >
-                  <GraduationCap className="w-3.5 h-3.5" /> Giao diện Học viên
-                </button>
-                <button
-                  onClick={async () => {
-                    await quickSwitchRole('ROLE_INSTRUCTOR');
-                    navigate('/instructor/dashboard');
-                    setShowRoleMenu(false);
-                  }}
-                  className="w-full text-left px-3 py-1.5 text-xs flex items-center gap-2 hover:bg-[#FAF9FC] cursor-pointer"
-                >
-                  <LayoutDashboard className="w-3.5 h-3.5 text-blue-600" /> Portal Giảng viên
-                </button>
-                <button
-                  onClick={async () => {
-                    await quickSwitchRole('ROLE_ADMIN');
-                    navigate('/admin/dashboard');
-                    setShowRoleMenu(false);
-                  }}
-                  className="w-full text-left px-3 py-1.5 text-xs flex items-center gap-2 font-bold text-[#16324F] bg-[#F4F3F6] cursor-pointer"
-                >
-                  <ShieldCheck className="w-3.5 h-3.5 text-[#16324F]" /> Portal Quản trị viên
-                </button>
-              </div>
-            )}
+            <UserMenuDropdown />
           </div>
         </header>
 
