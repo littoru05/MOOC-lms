@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { adminApi } from '../../api/adminApi';
 import { 
   Users, 
@@ -7,12 +8,13 @@ import {
   CheckCircle2, 
   Clock, 
   Award, 
-  TrendingUp,
-  ShieldCheck,
-  ArrowUpRight
+  TrendingUp, 
+  ShieldCheck, 
+  ArrowUpRight 
 } from 'lucide-react';
 
 export const AdminOverviewPage = ({ onNavigateSubTab }) => {
+  const navigate = useNavigate();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -65,15 +67,15 @@ export const AdminOverviewPage = ({ onNavigateSubTab }) => {
           {/* Quick Shortcuts */}
           <div className="flex items-center gap-2">
             <button
-              onClick={() => onNavigateSubTab('course-approval')}
-              className="px-3.5 py-2 bg-[#16324F] hover:bg-[#001D37] text-white text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-colors shadow-xs"
+              onClick={() => onNavigateSubTab ? onNavigateSubTab('course-approval') : navigate('/admin/courses/approval')}
+              className="px-3.5 py-2 bg-[#16324F] hover:bg-[#001D37] text-white text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer"
             >
               <Clock className="w-3.5 h-3.5" />
               <span>Duyệt khóa học ({stats?.pendingCourses || 0})</span>
             </button>
             <button
-              onClick={() => onNavigateSubTab('user-management')}
-              className="px-3.5 py-2 bg-white border border-[#E4E4E0] hover:bg-[#FAF9FC] text-[#1A1C1E] text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-colors"
+              onClick={() => onNavigateSubTab ? onNavigateSubTab('user-management') : navigate('/admin/users')}
+              className="px-3.5 py-2 bg-white border border-[#E4E4E0] hover:bg-[#FAF9FC] text-[#1A1C1E] text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer"
             >
               <Users className="w-3.5 h-3.5" />
               <span>Quản lý Users</span>
@@ -154,8 +156,8 @@ export const AdminOverviewPage = ({ onNavigateSubTab }) => {
                   </div>
                 </div>
                 <button
-                  onClick={() => onNavigateSubTab('course-approval')}
-                  className="px-3 py-1.5 bg-amber-600 text-white text-xs font-semibold rounded-md hover:bg-amber-700 transition-colors"
+                  onClick={() => onNavigateSubTab ? onNavigateSubTab('course-approval') : navigate('/admin/courses/approval')}
+                  className="px-3 py-1.5 bg-amber-600 text-white text-xs font-semibold rounded-md hover:bg-amber-700 transition-colors cursor-pointer"
                 >
                   Xử lý ngay
                 </button>

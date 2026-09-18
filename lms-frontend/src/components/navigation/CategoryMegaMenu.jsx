@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { MEGA_MENU_CATEGORIES } from '../../data/categoryMenu';
 import { 
   ChevronDown, 
@@ -11,10 +12,10 @@ import {
   ShieldCheck, 
   Database, 
   Layout, 
-  Sparkles,
-  BookOpen,
-  ArrowRight,
-  Hash
+  Sparkles, 
+  BookOpen, 
+  ArrowRight, 
+  Hash 
 } from 'lucide-react';
 
 // Icon Map Helper
@@ -33,6 +34,7 @@ const getCategoryIcon = (iconName) => {
 };
 
 export const CategoryMegaMenu = ({ onSelectCategory, isMobile = false }) => {
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [activeCategoryIdx, setActiveCategoryIdx] = useState(0);
   const [activeSubcategoryIdx, setActiveSubcategoryIdx] = useState(0);
@@ -81,6 +83,8 @@ export const CategoryMegaMenu = ({ onSelectCategory, isMobile = false }) => {
     setIsOpen(false);
     if (onSelectCategory) {
       onSelectCategory(query);
+    } else {
+      navigate(`/courses?category=${encodeURIComponent(query)}`);
     }
   };
 

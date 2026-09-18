@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { courseApi } from '../../api/courseApi';
+import { usePublishedCourses, useCategories } from '../../hooks/useCourses';
 import { COURSES, FEATURED_INSTRUCTORS, POPULAR_CATEGORIES } from '../../mocks/courses';
 import { Carousel } from '../../components/common/Carousel';
 import { CourseCardWithPreview } from '../../components/course/CourseCardWithPreview';
+import { getImageUrl } from '../../utils/imageUrl';
 import { 
   Search, 
   BookOpen, 
@@ -14,17 +15,19 @@ import {
   Users, 
   Sparkles, 
   Layers, 
-  CheckCircle2,
-  TrendingUp,
-  Globe,
-  GraduationCap,
-  Smartphone,
-  Cpu,
-  BarChart3,
-  Cloud,
-  ShieldCheck,
-  Database,
-  Layout
+  CheckCircle2, 
+  TrendingUp, 
+  Globe, 
+  GraduationCap, 
+  Smartphone, 
+  Cpu, 
+  BarChart3, 
+  Cloud, 
+  ShieldCheck, 
+  Database, 
+  Layout,
+  Loader2,
+  ChevronRight
 } from 'lucide-react';
 
 const getCategoryIcon = (iconName) => {
@@ -42,63 +45,18 @@ const getCategoryIcon = (iconName) => {
 };
 
 export const ExplorePage = ({ onSelectCourse, initialFilterQuery = '' }) => {
-  const [courses, setCourses] = useState(COURSES);
-  const [categories, setCategories] = useState([]);
+  const { data: courses = COURSES, isLoading: loadingCourses } = usePublishedCourses();
+  const { data: categories = [], isLoading: loadingCategories } = useCategories();
+
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedLevel, setSelectedLevel] = useState('all');
   const [searchQuery, setSearchQuery] = useState(initialFilterQuery || '');
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (initialFilterQuery) {
       setSearchQuery(initialFilterQuery);
     }
   }, [initialFilterQuery]);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [courseRes, catRes] = await Promise.all([
-          courseApi.getPublishedCourses().catch(() => ({ data: [] })),
-          courseApi.getCategories().catch(() => ({ data: [] })),
-        ]);
-        
-        // Merge backend courses with rich metadata if available
-        if (courseRes.data && courseRes.data.length > 0) {
-          const merged = courseRes.data.map((apiCourse) => {
-            const richMatch = COURSES.find(
-              (sc) => String(sc.slug).toLowerCase() === String(apiCourse.slug).toLowerCase() || String(sc.id) === String(apiCourse.id)
-            );
-            return richMatch ? { ...richMatch, ...apiCourse } : apiCourse;
-          });
-          const allCourses = [...merged];
-          COURSES.forEach((sc) => {
-            if (!allCourses.some((c) => String(c.slug).toLowerCase() === String(sc.slug).toLowerCase() || String(c.id) === String(sc.id))) {
-              allCourses.push(sc);
-            }
-          });
-          setCourses(allCourses);
-        } else {
-          setCourses(COURSES);
-        }
-
-        if (catRes.data && catRes.data.length > 0) {
-          setCategories(catRes.data);
-        } else {
-          setCategories([
-            { id: 1, name: 'Lập trình Web', slug: 'lap-trinh-web' },
-            { id: 2, name: 'Trí tuệ nhân tạo & Data Science', slug: 'ai-data-science' },
-            { id: 3, name: 'Lập trình Di động', slug: 'lap-trinh-di-dong' }
-          ]);
-        }
-      } catch (err) {
-        console.warn('Dùng dữ liệu chuẩn hóa nội bộ:', err);
-        setCourses(COURSES);
-      }
-    };
-
-    fetchData();
-  }, []);
 
   const filteredCourses = courses.filter((c) => {
     const matchCat =
@@ -221,6 +179,56 @@ export const ExplorePage = ({ onSelectCourse, initialFilterQuery = '' }) => {
       {/* 3 CAROUSEL SECTIONS IN EXACT REQUESTED ORDER */}
       <div className="max-w-[1280px] mx-auto px-6 space-y-14">
         
+        {/* CATEGORY SHOWCASE SECTION */}
+        <div className="space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
+            <div>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#EFEDF0] border border-[#E4E4E0] rounded-full text-[11px] font-bold text-[#16324F] mb-2">
+                <Layers className="w-3.5 h-3.5 text-[#16324F]" />
+                <span>Lĩnh vực đào tạo</span>
+              </div>
+              <h2 className="text-2xl font-bold font-serif text-[#001D37]">
+                Khám phá theo danh mục chuyên môn
+              </h2>
+              <p className="text-xs text-[#5E5E5E] mt-1">
+                Lựa chọn lĩnh vực chuyên sâu để tiếp cận lộ trình đào tạo bài bản từ chuyên gia
+              </p>
+            </div>
+            <button
+              onClick={() => navigate('/courses')}
+              className="text-xs font-bold text-[#16324F] hover:text-[#001D37] flex items-center gap-1 hover:underline cursor-pointer self-start sm:self-auto"
+            >
+              <span>Xem tất cả ({categories.length})</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+            {categories.map((cat) => (
+              <div
+                key={cat.id || cat.slug}
+                onClick={() => navigate(`/courses?category=${cat.slug}`)}
+                className="bg-white border border-[#E4E4E0] rounded-2xl p-4.5 hover:border-[#16324F] hover:shadow-md hover:-translate-y-1 transition-all duration-200 cursor-pointer group flex flex-col justify-between"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="w-10 h-10 rounded-xl bg-[#F4F3F6] border border-[#E4E4E0] flex items-center justify-center group-hover:bg-[#16324F]/10 group-hover:scale-105 transition-all">
+                    {getCategoryIcon(cat.icon || 'BookOpen')}
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-[#8C8C8C] group-hover:text-[#16324F] group-hover:translate-x-0.5 transition-transform" />
+                </div>
+                <div className="mt-3">
+                  <h3 className="text-xs sm:text-sm font-bold text-[#001D37] group-hover:text-[#16324F] transition-colors truncate">
+                    {cat.name}
+                  </h3>
+                  <p className="text-[11px] text-[#5E5E5E] mt-0.5 line-clamp-1">
+                    {cat.description || 'Lộ trình kiến thức chuyên sâu'}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* CAROUSEL 1: Khóa học nổi bật */}
         <Carousel
           badge="Khuyên học"
@@ -250,7 +258,7 @@ export const ExplorePage = ({ onSelectCourse, initialFilterQuery = '' }) => {
               <div className="space-y-3">
                 <div className="relative inline-block mx-auto">
                   <img
-                    src={inst.avatarUrl}
+                    src={getImageUrl(inst.avatarUrl, 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200')}
                     alt={inst.fullName}
                     className="w-20 h-20 rounded-full object-cover border-2 border-[#16324F] shadow-xs mx-auto group-hover:scale-105 transition-transform"
                   />
