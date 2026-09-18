@@ -5,6 +5,9 @@ import { learningApi } from '../../api/learningApi';
 import { getCourseBySlugOrId } from '../../mocks/courses';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
+import { useCart, useAddToCart } from '../../hooks/useCart';
+import { getImageUrl } from '../../utils/imageUrl';
+import { formatCurrency } from '../../utils/format';
 import { 
   BookOpen, 
   Video, 
@@ -26,7 +29,8 @@ import {
   Sparkles, 
   Smartphone, 
   Infinity as InfinityIcon, 
-  AlertCircle 
+  AlertCircle,
+  ShoppingCart
 } from 'lucide-react';
 
 export const CourseDetailPage = ({ courseSlug: courseSlugProp, onBack, onStartLearning, onOpenAuthModal }) => {
@@ -36,12 +40,35 @@ export const CourseDetailPage = ({ courseSlug: courseSlugProp, onBack, onStartLe
 
   const { user } = useAuth();
   const { showToast } = useToast();
+  const { data: cart } = useCart();
+  const addToCartMutation = useAddToCart();
   const [course, setCourse] = useState(null);
   const [sections, setSections] = useState([]);
   const [isEnrolled, setIsEnrolled] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState('');
   const [enrolling, setEnrolling] = useState(false);
   const [openSections, setOpenSections] = useState({});
+
+  const isInCart = cart?.items?.some((item) => String(item.courseId) === String(course?.id));
+
+  const handleAddToCart = async () => {
+    if (!user) {
+      handleAuthModal();
+      return;
+    }
+    if (isInCart) {
+      navigate('/cart');
+      return;
+    }
+    try {
+      await addToCartMutation.mutateAsync(course.id);
+      showToast('Đã thêm khóa học vào giỏ hàng!', 'success');
+    } catch (err) {
+      const msg = err.response?.data?.message || err.message || 'Lỗi khi thêm vào giỏ hàng';
+      showToast(msg, 'error');
+    }
+  };
 
   const handleBack = () => {
     if (onBack) {
@@ -68,61 +95,139 @@ export const CourseDetailPage = ({ courseSlug: courseSlugProp, onBack, onStartLe
   };
 
   useEffect(() => {
+    let isMounted = true;
+
     const fetchCourseData = async () => {
+      setLoading(true);
+      setErrorMessage('');
       try {
-        console.log('[CourseDetail] 🔍 Param nhận được (courseSlug):', courseSlug);
+        console.log('[CourseDetail] 🔍 Đang tải khóa học từ Backend API với slug:', courseSlug);
         
-        // 1. Tìm khóa học từ single source of truth (src/mocks/courses.js)
-        const richData = getCourseBySlugOrId(courseSlug);
-        console.log('[CourseDetail] 📋 Khóa học tìm thấy từ Mock Data:', richData);
+        let apiCourse = null;
 
-        let currentCourse = richData;
-
-        // 2. Thử đồng bộ thêm thông tin cập nhật từ backend API
+        // 1. GỌI BACKEND API LÀ NGUỒN CHÍNH
         if (courseSlug) {
           try {
             const res = await courseApi.getCourseBySlug(courseSlug);
             if (res.data) {
-              currentCourse = { ...richData, ...res.data };
-              console.log('[CourseDetail] 🌐 Đã merge thêm dữ liệu từ Backend API:', res.data);
+              apiCourse = res.data;
+              console.log('[CourseDetail] 🌐 Đã nhận dữ liệu thật từ Backend API:', apiCourse);
             }
           } catch (apiErr) {
-            console.warn('[CourseDetail] Backend API không trả về, dùng trực tiếp Mock Data chuẩn:', apiErr.message);
+            console.warn('[CourseDetail] Backend API trả về lỗi hoặc không tìm thấy:', apiErr);
+            // Nếu API báo 404 hoặc lỗi không tìm thấy -> không dùng mock đè lên
+            if (apiErr.response?.status === 404) {
+              if (isMounted) {
+                setCourse(null);
+                setErrorMessage('Khóa học không tồn tại trong hệ thống hoặc đã bị gỡ bỏ.');
+                setLoading(false);
+              }
+              return;
+            }
+            // Fallback chỉ khi offline/network failure
+            const fallbackMock = getCourseBySlugOrId(courseSlug);
+            if (fallbackMock) {
+              apiCourse = fallbackMock;
+            } else {
+              if (isMounted) {
+                setCourse(null);
+                setErrorMessage(apiErr.response?.data?.message || 'Không thể kết nối đến máy chủ.');
+                setLoading(false);
+              }
+              return;
+            }
           }
         }
 
-        setCourse(currentCourse);
+        if (!apiCourse) {
+          if (isMounted) {
+            setCourse(null);
+            setErrorMessage('Không tìm thấy thông tin khóa học yêu cầu.');
+            setLoading(false);
+          }
+          return;
+        }
 
-        // 3. Nạp danh sách chương & bài học
-        if (currentCourse?.sections && currentCourse.sections.length > 0) {
-          setSections(currentCourse.sections);
-          // Mở sẵn 2 chương đầu tiên
-          const initialOpen = {};
-          currentCourse.sections.slice(0, 2).forEach((s) => {
-            initialOpen[s.id] = true;
-          });
-          setOpenSections(initialOpen);
-        } else {
-          setSections([]);
+        // 2. TÌM MOCK ĐỂ BỔ SUNG CÁC TRƯỜNG TRANG TRÍ PHỤ TRỢ (NẾU CÓ)
+        const mockMatch = getCourseBySlugOrId(courseSlug) || {};
+
+        // Default decorative fields for UI completeness (kể cả khóa học mới tạo chỉ có ở Backend)
+        const decorativeDefaults = {
+          whatYouWillLearn: [
+            'Làm chủ toàn diện kiến thức và kỹ năng thực tế của chương trình đào tạo',
+            'Xây dựng tư duy giải quyết vấn đề và kiến trúc dự án chuẩn quốc tế',
+            'Thực hành trực tiếp qua các bài tập và dự án thực chiến',
+            'Tự tin áp dụng ngay vào công việc và định hướng nghề nghiệp',
+          ],
+          requirements: [
+            'Máy tính cá nhân có kết nối Internet ổn định',
+            'Tinh thần chủ động học tập và đam mê nâng cao trình độ chuyên môn',
+          ],
+          targetAudience: [
+            'Học viên, sinh viên và lập trình viên muốn nâng cao kỹ năng',
+            'Bất kỳ ai muốn bắt đầu hoặc chuyển hướng sự nghiệp công nghệ',
+          ],
+          language: 'Tiếng Việt',
+          certificateAvailable: true,
+          rating: 5.0,
+          reviewCount: 1,
+          totalDuration: apiCourse.totalDurationMinutes ? `${Math.round(apiCourse.totalDurationMinutes / 60) || 1} giờ` : '20 giờ',
+        };
+
+        // 3. MERGE: apiCourse luôn GHI ĐÈ LÊN tất cả các field trùng tên
+        const finalCourse = {
+          ...decorativeDefaults,
+          ...mockMatch,
+          ...apiCourse,
+        };
+
+        if (isMounted) {
+          setCourse(finalCourse);
+
+          // Nạp danh sách chương & bài học từ dữ liệu Backend
+          if (finalCourse.sections && finalCourse.sections.length > 0) {
+            setSections(finalCourse.sections);
+            const initialOpen = {};
+            finalCourse.sections.slice(0, 2).forEach((s) => {
+              initialOpen[s.id] = true;
+            });
+            setOpenSections(initialOpen);
+          } else {
+            setSections([]);
+          }
         }
 
         // 4. Kiểm tra trạng thái ghi danh nếu đã đăng nhập
-        if (user && currentCourse?.id) {
+        if (user && finalCourse.id) {
           try {
-            const enrollRes = await learningApi.checkEnrollment(currentCourse.id);
-            setIsEnrolled(enrollRes.data?.enrolled);
+            const enrollRes = await learningApi.checkEnrollment(finalCourse.id);
+            if (isMounted) {
+              setIsEnrolled(enrollRes.data?.enrolled);
+            }
           } catch (e) {
-            setIsEnrolled(false);
+            if (isMounted) {
+              setIsEnrolled(false);
+            }
           }
         }
       } catch (err) {
-        console.error('[CourseDetail] ❌ Lỗi khi tải chi tiết khóa học:', err);
+        console.error('[CourseDetail] ❌ Lỗi khi xử lý dữ liệu khóa học:', err);
+        if (isMounted) {
+          setCourse(null);
+          setErrorMessage('Có lỗi xảy ra trong quá trình nạp thông tin khóa học.');
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchCourseData();
+
+    return () => {
+      isMounted = false;
+    };
   }, [courseSlug, user]);
 
   const toggleSection = (secId) => {
@@ -271,7 +376,7 @@ export const CourseDetailPage = ({ courseSlug: courseSlugProp, onBack, onStartLe
             <div className="flex flex-wrap items-center gap-4 text-xs text-slate-300 pt-2 border-t border-white/10">
               <div className="flex items-center gap-2">
                 <img
-                  src={course.instructor?.avatarUrl || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150'}
+                  src={getImageUrl(course.instructor?.avatarUrl, 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150')}
                   alt={course.instructor?.fullName}
                   className="w-6 h-6 rounded-full object-cover border border-white/30"
                 />
@@ -297,7 +402,7 @@ export const CourseDetailPage = ({ courseSlug: courseSlugProp, onBack, onStartLe
             {/* Thumbnail Preview */}
             <div className="aspect-video w-full overflow-hidden rounded-lg relative bg-black/10 group">
               <img
-                src={course.thumbnailUrl || 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800'}
+                src={getImageUrl(course.thumbnailUrl, 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800')}
                 alt={course.title}
                 className="w-full h-full object-cover"
               />
@@ -313,27 +418,56 @@ export const CourseDetailPage = ({ courseSlug: courseSlugProp, onBack, onStartLe
 
             {/* Price / Enrollment Status */}
             <div>
-              <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-bold font-serif text-[#001D37]">Miễn phí</span>
-                <span className="text-xs text-[#5E5E5E] line-through">1.200.000đ</span>
-                <span className="text-xs font-bold text-[#22C55E] bg-[#22C55E]/10 px-2 py-0.5 rounded">100% OFF</span>
-              </div>
-              <p className="text-[11px] text-[#6B6B6B] mt-0.5">Tài trợ học bổng học tập trực tuyến MOOC</p>
+              {Number(course.price) > 0 ? (
+                <div>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-2xl font-bold font-serif text-[#001D37]">
+                      {formatCurrency(course.price)}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-[#6B6B6B] mt-0.5">Thanh toán một lần, sở hữu khóa học trọn đời</p>
+                </div>
+              ) : (
+                <div>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-2xl font-bold font-serif text-emerald-700">Miễn phí</span>
+                    <span className="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded">100% FREE</span>
+                  </div>
+                  <p className="text-[11px] text-[#6B6B6B] mt-0.5">Tài trợ học bổng học tập trực tuyến MOOC</p>
+                </div>
+              )}
             </div>
 
             {/* CTA Button */}
             {isEnrolled ? (
               <button
-                onClick={() => onStartLearning(course.id)}
-                className="w-full py-3.5 bg-[#16324F] hover:bg-[#001D37] text-white text-xs font-bold rounded-lg flex items-center justify-center gap-2 transition-colors shadow-sm"
+                onClick={() => handleStartLearn(course.id)}
+                className="w-full py-3.5 bg-[#16324F] hover:bg-[#001D37] text-white text-xs font-bold rounded-lg flex items-center justify-center gap-2 transition-colors shadow-sm cursor-pointer"
               >
                 <Play className="w-4 h-4" /> Tiếp tục học tập ngay
               </button>
+            ) : Number(course.price) > 0 ? (
+              isInCart ? (
+                <button
+                  onClick={() => navigate('/cart')}
+                  className="w-full py-3.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-lg flex items-center justify-center gap-2 transition-colors shadow-sm cursor-pointer"
+                >
+                  <ShoppingCart className="w-4 h-4" /> Đã có trong giỏ hàng (Xem giỏ)
+                </button>
+              ) : (
+                <button
+                  onClick={handleAddToCart}
+                  disabled={addToCartMutation.isPending}
+                  className="w-full py-3.5 bg-[#16324F] hover:bg-[#001D37] text-white text-xs font-bold rounded-lg flex items-center justify-center gap-2 transition-colors shadow-sm disabled:opacity-50 cursor-pointer"
+                >
+                  <ShoppingCart className="w-4 h-4" /> {addToCartMutation.isPending ? 'Đang thêm...' : 'Thêm vào giỏ hàng'}
+                </button>
+              )
             ) : (
               <button
                 onClick={handleEnroll}
                 disabled={enrolling}
-                className="w-full py-3.5 bg-[#16324F] hover:bg-[#001D37] text-white text-xs font-bold rounded-lg flex items-center justify-center gap-2 transition-colors shadow-sm disabled:opacity-50"
+                className="w-full py-3.5 bg-[#16324F] hover:bg-[#001D37] text-white text-xs font-bold rounded-lg flex items-center justify-center gap-2 transition-colors shadow-sm disabled:opacity-50 cursor-pointer"
               >
                 <CheckCircle2 className="w-4 h-4" /> {enrolling ? 'Đang ghi danh...' : 'Ghi danh khóa học ngay'}
               </button>
@@ -524,7 +658,7 @@ export const CourseDetailPage = ({ courseSlug: courseSlugProp, onBack, onStartLe
               <div className="bg-white border border-[#E4E4E0] rounded-xl p-6 shadow-xs space-y-4">
                 <div className="flex items-start gap-4">
                   <img
-                    src={course.instructor?.avatarUrl || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200'}
+                    src={getImageUrl(course.instructor?.avatarUrl, 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200')}
                     alt={course.instructor?.fullName}
                     className="w-16 h-16 rounded-full object-cover border border-[#E4E4E0] shrink-0"
                   />

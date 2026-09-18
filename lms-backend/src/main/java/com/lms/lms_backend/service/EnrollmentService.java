@@ -41,6 +41,10 @@ public class EnrollmentService {
             throw new RuntimeException("Khóa học chưa được công khai/xuất bản!");
         }
 
+        if (course.getPrice() != null && course.getPrice().compareTo(BigDecimal.ZERO) > 0) {
+            throw new RuntimeException("Khóa học có phí, vui lòng thêm vào giỏ hàng và thanh toán trước khi ghi danh.");
+        }
+
         if (enrollmentRepository.existsByUserIdAndCourseId(user.getId(), course.getId())) {
             throw new RuntimeException("Bạn đã đăng ký khóa học này rồi!");
         }
@@ -54,6 +58,25 @@ public class EnrollmentService {
 
         Enrollment saved = enrollmentRepository.save(enrollment);
         return mapToResponse(saved);
+    }
+
+    @Transactional
+    public Enrollment enrollCourseFromOrder(User user, Course course) {
+        if (enrollmentRepository.existsByUserIdAndCourseId(user.getId(), course.getId())) {
+            return enrollmentRepository.findByUserIdOrderByEnrolledAtDesc(user.getId()).stream()
+                    .filter(e -> e.getCourse().getId().equals(course.getId()))
+                    .findFirst()
+                    .orElse(null);
+        }
+
+        Enrollment enrollment = Enrollment.builder()
+                .user(user)
+                .course(course)
+                .progressPercent(BigDecimal.ZERO)
+                .isCompleted(false)
+                .build();
+
+        return enrollmentRepository.save(enrollment);
     }
 
     public List<EnrollmentResponse> getMyEnrollments(String userEmail) {
