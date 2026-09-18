@@ -1,7 +1,10 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
+import { queryClient } from './lib/queryClient';
+import { ScrollToTop } from './components/common/ScrollToTop';
 import { AppRoutes } from './routes/AppRoutes';
 
 function AuthListener() {
@@ -21,11 +24,14 @@ function AuthListener() {
 
 export default function App() {
   return (
-    <ToastProvider>
-      <AuthProvider>
-        <AuthListener />
-        <AppRoutes />
-      </AuthProvider>
-    </ToastProvider>
+    <QueryClientProvider client={queryClient}>
+      <ToastProvider>
+        <AuthProvider>
+          <ScrollToTop />
+          <AuthListener />
+          <AppRoutes />
+        </AuthProvider>
+      </ToastProvider>
+    </QueryClientProvider>
   );
 }
