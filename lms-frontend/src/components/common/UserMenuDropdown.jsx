@@ -8,12 +8,10 @@ import {
   BookOpen, 
   Award, 
   ShoppingCart, 
-  Receipt, 
   LayoutDashboard, 
   ShieldCheck, 
   LogOut, 
   ChevronRight,
-  Sparkles,
   TrendingUp
 } from 'lucide-react';
 
@@ -208,7 +206,7 @@ export const UserMenuDropdown = ({
             </div>
           )}
 
-          {/* Group 3: Mua sắm & Đơn hàng (Chỉ hiển thị cho Học viên) */}
+          {/* Group 3: Giỏ hàng (Chỉ hiển thị cho Học viên) */}
           {isStudent && (
             <div className="py-1 border-t border-[#E4E4E0]">
               <button
@@ -225,16 +223,6 @@ export const UserMenuDropdown = ({
                     {cart.totalItems}
                   </span>
                 )}
-              </button>
-              <button
-                type="button"
-                onClick={() => handleNavigate('/orders')}
-                className="w-full text-left px-4 py-2 text-xs hover:bg-[#F4F3F6] flex items-center justify-between text-[#1A1C1E] font-medium transition-colors cursor-pointer group"
-              >
-                <div className="flex items-center gap-2.5">
-                  <Receipt className="w-4 h-4 text-[#16324F] group-hover:scale-110 transition-transform" />
-                  <span>Lịch sử đơn hàng</span>
-                </div>
               </button>
             </div>
           )}

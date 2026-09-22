@@ -65,7 +65,7 @@ describe('UserMenuDropdown Component', () => {
     expect(screen.getByText('Khóa học của tôi')).toBeInTheDocument();
     expect(screen.getByText('Chứng chỉ của tôi')).toBeInTheDocument();
     expect(screen.getByText('Giỏ hàng của tôi')).toBeInTheDocument();
-    expect(screen.getByText('Lịch sử đơn hàng')).toBeInTheDocument();
+    expect(screen.queryByText('Lịch sử đơn hàng')).not.toBeInTheDocument();
     expect(screen.getByText('Hồ sơ cá nhân')).toBeInTheDocument();
     expect(screen.getByText('Đăng xuất')).toBeInTheDocument();
   });
@@ -114,7 +114,7 @@ describe('UserMenuDropdown Component', () => {
     expect(screen.queryByText('Lịch sử đơn hàng')).not.toBeInTheDocument();
   });
 
-  it('navigates to /cart and /orders on click for student', () => {
+  it('navigates to /cart on click for student', () => {
     vi.spyOn(AuthContextModule, 'useAuth').mockReturnValue({
       user: { id: 3, fullName: 'Học viên Test', email: 'student@lms.com', role: 'ROLE_STUDENT' },
       logout: vi.fn(),
@@ -130,9 +130,5 @@ describe('UserMenuDropdown Component', () => {
 
     fireEvent.click(screen.getByText('Giỏ hàng của tôi'));
     expect(mockNavigate).toHaveBeenCalledWith('/cart');
-
-    fireEvent.click(screen.getByRole('button'));
-    fireEvent.click(screen.getByText('Lịch sử đơn hàng'));
-    expect(mockNavigate).toHaveBeenCalledWith('/orders');
   });
 });
