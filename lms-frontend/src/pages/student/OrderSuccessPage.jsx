@@ -135,30 +135,21 @@ export const OrderSuccessPage = () => {
             </div>
 
             {/* Action Buttons */}
-            <div className="pt-4 border-t border-[#E4E4E0] flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="pt-4 border-t border-[#E4E4E0] flex flex-col sm:flex-row items-center justify-end gap-3">
               <Link
-                to="/orders"
-                className="w-full sm:w-auto px-5 py-2.5 border border-[#E4E4E0] hover:bg-[#FAF9FC] text-[#1A1C1E] text-xs font-semibold rounded-xl text-center transition-colors"
+                to="/courses"
+                className="w-full sm:w-auto px-5 py-2.5 border border-[#16324F]/30 text-[#16324F] hover:bg-blue-50 text-xs font-semibold rounded-xl text-center transition-colors"
               >
-                Xem lịch sử đơn hàng
+                Khám phá thêm
               </Link>
 
-              <div className="flex items-center gap-3 w-full sm:w-auto">
-                <Link
-                  to="/courses"
-                  className="w-full sm:w-auto px-5 py-2.5 border border-[#16324F]/30 text-[#16324F] hover:bg-blue-50 text-xs font-semibold rounded-xl text-center transition-colors"
-                >
-                  Khám phá thêm
-                </Link>
-
-                <button
-                  onClick={() => navigate('/my-learning')}
-                  className="w-full sm:w-auto px-6 py-2.5 bg-[#16324F] hover:bg-[#001D37] text-white text-xs font-bold rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
-                >
-                  <BookOpen className="w-4 h-4" />
-                  <span>Vào học ngay</span>
-                </button>
-              </div>
+              <button
+                onClick={() => navigate('/my-learning')}
+                className="w-full sm:w-auto px-6 py-2.5 bg-[#16324F] hover:bg-[#001D37] text-white text-xs font-bold rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <BookOpen className="w-4 h-4" />
+                <span>Vào học ngay</span>
+              </button>
             </div>
           </div>
         ) : (
@@ -170,14 +161,14 @@ export const OrderSuccessPage = () => {
               Đơn hàng đã được ghi nhận
             </h2>
             <p className="text-xs text-[#5E5E5E] max-w-sm mx-auto">
-              Bạn có thể xem lại toàn bộ các khóa học và biên lai đơn hàng trong mục Lịch sử đơn hàng.
+              Bạn có thể bắt đầu học tập và theo dõi tiến độ các khóa học trong mục Khóa học của tôi.
             </p>
             <div className="flex items-center justify-center gap-3 pt-2">
               <Link
-                to="/orders"
+                to="/courses"
                 className="px-5 py-2.5 border border-[#E4E4E0] hover:bg-[#FAF9FC] text-[#1A1C1E] text-xs font-semibold rounded-xl"
               >
-                Lịch sử đơn hàng
+                Khám phá thêm
               </Link>
               <Link
                 to="/my-learning"
