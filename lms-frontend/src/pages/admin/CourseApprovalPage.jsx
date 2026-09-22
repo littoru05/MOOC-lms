@@ -13,9 +13,10 @@ import {
   Eye,
   Star,
   Users,
-  Check,
-  Award,
-  Sparkles
+  Check, 
+  Award, 
+  Sparkles,
+  Trash2
 } from 'lucide-react';
 
 import { useToast } from '../../context/ToastContext';
@@ -48,34 +49,51 @@ export const CourseApprovalPage = ({ onBack }) => {
     }
   }, [courses, selectedCourse]);
 
-  const handleApprove = (courseId) => {
+  const handleApprove = (course) => {
+    const isDeleteRequest = course.status === 'PENDING_DELETE';
     confirm({
-      title: 'Phê duyệt xuất bản khóa học',
-      message: 'Bạn có chắc chắn khóa học đã đạt chuẩn kiểm định chất lượng và sẵn sàng phát hành công khai cho học viên?',
-      confirmText: 'Phê duyệt & Xuất bản',
+      title: isDeleteRequest ? 'Xác nhận xóa vĩnh viễn khóa học' : 'Phê duyệt xuất bản khóa học',
+      message: isDeleteRequest
+        ? `Bạn có chắc chắn đồng ý với yêu cầu của giảng viên để xóa vĩnh viễn khóa học "${course.title}" khỏi hệ thống? Thao tác này không thể hoàn tác.`
+        : 'Bạn có chắc chắn khóa học đã đạt chuẩn kiểm định chất lượng và sẵn sàng phát hành công khai cho học viên?',
+      confirmText: isDeleteRequest ? 'Xác nhận xóa khóa học' : 'Phê duyệt & Xuất bản',
+      isDanger: isDeleteRequest,
       onConfirm: async () => {
         try {
-          await approveMutation.mutateAsync(courseId);
-          showToast('Đã phê duyệt và xuất bản khóa học thành công lên trang chủ!', 'success');
+          await approveMutation.mutateAsync(course.id);
+          showToast(
+            isDeleteRequest
+              ? 'Đã phê duyệt xóa vĩnh viễn khóa học khỏi hệ thống!'
+              : 'Đã phê duyệt và xuất bản khóa học thành công lên trang chủ!',
+            'success'
+          );
         } catch (err) {
-          showToast(err.response?.data?.message || 'Đã phê duyệt thành công!', 'success');
+          showToast(err.response?.data?.message || 'Đã xử lý thành công!', 'success');
         }
       },
     });
   };
 
-  const handleReject = (courseId) => {
+  const handleReject = (course) => {
+    const isDeleteRequest = course.status === 'PENDING_DELETE';
     confirm({
-      title: 'Từ chối khóa học',
-      message: 'Bạn có chắc muốn từ chối yêu cầu xuất bản của khóa học này để giảng viên bổ sung thêm nội dung?',
-      confirmText: 'Xác nhận từ chối',
-      isDanger: true,
+      title: isDeleteRequest ? 'Từ chối yêu cầu xóa khóa học' : 'Từ chối khóa học',
+      message: isDeleteRequest
+        ? `Bạn có chắc muốn từ chối yêu cầu xóa và tiếp tục giữ lại khóa học "${course.title}" trên hệ thống ở trạng thái hoạt động?`
+        : 'Bạn có chắc muốn từ chối yêu cầu xuất bản của khóa học này để giảng viên bổ sung thêm nội dung?',
+      confirmText: isDeleteRequest ? 'Từ chối xóa & Giữ lại' : 'Xác nhận từ chối',
+      isDanger: !isDeleteRequest,
       onConfirm: async () => {
         try {
-          await rejectMutation.mutateAsync(courseId);
-          showToast('Đã từ chối khóa học và gửi thông báo phản hồi cho giảng viên.', 'warning');
+          await rejectMutation.mutateAsync(course.id);
+          showToast(
+            isDeleteRequest
+              ? 'Đã từ chối yêu cầu xóa và giữ lại khóa học trên hệ thống.'
+              : 'Đã từ chối khóa học và gửi thông báo phản hồi cho giảng viên.',
+            'info'
+          );
         } catch (err) {
-          showToast(err.response?.data?.message || 'Đã từ chối khóa học!', 'warning');
+          showToast(err.response?.data?.message || 'Đã từ chối thành công!', 'info');
         }
       },
     });
@@ -140,9 +158,15 @@ export const CourseApprovalPage = ({ onBack }) => {
                   }`}
                 >
                   <div className="flex items-center justify-between text-[11px] mb-1.5">
-                    <span className="px-2 py-0.5 bg-amber-100 text-amber-800 font-bold rounded">
-                      Chờ duyệt
-                    </span>
+                    {course.status === 'PENDING_DELETE' ? (
+                      <span className="px-2 py-0.5 bg-rose-100 text-rose-800 font-bold rounded flex items-center gap-1">
+                        <Trash2 className="w-3 h-3" /> Yêu cầu xóa
+                      </span>
+                    ) : (
+                      <span className="px-2 py-0.5 bg-amber-100 text-amber-800 font-bold rounded flex items-center gap-1">
+                        <Clock className="w-3 h-3" /> Chờ duyệt
+                      </span>
+                    )}
                     <span className="text-[#6B6B6B]">{course.submittedDate || 'Hôm nay'}</span>
                   </div>
 
@@ -167,30 +191,67 @@ export const CourseApprovalPage = ({ onBack }) => {
           {selectedCourse && (
             <div className="lg:col-span-2 bg-white border border-[#E4E4E0] rounded-xl p-7 shadow-xs space-y-6">
               
+              {/* If Deletion Request, display Alert Banner */}
+              {selectedCourse.status === 'PENDING_DELETE' && (
+                <div className="p-4 bg-rose-50 border border-rose-200 rounded-xl flex items-start gap-3 text-rose-900 text-xs">
+                  <AlertCircle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-bold text-sm text-rose-900">Yêu cầu xóa khóa học từ giảng viên</p>
+                    <p className="text-rose-700 mt-1 leading-relaxed">
+                      Giảng viên phụ trách đã gửi yêu cầu gỡ bỏ và xóa vĩnh viễn khóa học này khỏi nền tảng. Khi chấp thuận, dữ liệu khóa học sẽ bị xóa hoàn toàn khỏi hệ thống.
+                    </p>
+                  </div>
+                </div>
+              )}
+
               {/* Header & Approval Actions */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[#E4E4E0]">
                 <div>
-                  <span className="text-[11px] font-bold text-[#16324F] uppercase tracking-wider">Hồ sơ kiểm định khóa học</span>
+                  <span className="text-[11px] font-bold text-[#16324F] uppercase tracking-wider">
+                    {selectedCourse.status === 'PENDING_DELETE' ? 'Hồ sơ xét duyệt xóa khóa học' : 'Hồ sơ kiểm định khóa học'}
+                  </span>
                   <h2 className="text-xl font-bold font-serif text-[#001D37] mt-1">{selectedCourse.title}</h2>
                   <p className="text-xs text-[#5E5E5E]">Cấp độ: <strong>{selectedCourse.level || 'Trung cấp'}</strong> • Ngôn ngữ: <strong>{selectedCourse.language || 'Tiếng Việt'}</strong></p>
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => handleReject(selectedCourse.id)}
-                    disabled={actionLoading}
-                    className="px-4 py-2 bg-[#FFDAD6] hover:bg-red-200 text-[#BA1A1A] text-xs font-bold rounded-lg flex items-center gap-1.5 transition-colors"
-                  >
-                    <XCircle className="w-4 h-4" /> Từ chối
-                  </button>
+                  {selectedCourse.status === 'PENDING_DELETE' ? (
+                    <>
+                      <button
+                        onClick={() => handleReject(selectedCourse)}
+                        disabled={actionLoading}
+                        className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-[#1A1C1E] text-xs font-bold rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer"
+                      >
+                        <XCircle className="w-4 h-4 text-slate-500" /> Từ chối xóa & Giữ lại
+                      </button>
 
-                  <button
-                    onClick={() => handleApprove(selectedCourse.id)}
-                    disabled={actionLoading}
-                    className="px-5 py-2 bg-[#16324F] hover:bg-[#001D37] text-white text-xs font-bold rounded-lg flex items-center gap-1.5 transition-colors shadow-sm"
-                  >
-                    <CheckCircle2 className="w-4 h-4" /> Phê duyệt xuất bản
-                  </button>
+                      <button
+                        onClick={() => handleApprove(selectedCourse)}
+                        disabled={actionLoading}
+                        className="px-5 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-lg flex items-center gap-1.5 transition-colors shadow-sm cursor-pointer"
+                      >
+                        <Trash2 className="w-4 h-4" /> Chấp thuận xóa khóa học
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => handleReject(selectedCourse)}
+                        disabled={actionLoading}
+                        className="px-4 py-2 bg-[#FFDAD6] hover:bg-red-200 text-[#BA1A1A] text-xs font-bold rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer"
+                      >
+                        <XCircle className="w-4 h-4" /> Từ chối
+                      </button>
+
+                      <button
+                        onClick={() => handleApprove(selectedCourse)}
+                        disabled={actionLoading}
+                        className="px-5 py-2 bg-[#16324F] hover:bg-[#001D37] text-white text-xs font-bold rounded-lg flex items-center gap-1.5 transition-colors shadow-sm cursor-pointer"
+                      >
+                        <CheckCircle2 className="w-4 h-4" /> Phê duyệt xuất bản
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
 

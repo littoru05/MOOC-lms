@@ -97,6 +97,59 @@ export function useSubmitForReview() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['courses', 'teaching'] });
       queryClient.invalidateQueries({ queryKey: ['admin', 'pendingCourses'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'stats'] });
+      queryClient.invalidateQueries({ queryKey: ['courses'] });
+    },
+  });
+}
+
+/**
+ * Mutation gửi yêu cầu xóa khóa học (Chuyển sang PENDING_DELETE chờ Admin duyệt)
+ */
+export function useRequestDeleteCourse() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (courseId) => courseApi.requestDeleteCourse(courseId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['courses', 'teaching'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'pendingCourses'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'stats'] });
+      queryClient.invalidateQueries({ queryKey: ['courses'] });
+    },
+  });
+}
+
+/**
+ * Mutation xóa / lưu trữ khóa học (soft delete nếu chưa có ai mua, ARCHIVED nếu đã có học viên)
+ */
+export function useDeleteCourse() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (courseId) => courseApi.deleteCourse(courseId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['courses', 'teaching'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'pendingCourses'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'stats'] });
+      queryClient.invalidateQueries({ queryKey: ['courses'] });
+    },
+  });
+}
+
+/**
+ * Mutation khôi phục khóa học từ trạng thái Lưu trữ (ARCHIVED -> PUBLISHED)
+ */
+export function useRestoreCourse() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (courseId) => courseApi.restoreCourse(courseId),
+    onSuccess: (_, courseId) => {
+      queryClient.invalidateQueries({ queryKey: ['courses', 'teaching'] });
+      queryClient.invalidateQueries({ queryKey: ['courses', 'published'] });
+      queryClient.invalidateQueries({ queryKey: ['courses', 'detail', courseId] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'stats'] });
       queryClient.invalidateQueries({ queryKey: ['courses'] });
     },
   });
@@ -153,5 +206,19 @@ export function useCourseQuizzes(courseId) {
       }
     },
     enabled: isValidId,
+  });
+}
+
+/**
+ * 8. Query lấy danh sách học viên và tiến độ học tập theo khóa học của Giảng viên
+ */
+export function useInstructorStudents(courseId) {
+  return useQuery({
+    queryKey: ['instructor', 'course-students', courseId],
+    queryFn: async () => {
+      const res = await courseApi.getInstructorCourseProgress(courseId);
+      return res.data || [];
+    },
+    staleTime: 30 * 1000,
   });
 }

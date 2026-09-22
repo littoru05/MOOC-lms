@@ -23,8 +23,9 @@ public class CourseSpecification {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            // 1. Chỉ lấy khóa học PUBLISHED
+            // 1. Chỉ lấy khóa học PUBLISHED và chưa bị xóa mềm
             predicates.add(cb.equal(root.get("status"), CourseStatus.PUBLISHED));
+            predicates.add(cb.or(cb.isNull(root.get("isDeleted")), cb.isFalse(root.get("isDeleted"))));
 
             // 2. Lọc theo priceType ("free" | "paid")
             if ("free".equalsIgnoreCase(priceType)) {

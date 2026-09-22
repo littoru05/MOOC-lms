@@ -67,6 +67,13 @@ public class Course {
     @Builder.Default
     private java.math.BigDecimal price = java.math.BigDecimal.ZERO;
 
+    @Column(name = "is_deleted", nullable = false)
+    @Builder.Default
+    private Boolean isDeleted = false;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

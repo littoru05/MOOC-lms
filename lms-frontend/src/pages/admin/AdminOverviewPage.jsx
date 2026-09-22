@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { adminApi } from '../../api/adminApi';
+import { useAdminStats } from '../../hooks/useAdmin';
 import { 
   Users, 
   BookOpen, 
@@ -15,35 +15,19 @@ import {
 
 export const AdminOverviewPage = ({ onNavigateSubTab }) => {
   const navigate = useNavigate();
-  const [stats, setStats] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { data: apiStats, isLoading: loading } = useAdminStats();
 
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const res = await adminApi.getDashboardStats();
-        setStats(res.data);
-      } catch (err) {
-        console.warn('Lỗi khi tải thống kê admin:', err);
-        // Mock fallback stats if backend offline
-        setStats({
-          totalUsers: 24,
-          totalStudents: 18,
-          totalInstructors: 5,
-          totalCourses: 8,
-          publishedCourses: 6,
-          pendingCourses: 2,
-          totalEnrollments: 45,
-          completedEnrollments: 32,
-          completionRate: 71.11,
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchStats();
-  }, []);
+  const stats = apiStats || {
+    totalUsers: 0,
+    totalStudents: 0,
+    totalInstructors: 0,
+    totalCourses: 0,
+    publishedCourses: 0,
+    pendingCourses: 0,
+    totalEnrollments: 0,
+    completedEnrollments: 0,
+    completionRate: 0,
+  };
 
   return (
     <div className="min-h-screen bg-[#FAF9FC] py-10 px-6">
@@ -72,6 +56,13 @@ export const AdminOverviewPage = ({ onNavigateSubTab }) => {
             >
               <Clock className="w-3.5 h-3.5" />
               <span>Duyệt khóa học ({stats?.pendingCourses || 0})</span>
+            </button>
+            <button
+              onClick={() => navigate('/admin/revenue')}
+              className="px-3.5 py-2 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer"
+            >
+              <TrendingUp className="w-3.5 h-3.5" />
+              <span>Báo cáo doanh thu</span>
             </button>
             <button
               onClick={() => onNavigateSubTab ? onNavigateSubTab('user-management') : navigate('/admin/users')}

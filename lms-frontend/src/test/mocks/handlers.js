@@ -131,6 +131,39 @@ export const handlers = [
     return HttpResponse.json(updated);
   }),
 
+  // 3c-del. Delete / Archive Course by ID
+  http.delete('*/api/v1/courses/:id', ({ params }) => {
+    const { id } = params;
+    const course = mockCourses.find((c) => String(c.id) === String(id));
+    const enrolled = (course && course.enrolledCount) || 0;
+    if (enrolled > 0) {
+      return HttpResponse.json({
+        courseId: Number(id),
+        status: 'ARCHIVED',
+        isDeleted: false,
+        isArchived: true,
+        enrolledCount: enrolled,
+        message: 'Khóa học đã có học viên đăng ký nên đã được chuyển sang trạng thái Lưu trữ (Ngừng kinh doanh) thay vì xóa vĩnh viễn.',
+      });
+    }
+    return HttpResponse.json({
+      courseId: Number(id),
+      status: 'DRAFT',
+      isDeleted: true,
+      isArchived: false,
+      enrolledCount: 0,
+      message: 'Khóa học chưa có học viên đăng ký nên đã được xóa thành công khỏi hệ thống.',
+    });
+  }),
+
+  // 3c-res. Restore / Unarchive Course by ID
+  http.post('*/api/v1/courses/:id/restore', ({ params }) => {
+    const { id } = params;
+    const course = mockCourses.find((c) => String(c.id) === String(id)) || mockCourses[0];
+    const restored = { ...course, status: 'PUBLISHED', isDeleted: false, deletedAt: null };
+    return HttpResponse.json(restored);
+  }),
+
   // 3d. Sections by Course ID
   http.get('*/api/v1/sections/course/:courseId', ({ params }) => {
     const { courseId } = params;
@@ -597,5 +630,121 @@ export const handlers = [
   http.post('*/api/v1/payment-sessions/:token/confirm', () => {
     mockPaymentSessionState.status = 'CONFIRMED';
     return HttpResponse.json(mockPaymentSessionState);
+  }),
+
+  // 17. Instructor Student Progress Endpoints
+  http.get('*/api/v1/instructor/courses/:courseId/progress', () => {
+    return HttpResponse.json([
+      {
+        enrollmentId: 1,
+        userId: 3,
+        fullName: 'Trần Văn Học Viên',
+        email: 'student@lms.com',
+        avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150',
+        courseId: 1,
+        courseTitle: 'Lập trình Fullstack Web hiện đại với React và Spring Boot',
+        enrolledAt: '2026-08-20T10:00:00',
+        progressPercent: 100,
+        isCompleted: true,
+        completedLessonsCount: 2,
+        totalLessonsCount: 2,
+        quizScore: 100,
+      },
+    ]);
+  }),
+
+  http.get('*/api/v1/instructor/courses/progress', () => {
+    return HttpResponse.json([
+      {
+        enrollmentId: 1,
+        userId: 3,
+        fullName: 'Trần Văn Học Viên',
+        email: 'student@lms.com',
+        avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150',
+        courseId: 1,
+        courseTitle: 'Lập trình Fullstack Web hiện đại với React và Spring Boot',
+        enrolledAt: '2026-08-20T10:00:00',
+        progressPercent: 100,
+        isCompleted: true,
+        completedLessonsCount: 2,
+        totalLessonsCount: 2,
+        quizScore: 100,
+      },
+    ]);
+  }),
+
+  // 18. Admin Revenue Endpoints
+  http.get('*/api/v1/admin/revenue/overview', () => {
+    return HttpResponse.json({
+      totalGrossRevenue: 12500000,
+      totalPlatformCommission: 2500000,
+      totalInstructorPayout: 10000000,
+      totalOrdersCount: 25,
+      totalStudentsCount: 18,
+      platformCommissionRate: 0.20,
+    });
+  }),
+
+  http.get('*/api/v1/admin/revenue/chart', () => {
+    return HttpResponse.json([
+      { period: '2026-01', grossRevenue: 5000000, platformCommission: 1000000, instructorPayout: 4000000, ordersCount: 10 },
+      { period: '2026-02', grossRevenue: 7500000, platformCommission: 1500000, instructorPayout: 6000000, ordersCount: 15 },
+    ]);
+  }),
+
+  http.get('*/api/v1/admin/revenue/by-instructor', () => {
+    return HttpResponse.json([
+      {
+        instructorId: 2,
+        instructorName: 'TS. Nguyễn Văn A',
+        avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
+        totalRevenue: 8000000,
+        coursesSoldCount: 18,
+      },
+    ]);
+  }),
+
+  http.get('*/api/v1/admin/revenue/top-courses', () => {
+    return HttpResponse.json([
+      {
+        courseId: 1,
+        title: 'Lập trình Fullstack Web hiện đại với React và Spring Boot',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=600',
+        instructorName: 'TS. Nguyễn Văn A',
+        totalSold: 12,
+        totalRevenue: 6000000,
+      },
+    ]);
+  }),
+
+  http.get('*/api/v1/admin/revenue/by-category', () => {
+    return HttpResponse.json([
+      {
+        categoryId: 1,
+        categoryName: 'Lập trình Web',
+        totalRevenue: 10000000,
+      },
+      {
+        categoryId: 2,
+        categoryName: 'Trí tuệ nhân tạo',
+        totalRevenue: 2500000,
+      },
+    ]);
+  }),
+
+  http.get('*/api/v1/admin/revenue/growth/users', () => {
+    return HttpResponse.json([
+      { period: '2026-01', newStudentsCount: 10 },
+      { period: '2026-02', newStudentsCount: 8 },
+    ]);
+  }),
+
+  // 19. Course Request Delete & Admin Approvals
+  http.post('*/api/v1/courses/:id/request-delete', ({ params }) => {
+    return HttpResponse.json({
+      id: Number(params.id),
+      status: 'PENDING_DELETE',
+      title: 'Khóa học chờ duyệt xóa',
+    });
   }),
 ];

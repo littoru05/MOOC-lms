@@ -47,6 +47,10 @@ public class CartService {
         Course course = courseRepository.findById(request.getCourseId())
                 .orElseThrow(() -> new RuntimeException("Khóa học không tồn tại với ID: " + request.getCourseId()));
 
+        if (Boolean.TRUE.equals(course.getIsDeleted()) || course.getStatus() == CourseStatus.ARCHIVED) {
+            throw new RuntimeException("Khóa học này đã ngừng kinh doanh hoặc không còn khả dụng!");
+        }
+
         if (course.getStatus() != CourseStatus.PUBLISHED) {
             throw new RuntimeException("Khóa học chưa được phát hành công khai!");
         }

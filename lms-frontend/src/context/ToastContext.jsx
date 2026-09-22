@@ -24,13 +24,14 @@ export const ToastProvider = ({ children }) => {
   };
 
   // Custom in-app Confirmation Dialog
-  const confirm = useCallback(({ title, message, confirmText = 'Xác nhận', cancelText = 'Hủy', onConfirm, isDanger = false }) => {
+  const confirm = useCallback(({ title, message, confirmText = 'Xác nhận', cancelText = 'Hủy', onConfirm, isDanger = false, isWarning = false }) => {
     setModalConfig({
       title,
       message,
       confirmText,
       cancelText,
       isDanger,
+      isWarning,
       onConfirm: () => {
         setModalConfig(null);
         if (onConfirm) onConfirm();
@@ -102,6 +103,8 @@ export const ToastProvider = ({ children }) => {
                 className={`px-5 py-2 text-xs font-semibold text-white rounded-lg transition-colors shadow-sm ${
                   modalConfig.isDanger
                     ? 'bg-[#BA1A1A] hover:bg-red-700'
+                    : modalConfig.isWarning
+                    ? 'bg-amber-600 hover:bg-amber-700'
                     : 'bg-[#16324F] hover:bg-[#001D37]'
                 }`}
               >
