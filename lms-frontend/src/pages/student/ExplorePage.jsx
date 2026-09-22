@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePublishedCourses, useCategories } from '../../hooks/useCourses';
-import { COURSES, FEATURED_INSTRUCTORS, POPULAR_CATEGORIES } from '../../mocks/courses';
+import { FEATURED_INSTRUCTORS } from '../../mocks/courses';
 import { Carousel } from '../../components/common/Carousel';
 import { CourseCardWithPreview } from '../../components/course/CourseCardWithPreview';
 import { getImageUrl } from '../../utils/imageUrl';
@@ -45,7 +45,7 @@ const getCategoryIcon = (iconName) => {
 };
 
 export const ExplorePage = ({ onSelectCourse, initialFilterQuery = '' }) => {
-  const { data: courses = COURSES, isLoading: loadingCourses } = usePublishedCourses();
+  const { data: courses = [], isLoading: loadingCourses } = usePublishedCourses();
   const { data: categories = [], isLoading: loadingCategories } = useCategories();
 
   const [selectedCategory, setSelectedCategory] = useState('all');

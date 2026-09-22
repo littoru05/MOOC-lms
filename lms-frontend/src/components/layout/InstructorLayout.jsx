@@ -15,7 +15,8 @@ import {
   LayoutDashboard,
   GraduationCap,
   ShieldCheck,
-  User
+  User,
+  TrendingUp
 } from 'lucide-react';
 
 export const InstructorLayout = ({ currentTab: currentTabProp, onNavigate, onCreateCourse, children }) => {
@@ -31,6 +32,7 @@ export const InstructorLayout = ({ currentTab: currentTabProp, onNavigate, onCre
   const isEdit = pathname.includes('/editor');
   const isQuiz = pathname.includes('/quiz-builder');
   const isStudents = pathname.startsWith('/instructor/students');
+  const isRevenue = pathname.startsWith('/instructor/revenue');
   const isProfile = pathname === '/instructor/profile';
 
   return (
@@ -120,6 +122,18 @@ export const InstructorLayout = ({ currentTab: currentTabProp, onNavigate, onCre
             </Link>
 
             <Link
+              to="/instructor/revenue"
+              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs transition-all cursor-pointer ${
+                isRevenue
+                  ? 'bg-[#16324F] text-white font-bold border-l-4 border-emerald-400 shadow-md'
+                  : 'text-slate-300 hover:bg-white/10 hover:text-white font-medium'
+              }`}
+            >
+              <TrendingUp className="w-4 h-4 text-emerald-400" />
+              <span>Doanh thu & Thu nhập</span>
+            </Link>
+
+            <Link
               to="/instructor/profile"
               className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs transition-all cursor-pointer ${
                 isProfile
@@ -183,6 +197,8 @@ export const InstructorLayout = ({ currentTab: currentTabProp, onNavigate, onCre
                 ? 'Biên soạn đề thi'
                 : isStudents
                 ? 'Tiến độ học viên'
+                : isRevenue
+                ? 'Doanh thu & Thu nhập'
                 : 'Hồ sơ cá nhân'}
             </span>
           </div>
