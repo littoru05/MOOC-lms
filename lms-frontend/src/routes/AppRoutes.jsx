@@ -37,12 +37,14 @@ import { CourseEditorPage } from '../pages/instructor/CourseEditorPage';
 import { QuizBuilderPage } from '../pages/instructor/QuizBuilderPage';
 import { StudentProgressPage } from '../pages/instructor/StudentProgressPage';
 import { InstructorProfilePage } from '../pages/instructor/InstructorProfilePage';
+import { InstructorRevenuePage } from '../pages/instructor/InstructorRevenuePage';
 
 // Admin Pages
 import { AdminOverviewPage } from '../pages/admin/AdminOverviewPage';
 import { CourseApprovalPage } from '../pages/admin/CourseApprovalPage';
 import { UserManagementPage } from '../pages/admin/UserManagementPage';
 import { AdminProfilePage } from '../pages/admin/AdminProfilePage';
+import { AdminRevenuePage } from '../pages/admin/AdminRevenuePage';
 
 export const AppRoutes = () => {
   return (
@@ -161,6 +163,7 @@ export const AppRoutes = () => {
         <Route path="/instructor/courses/editor" element={<CourseEditorPage />} />
         <Route path="/instructor/courses/quiz-builder" element={<QuizBuilderPage />} />
         <Route path="/instructor/students" element={<StudentProgressPage />} />
+        <Route path="/instructor/revenue" element={<InstructorRevenuePage />} />
         <Route path="/instructor/profile" element={<InstructorProfilePage />} />
       </Route>
 
@@ -178,6 +181,7 @@ export const AppRoutes = () => {
         <Route path="/admin/dashboard" element={<AdminOverviewPage />} />
         <Route path="/admin/courses/approval" element={<CourseApprovalPage />} />
         <Route path="/admin/users" element={<UserManagementPage />} />
+        <Route path="/admin/revenue" element={<AdminRevenuePage />} />
         <Route path="/admin/profile" element={<AdminProfilePage />} />
       </Route>
 

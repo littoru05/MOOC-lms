@@ -21,4 +21,10 @@ public interface LessonProgressRepository extends JpaRepository<LessonProgress, 
            "WHERE lp.enrollment.id = :enrollmentId " +
            "AND lp.isCompleted = true")
     long countCompletedLessonsByEnrollmentId(@Param("enrollmentId") Long enrollmentId);
+
+    @Query("SELECT lp.enrollment.id, COUNT(lp) FROM LessonProgress lp " +
+           "WHERE lp.enrollment.id IN :enrollmentIds " +
+           "AND lp.isCompleted = true " +
+           "GROUP BY lp.enrollment.id")
+    List<Object[]> countCompletedLessonsByEnrollmentIds(@Param("enrollmentIds") List<Long> enrollmentIds);
 }

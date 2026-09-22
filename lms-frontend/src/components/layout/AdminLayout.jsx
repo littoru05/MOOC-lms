@@ -15,7 +15,8 @@ import {
   Shield,
   Layers,
   Database,
-  User
+  User,
+  TrendingUp
 } from 'lucide-react';
 
 export const AdminLayout = ({ currentTab: currentTabProp, onNavigate, children }) => {
@@ -29,6 +30,7 @@ export const AdminLayout = ({ currentTab: currentTabProp, onNavigate, children }
   const isOverview = pathname === '/admin/dashboard' || pathname === '/admin/overview' || pathname === '/admin';
   const isApproval = pathname === '/admin/courses/approval' || pathname === '/admin/course-approval';
   const isUsers = pathname === '/admin/users' || pathname === '/admin/user-management';
+  const isRevenue = pathname === '/admin/revenue';
   const isProfile = pathname === '/admin/profile';
 
   return (
@@ -94,6 +96,18 @@ export const AdminLayout = ({ currentTab: currentTabProp, onNavigate, children }
             </Link>
 
             <Link
+              to="/admin/revenue"
+              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                isRevenue
+                  ? 'bg-[#16324F] text-white font-semibold border-l-4 border-indigo-400 shadow-sm'
+                  : 'text-slate-300 hover:bg-white/10 hover:text-white'
+              }`}
+            >
+              <TrendingUp className="w-4 h-4 text-indigo-400" />
+              <span>Doanh thu & Báo cáo</span>
+            </Link>
+
+            <Link
               to="/admin/profile"
               className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
                 isProfile
@@ -151,6 +165,8 @@ export const AdminLayout = ({ currentTab: currentTabProp, onNavigate, children }
                 ? 'Kiểm duyệt khóa học'
                 : isUsers
                 ? 'Quản lý người dùng'
+                : isRevenue
+                ? 'Doanh thu & Báo cáo'
                 : 'Hồ sơ cá nhân'}
             </span>
           </div>

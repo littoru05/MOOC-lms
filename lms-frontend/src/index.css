@@ -44,6 +44,15 @@
   background: #74777e;
 }
 
+/* Utility to completely hide scrollbars while preserving scrolling */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 /* Unified Page Transitions Across All Roles & Levels */
 @keyframes unifiedPageEnter {
   from {

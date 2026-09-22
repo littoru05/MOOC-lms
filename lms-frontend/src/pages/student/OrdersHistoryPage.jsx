@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Receipt, 
@@ -15,9 +15,29 @@ import {
 import { useOrderHistory } from '../../hooks/useOrders';
 import { formatCurrency } from '../../utils/format';
 import { getImageUrl } from '../../utils/imageUrl';
+import { Pagination } from '../../components/common/Pagination';
 
 export const OrdersHistoryPage = () => {
   const { data: orders = [], isLoading } = useOrderHistory();
+
+  // Client-side pagination state (5 items per page)
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 5;
+
+  // Sắp xếp đơn hàng giảm dần theo thời gian tạo mới nhất
+  const sortedOrders = useMemo(() => {
+    return [...orders].sort((a, b) => {
+      const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return timeB - timeA;
+    });
+  }, [orders]);
+
+  // Phân trang cục bộ
+  const paginatedOrders = useMemo(() => {
+    const startIndex = (currentPage - 1) * PAGE_SIZE;
+    return sortedOrders.slice(startIndex, startIndex + PAGE_SIZE);
+  }, [sortedOrders, currentPage]);
 
   if (isLoading) {
     return (
@@ -82,106 +102,117 @@ export const OrdersHistoryPage = () => {
           </div>
         ) : (
           <div className="space-y-6">
-            {orders.map((order) => {
-              const items = order.items || [];
-              return (
-                <div
-                  key={order.id}
-                  className="bg-white border border-[#E4E4E0] hover:border-[#16324F]/30 rounded-2xl shadow-2xs overflow-hidden transition-all"
-                >
-                  {/* Order Top Summary Bar */}
-                  <div className="p-4 sm:p-5 bg-[#FAF9FC] border-b border-[#E4E4E0] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-                    <div className="flex flex-wrap items-center gap-3 sm:gap-6">
-                      <div className="space-y-0.5">
-                        <span className="text-[11px] text-[#5E5E5E] block">MÃ ĐƠN HÀNG</span>
-                        <span className="font-mono font-bold text-[#001D37]">{order.orderCode}</span>
-                      </div>
-
-                      <div className="space-y-0.5">
-                        <span className="text-[11px] text-[#5E5E5E] block">NGÀY ĐẶT</span>
-                        <span className="font-medium text-[#1A1C1E]">
-                          {order.createdAt ? new Date(order.createdAt).toLocaleString('vi-VN') : '—'}
-                        </span>
-                      </div>
-
-                      <div className="space-y-0.5">
-                        <span className="text-[11px] text-[#5E5E5E] block">TRẠNG THÁI</span>
-                        <span className="inline-flex items-center gap-1 font-bold text-[11px] text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
-                          <CheckCircle2 className="w-3 h-3" />
-                          Hoàn tất
-                        </span>
-                      </div>
-
-                      <div className="space-y-0.5">
-                        <span className="text-[11px] text-[#5E5E5E] block">PHƯƠNG THỨC</span>
-                        <span className="inline-flex items-center gap-1 font-semibold text-[11px] text-[#16324F] bg-blue-50/80 border border-blue-200/80 px-2 py-0.5 rounded-full">
-                          {order.paymentMethod === 'CARD' ? (
-                            <>
-                              <CreditCard className="w-3 h-3 text-blue-600" />
-                              <span>Đã thanh toán qua Thẻ</span>
-                            </>
-                          ) : (
-                            <>
-                              <QrCode className="w-3 h-3 text-emerald-600" />
-                              <span>Đã thanh toán qua QR</span>
-                            </>
-                          )}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="text-left sm:text-right space-y-0.5">
-                      <span className="text-[11px] text-[#5E5E5E] block">TỔNG TIỀN</span>
-                      <span className="font-serif font-bold text-base text-emerald-700">
-                        {formatCurrency(order.totalAmount)}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Order Items List */}
-                  <div className="p-4 sm:p-5 divide-y divide-[#E4E4E0]">
-                    {items.map((item) => (
-                      <div
-                        key={item.id}
-                        className="py-3 first:pt-0 last:pb-0 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
-                      >
-                        <div className="flex items-center gap-4 min-w-0">
-                          <img
-                            src={getImageUrl(item.courseThumbnailUrl) || 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=300'}
-                            alt={item.courseTitle}
-                            className="w-20 h-14 object-cover rounded-lg shrink-0 border border-[#E4E4E0]"
-                            onError={(e) => {
-                              e.target.src = 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=300';
-                            }}
-                          />
-                          <div className="space-y-1 min-w-0">
-                            <Link
-                              to={`/courses/${item.courseSlug}`}
-                              className="font-bold text-xs text-[#001D37] hover:text-blue-700 line-clamp-1 transition-colors"
-                            >
-                              {item.courseTitle}
-                            </Link>
-                            <p className="text-[11px] text-[#5E5E5E]">
-                              Giá đã mua: <span className="font-semibold text-[#1A1C1E]">{formatCurrency(item.price)}</span>
-                            </p>
-                          </div>
+            <div className="space-y-6 transition-opacity duration-200">
+              {paginatedOrders.map((order) => {
+                const items = order.items || [];
+                return (
+                  <div
+                    key={order.id}
+                    className="bg-white border border-[#E4E4E0] hover:border-[#16324F]/30 rounded-2xl shadow-2xs overflow-hidden transition-all"
+                  >
+                    {/* Order Top Summary Bar */}
+                    <div className="p-4 sm:p-5 bg-[#FAF9FC] border-b border-[#E4E4E0] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                      <div className="flex flex-wrap items-center gap-3 sm:gap-6">
+                        <div className="space-y-0.5">
+                          <span className="text-[11px] text-[#5E5E5E] block">MÃ ĐƠN HÀNG</span>
+                          <span className="font-mono font-bold text-[#001D37]">{order.orderCode}</span>
                         </div>
 
-                        {item.courseId && (
-                          <Link
-                            to={`/learn/${item.courseId}`}
-                            className="shrink-0 px-4 py-2 bg-[#16324F] hover:bg-[#001D37] text-white text-xs font-bold rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs self-end sm:self-center"
-                          >
-                            <BookOpen className="w-3.5 h-3.5" />
-                            <span>Vào học</span>
-                          </Link>
-                        )}
+                        <div className="space-y-0.5">
+                          <span className="text-[11px] text-[#5E5E5E] block">NGÀY ĐẶT</span>
+                          <span className="font-medium text-[#1A1C1E]">
+                            {order.createdAt ? new Date(order.createdAt).toLocaleString('vi-VN') : '—'}
+                          </span>
+                        </div>
+
+                        <div className="space-y-0.5">
+                          <span className="text-[11px] text-[#5E5E5E] block">TRẠNG THÁI</span>
+                          <span className="inline-flex items-center gap-1 font-bold text-[11px] text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+                            <CheckCircle2 className="w-3 h-3" />
+                            Hoàn tất
+                          </span>
+                        </div>
+
+                        <div className="space-y-0.5">
+                          <span className="text-[11px] text-[#5E5E5E] block">PHƯƠNG THỨC</span>
+                          <span className="inline-flex items-center gap-1 font-semibold text-[11px] text-[#16324F] bg-blue-50/80 border border-blue-200/80 px-2 py-0.5 rounded-full">
+                            {order.paymentMethod === 'CARD' ? (
+                              <>
+                                <CreditCard className="w-3 h-3 text-blue-600" />
+                                <span>Đã thanh toán qua Thẻ</span>
+                              </>
+                            ) : (
+                              <>
+                                <QrCode className="w-3 h-3 text-emerald-600" />
+                                <span>Đã thanh toán qua QR</span>
+                              </>
+                            )}
+                          </span>
+                        </div>
                       </div>
-                    ))}
+
+                      <div className="text-left sm:text-right space-y-0.5">
+                        <span className="text-[11px] text-[#5E5E5E] block">TỔNG TIỀN</span>
+                        <span className="font-serif font-bold text-base text-emerald-700">
+                          {formatCurrency(order.totalAmount)}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Order Items List */}
+                    <div className="divide-y divide-[#E4E4E0] p-4 sm:p-5">
+                      {items.map((item) => (
+                        <div
+                          key={item.id}
+                          className="py-3 first:pt-0 last:pb-0 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                        >
+                          <div className="flex items-center gap-4 min-w-0">
+                            <img
+                              src={getImageUrl(item.courseThumbnailUrl) || 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=300'}
+                              alt={item.courseTitle}
+                              className="w-20 h-14 object-cover rounded-lg shrink-0 border border-[#E4E4E0]"
+                              onError={(e) => {
+                                e.target.src = 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=300';
+                              }}
+                            />
+                            <div className="space-y-1 min-w-0">
+                              <Link
+                                to={`/courses/${item.courseSlug}`}
+                                className="font-bold text-xs text-[#001D37] hover:text-blue-700 line-clamp-1 transition-colors"
+                              >
+                                {item.courseTitle}
+                              </Link>
+                              <p className="text-[11px] text-[#5E5E5E]">
+                                Giá đã mua: <span className="font-semibold text-[#1A1C1E]">{formatCurrency(item.price)}</span>
+                              </p>
+                            </div>
+                          </div>
+
+                          {item.courseId && (
+                            <Link
+                              to={`/learn/${item.courseId}`}
+                              className="shrink-0 px-4 py-2 bg-[#16324F] hover:bg-[#001D37] text-white text-xs font-bold rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs self-end sm:self-center"
+                            >
+                              <BookOpen className="w-3.5 h-3.5" />
+                              <span>Vào học</span>
+                            </Link>
+                          )}
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
+
+            {/* Thanh phân trang client-side */}
+            <Pagination
+              currentPage={currentPage}
+              totalItems={sortedOrders.length}
+              pageSize={PAGE_SIZE}
+              onPageChange={(page) => setCurrentPage(page)}
+              className="rounded-2xl border border-[#E4E4E0]"
+            />
           </div>
         )}
       </div>

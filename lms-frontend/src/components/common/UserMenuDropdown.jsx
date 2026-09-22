@@ -13,7 +13,8 @@ import {
   ShieldCheck, 
   LogOut, 
   ChevronRight,
-  Sparkles
+  Sparkles,
+  TrendingUp
 } from 'lucide-react';
 
 export const UserMenuDropdown = ({ 
@@ -192,6 +193,17 @@ export const UserMenuDropdown = ({
                   <span>Trang Quản trị Admin</span>
                 </div>
                 <ChevronRight className="w-3.5 h-3.5 text-amber-400 group-hover:translate-x-0.5 transition-transform" />
+              </button>
+              <button
+                type="button"
+                onClick={() => handleNavigate('/admin/revenue')}
+                className="w-full text-left px-4 py-2 text-xs hover:bg-indigo-50/70 flex items-center justify-between text-indigo-900 font-semibold transition-colors cursor-pointer group"
+              >
+                <div className="flex items-center gap-2.5">
+                  <TrendingUp className="w-4 h-4 text-indigo-700 group-hover:scale-110 transition-transform" />
+                  <span>Doanh thu & Báo cáo</span>
+                </div>
+                <ChevronRight className="w-3.5 h-3.5 text-indigo-400 group-hover:translate-x-0.5 transition-transform" />
               </button>
             </div>
           )}
