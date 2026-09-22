@@ -162,7 +162,7 @@ public class DataInitializer implements CommandLineRunner {
                 .title("Thiết kế UI/UX Sản phẩm Chuyên nghiệp với Figma & Design Systems")
                 .slug("thiet-ke-ui-ux-figma-design-system")
                 .description("Làm chủ quy trình nghiên cứu người dùng, thiết kế wireframe, prototype tương tác cao và xây dựng Design System quy chuẩn cho Web & Mobile.")
-                .thumbnailUrl("https://images.unsplash.com/photo-1581291518655-9523c932edcf?w=800")
+                .thumbnailUrl("https://images.unsplash.com/photo-1586717791821-3f44a563fa4c?w=800")
                 .status(CourseStatus.PUBLISHED)
                 .category(catWeb)
                 .instructor(instructor)

@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.lms.lms_backend.dto.course.CourseCreateRequest;
+import com.lms.lms_backend.dto.course.CourseDeleteResponse;
 import com.lms.lms_backend.dto.course.CourseResponse;
 import com.lms.lms_backend.dto.course.CourseUpdateRequest;
 import com.lms.lms_backend.service.CourseService;
@@ -85,6 +87,35 @@ public class CourseController {
             Authentication authentication
     ) {
         return ResponseEntity.ok(courseService.submitForReview(id, authentication.getName()));
+    }
+
+    // Giảng viên gửi yêu cầu xóa khóa học -> Chờ Admin duyệt (-> PENDING_DELETE)
+    @PostMapping("/{id}/request-delete")
+    @PreAuthorize("hasAnyAuthority('ROLE_INSTRUCTOR', 'ROLE_ADMIN')")
+    public ResponseEntity<CourseResponse> requestDeleteCourse(
+            @PathVariable Long id,
+            Authentication authentication
+    ) {
+        return ResponseEntity.ok(courseService.requestDeleteCourse(id, authentication.getName()));
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('ROLE_INSTRUCTOR', 'ROLE_ADMIN')")
+    public ResponseEntity<CourseDeleteResponse> deleteCourse(
+            @PathVariable Long id,
+            Authentication authentication
+    ) {
+        return ResponseEntity.ok(courseService.deleteCourse(id, authentication.getName()));
+    }
+
+    // Khôi phục khóa học từ Lưu trữ hoặc Đã xóa
+    @PostMapping("/{id}/restore")
+    @PreAuthorize("hasAnyAuthority('ROLE_INSTRUCTOR', 'ROLE_ADMIN')")
+    public ResponseEntity<CourseResponse> restoreCourse(
+            @PathVariable Long id,
+            Authentication authentication
+    ) {
+        return ResponseEntity.ok(courseService.restoreCourse(id, authentication.getName()));
     }
 
     // Danh sách khóa học do Giảng viên hiện tại tạo

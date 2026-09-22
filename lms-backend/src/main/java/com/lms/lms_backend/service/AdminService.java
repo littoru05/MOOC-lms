@@ -28,9 +28,9 @@ public class AdminService {
     private final EnrollmentRepository enrollmentRepository;
     private final CourseService courseService;
 
-    // 1. Quản lý kiểm duyệt khóa học (SD06)
+    // 1. Quản lý kiểm duyệt khóa học (SD06 & Deletion Request)
     public List<CourseResponse> getPendingCourses() {
-        return courseRepository.findByStatus(CourseStatus.PENDING).stream()
+        return courseRepository.findByStatusInAndIsDeletedFalse(List.of(CourseStatus.PENDING, CourseStatus.PENDING_DELETE)).stream()
                 .map(courseService::mapToResponse)
                 .collect(Collectors.toList());
     }
@@ -88,9 +88,9 @@ public class AdminService {
         long totalStudents = users.stream().filter(u -> u.getRole() == Role.ROLE_STUDENT).count();
         long totalInstructors = users.stream().filter(u -> u.getRole() == Role.ROLE_INSTRUCTOR).count();
 
-        long totalCourses = courseRepository.count();
-        long publishedCourses = courseRepository.countByStatus(CourseStatus.PUBLISHED);
-        long pendingCourses = courseRepository.countByStatus(CourseStatus.PENDING);
+        long totalCourses = courseRepository.countByIsDeletedFalse();
+        long publishedCourses = courseRepository.countByStatusAndIsDeletedFalse(CourseStatus.PUBLISHED);
+        long pendingCourses = courseRepository.countByStatusInAndIsDeletedFalse(List.of(CourseStatus.PENDING, CourseStatus.PENDING_DELETE));
 
         long totalEnrollments = enrollmentRepository.count();
         long completedEnrollments = enrollmentRepository.countByIsCompleted(true);

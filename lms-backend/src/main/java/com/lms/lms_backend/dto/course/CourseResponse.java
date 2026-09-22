@@ -25,5 +25,8 @@ public class CourseResponse {
     private Long instructorId;
     private String instructorName;
     private java.math.BigDecimal price;
+    private Boolean isDeleted;
+    private LocalDateTime deletedAt;
+    private Long enrolledCount;
     private LocalDateTime createdAt;
 }

@@ -30,8 +30,11 @@ import com.lms.lms_backend.entity.CourseStatus;
 import com.lms.lms_backend.entity.Enrollment;
 import com.lms.lms_backend.entity.Role;
 import com.lms.lms_backend.entity.User;
+import com.lms.lms_backend.repository.CertificateRepository;
 import com.lms.lms_backend.repository.CourseRepository;
 import com.lms.lms_backend.repository.EnrollmentRepository;
+import com.lms.lms_backend.repository.LessonProgressRepository;
+import com.lms.lms_backend.repository.LessonRepository;
 import com.lms.lms_backend.repository.UserRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -48,6 +51,15 @@ class EnrollmentServiceTest {
 
     @Mock
     private CourseService courseService;
+
+    @Mock
+    private LessonRepository lessonRepository;
+
+    @Mock
+    private LessonProgressRepository lessonProgressRepository;
+
+    @Mock
+    private CertificateRepository certificateRepository;
 
     @InjectMocks
     private EnrollmentService enrollmentService;
@@ -226,5 +238,78 @@ class EnrollmentServiceTest {
 
         assertTrue(enrollmentService.isEnrolled("student@lms.com", 10L));
         assertFalse(enrollmentService.isEnrolled("student@lms.com", 99L));
+    }
+
+    @Test
+    @DisplayName("Giảng viên xem tiến độ học viên của khóa học thành công")
+    void getCourseStudentProgress_Success() {
+        User instructor = User.builder()
+                .id(2L)
+                .email("instructor@lms.com")
+                .role(Role.ROLE_INSTRUCTOR)
+                .build();
+
+        Course course = Course.builder()
+                .id(10L)
+                .title("Khóa học Java")
+                .instructor(instructor)
+                .build();
+
+        Enrollment enrollment = Enrollment.builder()
+                .id(100L)
+                .user(student)
+                .course(course)
+                .progressPercent(new BigDecimal("50.00"))
+                .isCompleted(false)
+                .enrolledAt(LocalDateTime.now())
+                .build();
+
+        when(userRepository.findByEmail("instructor@lms.com")).thenReturn(Optional.of(instructor));
+        when(courseRepository.findById(10L)).thenReturn(Optional.of(course));
+        when(enrollmentRepository.findByCourseIdWithUserAndCourse(10L)).thenReturn(List.of(enrollment));
+        when(lessonRepository.countByCourseId(10L)).thenReturn(4L);
+        when(lessonProgressRepository.countCompletedLessonsByEnrollmentIds(List.of(100L)))
+                .thenReturn(List.<Object[]>of(new Object[]{100L, 2L}));
+        when(certificateRepository.findFinalScoresByEnrollmentIds(List.of(100L)))
+                .thenReturn(List.<Object[]>of(new Object[]{100L, 95}));
+
+        var results = enrollmentService.getCourseStudentProgress("instructor@lms.com", 10L);
+
+        assertNotNull(results);
+        assertEquals(1, results.size());
+        assertEquals("Trần Văn Học Viên", results.get(0).getFullName());
+        assertEquals("student@lms.com", results.get(0).getEmail());
+        assertEquals(new BigDecimal("50.00"), results.get(0).getProgressPercent());
+        assertEquals(2L, results.get(0).getCompletedLessonsCount());
+        assertEquals(4L, results.get(0).getTotalLessonsCount());
+        assertEquals(95, results.get(0).getQuizScore());
+    }
+
+    @Test
+    @DisplayName("Giảng viên khác không được xem tiến độ khóa học không sở hữu")
+    void getCourseStudentProgress_AccessDenied_WhenNotOwner() {
+        User instructorA = User.builder()
+                .id(2L)
+                .email("instructorA@lms.com")
+                .role(Role.ROLE_INSTRUCTOR)
+                .build();
+
+        User instructorB = User.builder()
+                .id(3L)
+                .email("instructorB@lms.com")
+                .role(Role.ROLE_INSTRUCTOR)
+                .build();
+
+        Course course = Course.builder()
+                .id(10L)
+                .instructor(instructorB)
+                .build();
+
+        when(userRepository.findByEmail("instructorA@lms.com")).thenReturn(Optional.of(instructorA));
+        when(courseRepository.findById(10L)).thenReturn(Optional.of(course));
+
+        assertThrows(org.springframework.security.access.AccessDeniedException.class, () ->
+                enrollmentService.getCourseStudentProgress("instructorA@lms.com", 10L)
+        );
     }
 }

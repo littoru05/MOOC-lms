@@ -455,7 +455,7 @@ Nội dung bao gồm: Phân rã Monolith sang Microservices, giao tiếp đồng
     fullDescription: `Khóa học dành cho Product Designer và Frontend Developer muốn làm chủ tư duy thiết kế trải nghiệm người dùng chuẩn quốc tế.
 
 Bạn sẽ thực hành từ quy trình nghiên cứu người dùng (User Research), xây dựng chân dung Persona, vẽ luồng người dùng (User Flow), Wireframing đến thiết kế giao diện chi tiết High-Fidelity trong Figma bằng Auto Layout 5.0, Variables, Component Sets và tạo Prototype chuyển động mượt mà.`,
-    thumbnailUrl: "https://images.unsplash.com/photo-1581291518655-9523c932edcf?w=800",
+    thumbnailUrl: "https://images.unsplash.com/photo-1586717791821-3f44a563fa4c?w=800",
     category: { id: 5, name: "Thiết kế UI/UX & Sản phẩm số", slug: "thiet-ke-ui-ux" },
     subcategory: { id: "figma-mastery", name: "Figma & Design Systems", slug: "figma-design-systems" },
     tags: ["thiet-ke-ui-ux", "figma-design-systems", "figma", "design-tokens", "prototype", "UI/UX", "Figma", "Design Systems", "Auto Layout"],

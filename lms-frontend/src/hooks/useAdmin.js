@@ -25,6 +25,7 @@ export function useApproveCourse() {
     mutationFn: (courseId) => adminApi.approveCourse(courseId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'pendingCourses'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'stats'] });
       queryClient.invalidateQueries({ queryKey: ['courses', 'published'] });
       queryClient.invalidateQueries({ queryKey: ['courses'] });
     },
@@ -41,6 +42,7 @@ export function useRejectCourse() {
     mutationFn: (courseId) => adminApi.rejectCourse(courseId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'pendingCourses'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'stats'] });
     },
   });
 }
@@ -70,5 +72,19 @@ export function useToggleUserStatus() {
       queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
       queryClient.invalidateQueries({ queryKey: ['admin', 'stats'] });
     },
+  });
+}
+
+/**
+ * 6. Query lấy số liệu thống kê Dashboard hệ thống (Admin)
+ */
+export function useAdminStats() {
+  return useQuery({
+    queryKey: ['admin', 'stats'],
+    queryFn: async () => {
+      const res = await adminApi.getDashboardStats();
+      return res.data;
+    },
+    staleTime: 30 * 1000,
   });
 }

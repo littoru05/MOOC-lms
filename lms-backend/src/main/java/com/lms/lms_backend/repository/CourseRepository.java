@@ -14,7 +14,15 @@ import com.lms.lms_backend.entity.CourseStatus;
 public interface CourseRepository extends JpaRepository<Course, Long>, JpaSpecificationExecutor<Course> {
     Optional<Course> findBySlug(String slug);
     List<Course> findByStatus(CourseStatus status);
+    List<Course> findByStatusAndIsDeletedFalse(CourseStatus status);
+    List<Course> findByStatusIn(List<CourseStatus> statuses);
+    List<Course> findByStatusInAndIsDeletedFalse(List<CourseStatus> statuses);
     List<Course> findByInstructorId(Long instructorId);
+    List<Course> findByInstructorIdAndIsDeletedFalse(Long instructorId);
     boolean existsBySlug(String slug);
     long countByStatus(CourseStatus status);
+    long countByStatusAndIsDeletedFalse(CourseStatus status);
+    long countByStatusIn(List<CourseStatus> statuses);
+    long countByStatusInAndIsDeletedFalse(List<CourseStatus> statuses);
+    long countByIsDeletedFalse();
 }

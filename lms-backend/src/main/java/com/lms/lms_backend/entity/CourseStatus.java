@@ -4,5 +4,7 @@ public enum CourseStatus {
     DRAFT,
     PENDING,
     PUBLISHED,
-    REJECTED
+    REJECTED,
+    PENDING_DELETE,
+    ARCHIVED
 }

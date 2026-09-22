@@ -20,6 +20,7 @@ import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.lms.lms_backend.dto.course.CourseCreateRequest;
+import com.lms.lms_backend.dto.course.CourseDeleteResponse;
 import com.lms.lms_backend.dto.course.CourseResponse;
 import com.lms.lms_backend.entity.Category;
 import com.lms.lms_backend.entity.Course;
@@ -28,6 +29,7 @@ import com.lms.lms_backend.entity.Role;
 import com.lms.lms_backend.entity.User;
 import com.lms.lms_backend.repository.CategoryRepository;
 import com.lms.lms_backend.repository.CourseRepository;
+import com.lms.lms_backend.repository.EnrollmentRepository;
 import com.lms.lms_backend.repository.UserRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,6 +43,9 @@ class CourseServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private EnrollmentRepository enrollmentRepository;
 
     @InjectMocks
     private CourseService courseService;
@@ -178,6 +183,66 @@ class CourseServiceTest {
     }
 
     @Test
+    @DisplayName("Giảng viên gửi yêu cầu xóa khóa học chuyển trạng thái -> PENDING_DELETE")
+    void requestDeleteCourse_Success() {
+        when(courseRepository.findById(10L)).thenReturn(Optional.of(draftCourse));
+        when(userRepository.findByEmail("instructor@lms.com")).thenReturn(Optional.of(instructor));
+        when(courseRepository.save(any(Course.class))).thenAnswer(i -> i.getArgument(0));
+
+        CourseResponse res = courseService.requestDeleteCourse(10L, "instructor@lms.com");
+
+        assertNotNull(res);
+        assertEquals(CourseStatus.PENDING_DELETE, res.getStatus());
+        assertEquals(CourseStatus.PENDING_DELETE, draftCourse.getStatus());
+        verify(courseRepository).save(draftCourse);
+    }
+
+    @Test
+    @DisplayName("Ném ngoại lệ khi user không phải chủ sở hữu gửi yêu cầu xóa")
+    void requestDeleteCourse_Unauthorized_ThrowsException() {
+        User otherInstructor = User.builder().id(99L).email("other@lms.com").role(Role.ROLE_INSTRUCTOR).build();
+        when(courseRepository.findById(10L)).thenReturn(Optional.of(draftCourse));
+        when(userRepository.findByEmail("other@lms.com")).thenReturn(Optional.of(otherInstructor));
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () ->
+                courseService.requestDeleteCourse(10L, "other@lms.com")
+        );
+
+        assertTrue(ex.getMessage().contains("không có quyền yêu cầu xóa"));
+        verify(courseRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Admin phê duyệt yêu cầu xóa: thực hiện xóa mềm khóa học khi chưa có học viên")
+    void approveCourse_PendingDelete_DeletesCourse() {
+        draftCourse.setStatus(CourseStatus.PENDING_DELETE);
+        when(courseRepository.findById(10L)).thenReturn(Optional.of(draftCourse));
+        when(courseRepository.save(any(Course.class))).thenAnswer(i -> i.getArgument(0));
+        when(enrollmentRepository.countByCourseId(10L)).thenReturn(0L);
+
+        CourseResponse res = courseService.approveCourse(10L);
+
+        assertNotNull(res);
+        assertTrue(res.getIsDeleted());
+        verify(courseRepository).save(draftCourse);
+    }
+
+    @Test
+    @DisplayName("Admin từ chối yêu cầu xóa: khôi phục khóa học về PUBLISHED")
+    void rejectCourse_PendingDelete_RestoresPublished() {
+        draftCourse.setStatus(CourseStatus.PENDING_DELETE);
+        when(courseRepository.findById(10L)).thenReturn(Optional.of(draftCourse));
+        when(courseRepository.save(any(Course.class))).thenAnswer(i -> i.getArgument(0));
+
+        CourseResponse res = courseService.rejectCourse(10L);
+
+        assertNotNull(res);
+        assertEquals(CourseStatus.PUBLISHED, res.getStatus());
+        assertEquals(CourseStatus.PUBLISHED, draftCourse.getStatus());
+        verify(courseRepository).save(draftCourse);
+    }
+
+    @Test
     @DisplayName("Ném ngoại lệ khi tạo khóa học với giá âm")
     void createCourse_NegativePrice_ThrowsException() {
         CourseCreateRequest req = new CourseCreateRequest();
@@ -219,5 +284,64 @@ class CourseServiceTest {
         assertEquals(1, result.size());
         assertEquals(new java.math.BigDecimal("499000"), result.get(0).getPrice());
         verify(courseRepository, times(1)).findAll(any(org.springframework.data.jpa.domain.Specification.class));
+    }
+
+    @Test
+    @DisplayName("Xóa khóa học khi chưa có học viên -> Xóa mềm (isDeleted=true)")
+    void deleteCourse_ZeroEnrollments_SoftDeletes() {
+        when(courseRepository.findById(1L)).thenReturn(Optional.of(draftCourse));
+        when(userRepository.findByEmail("instructor@lms.com")).thenReturn(Optional.of(instructor));
+        when(enrollmentRepository.countByCourseId(1L)).thenReturn(0L);
+
+        CourseDeleteResponse response = courseService.deleteCourse(1L, "instructor@lms.com");
+
+        assertNotNull(response);
+        assertEquals(1L, response.getCourseId());
+        assertEquals(CourseStatus.DRAFT, response.getStatus());
+        assertTrue(response.isDeleted());
+        org.junit.jupiter.api.Assertions.assertFalse(response.isArchived());
+        assertEquals(0L, response.getEnrolledCount());
+        assertTrue(draftCourse.getIsDeleted());
+        assertEquals(CourseStatus.DRAFT, draftCourse.getStatus());
+        org.junit.jupiter.api.Assertions.assertNotNull(draftCourse.getDeletedAt());
+        verify(courseRepository, times(1)).save(draftCourse);
+    }
+
+    @Test
+    @DisplayName("Xóa khóa học khi ĐÃ có học viên -> Chuyển sang ARCHIVED (isArchived=true, isDeleted=false)")
+    void deleteCourse_HasEnrollments_Archives() {
+        when(courseRepository.findById(1L)).thenReturn(Optional.of(draftCourse));
+        when(userRepository.findByEmail("instructor@lms.com")).thenReturn(Optional.of(instructor));
+        when(enrollmentRepository.countByCourseId(1L)).thenReturn(12L);
+
+        CourseDeleteResponse response = courseService.deleteCourse(1L, "instructor@lms.com");
+
+        assertNotNull(response);
+        assertEquals(1L, response.getCourseId());
+        org.junit.jupiter.api.Assertions.assertFalse(response.isDeleted());
+        assertTrue(response.isArchived());
+        assertEquals(CourseStatus.ARCHIVED, response.getStatus());
+        assertEquals(12L, response.getEnrolledCount());
+        assertEquals(CourseStatus.ARCHIVED, draftCourse.getStatus());
+        org.junit.jupiter.api.Assertions.assertFalse(draftCourse.getIsDeleted());
+        verify(courseRepository, times(1)).save(draftCourse);
+    }
+
+    @Test
+    @DisplayName("Khôi phục khóa học đang ở trạng thái ARCHIVED -> Thành công chuyển về PUBLISHED")
+    void restoreCourse_ArchivedCourse_Success() {
+        draftCourse.setStatus(CourseStatus.ARCHIVED);
+        when(courseRepository.findById(1L)).thenReturn(Optional.of(draftCourse));
+        when(userRepository.findByEmail("instructor@lms.com")).thenReturn(Optional.of(instructor));
+        when(courseRepository.save(any(Course.class))).thenAnswer(i -> i.getArgument(0));
+
+        CourseResponse res = courseService.restoreCourse(1L, "instructor@lms.com");
+
+        assertNotNull(res);
+        assertEquals(CourseStatus.PUBLISHED, res.getStatus());
+        assertEquals(CourseStatus.PUBLISHED, draftCourse.getStatus());
+        org.junit.jupiter.api.Assertions.assertFalse(draftCourse.getIsDeleted());
+        org.junit.jupiter.api.Assertions.assertNull(draftCourse.getDeletedAt());
+        verify(courseRepository, times(1)).save(draftCourse);
     }
 }

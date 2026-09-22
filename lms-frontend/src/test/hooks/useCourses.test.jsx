@@ -1,7 +1,7 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { describe, expect, it } from 'vitest';
-import { useCategories, usePublishedCourses, useSubmitForReview, useTeachingCourses } from '../../hooks/useCourses';
+import { useCategories, usePublishedCourses, useSubmitForReview, useTeachingCourses, useRequestDeleteCourse } from '../../hooks/useCourses';
 import { createTestQueryClient } from '../test-utils';
 import { QueryClientProvider } from '@tanstack/react-query';
 
@@ -59,5 +59,17 @@ describe('useCourses Custom React Query Hooks', () => {
     });
 
     expect(result.current.isPending).toBe(false);
+  });
+
+  it('useRequestDeleteCourse thực thi mutation yêu cầu xóa khóa học thành công', async () => {
+    const { result } = renderHook(() => useRequestDeleteCourse(), {
+      wrapper: createWrapper(),
+    });
+
+    expect(result.current.isPending).toBe(false);
+    await result.current.mutateAsync(1);
+    await waitFor(() => {
+      expect(result.current.isSuccess).toBe(true);
+    });
   });
 });
