@@ -116,6 +116,14 @@ cp .env.example .env
 ```
 *(Bạn có thể giữ nguyên các giá trị mặc định để chạy ở môi trường Local Development, hoặc tùy chỉnh các thông số DB_PASSWORD, JWT_SECRET khi triển khai)*
 
+#### 📱 Cấu hình `VITE_PUBLIC_HOST` (Mã QR thanh toán 2 thiết bị):
+Hệ thống hỗ trợ tính năng hiển thị mã QR chuyển khoản trên máy tính để học viên dùng điện thoại quét và mở trang thanh toán. Để điện thoại hoặc thiết bị khác truy cập được, cấu hình biến `VITE_PUBLIC_HOST` trong file `.env`:
+- **Phát triển qua mạng LAN (cùng Wi-Fi):** Điền địa chỉ IP LAN của máy bạn (chạy `ipconfig` trên Windows hoặc `ifconfig` trên Linux/macOS). Ví dụ: `VITE_PUBLIC_HOST=192.168.1.15`
+- **Phát triển từ xa qua ngrok / tunnel:** Điền URL ngrok đầy đủ có giao thức. Ví dụ: `VITE_PUBLIC_HOST=https://xxxx-xxxx.ngrok-free.app`
+- **Môi trường Production:** Điền domain hoặc IP public của máy chủ Frontend. Ví dụ: `VITE_PUBLIC_HOST=https://lms.example.com`
+
+*(Lưu ý: Nếu để trống, hệ thống sẽ tự động dùng hostname hiện tại của trình duyệt).*
+
 ---
 
 ### Cách 1: Khởi chạy nhanh bằng Docker Compose (Khuyên dùng)
