@@ -101,8 +101,6 @@ export const CourseDetailPage = ({ courseSlug: courseSlugProp, onBack, onStartLe
       setLoading(true);
       setErrorMessage('');
       try {
-        console.log('[CourseDetail] 🔍 Đang tải khóa học từ Backend API với slug:', courseSlug);
-        
         let apiCourse = null;
 
         // 1. GỌI BACKEND API LÀ NGUỒN CHÍNH
@@ -111,7 +109,6 @@ export const CourseDetailPage = ({ courseSlug: courseSlugProp, onBack, onStartLe
             const res = await courseApi.getCourseBySlug(courseSlug);
             if (res.data) {
               apiCourse = res.data;
-              console.log('[CourseDetail] 🌐 Đã nhận dữ liệu thật từ Backend API:', apiCourse);
             }
           } catch (apiErr) {
             console.warn('[CourseDetail] Backend API trả về lỗi hoặc không tìm thấy:', apiErr);
