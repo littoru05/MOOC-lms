@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { quizApi } from '../../api/quizApi';
-import { getAllQuizzes, getCourseBySlugOrId } from '../../mocks/courses';
+import { courseApi } from '../../api/courseApi';
 import { 
   HelpCircle, 
   Clock, 
@@ -43,23 +43,21 @@ export const QuizIntroPage = ({ quizId: quizIdProp, enrollmentId: enrollmentIdPr
   useEffect(() => {
     const fetchQuizDetails = async () => {
       try {
-        const all = getAllQuizzes();
-        let currentQuiz = all.find((q) => Number(q.id) === Number(quizId)) || all[0];
+        const res = await quizApi.getQuizById(quizId);
+        if (res.data) {
+          const currentQuiz = res.data;
+          setQuiz(currentQuiz);
 
-        try {
-          const res = await quizApi.getQuizById(quizId);
-          if (res.data) {
-            currentQuiz = { ...currentQuiz, ...res.data };
+          if (currentQuiz?.courseId) {
+            try {
+              const cRes = await courseApi.getCourseById(currentQuiz.courseId);
+              if (cRes.data) {
+                setCourse(cRes.data);
+              }
+            } catch (cErr) {
+              console.warn('Lỗi khi tải thông tin khóa học:', cErr);
+            }
           }
-        } catch (e) {
-          // fallback
-        }
-
-        setQuiz(currentQuiz);
-
-        if (currentQuiz?.courseId) {
-          const courseData = getCourseBySlugOrId(currentQuiz.courseId);
-          setCourse(courseData);
         }
       } catch (err) {
         console.error('Lỗi khi tải thông tin bài thi:', err);

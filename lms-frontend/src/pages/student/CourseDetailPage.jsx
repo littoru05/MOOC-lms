@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { courseApi } from '../../api/courseApi';
 import { learningApi } from '../../api/learningApi';
-import { getCourseBySlugOrId } from '../../mocks/courses';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { useCart, useAddToCart } from '../../hooks/useCart';
@@ -112,27 +111,16 @@ export const CourseDetailPage = ({ courseSlug: courseSlugProp, onBack, onStartLe
             }
           } catch (apiErr) {
             console.warn('[CourseDetail] Backend API trả về lỗi hoặc không tìm thấy:', apiErr);
-            // Nếu API báo 404 hoặc lỗi không tìm thấy -> không dùng mock đè lên
-            if (apiErr.response?.status === 404) {
-              if (isMounted) {
-                setCourse(null);
-                setErrorMessage('Khóa học không tồn tại trong hệ thống hoặc đã bị gỡ bỏ.');
-                setLoading(false);
-              }
-              return;
+            if (isMounted) {
+              setCourse(null);
+              setErrorMessage(
+                apiErr.response?.status === 404
+                  ? 'Khóa học không tồn tại trong hệ thống hoặc đã bị gỡ bỏ.'
+                  : (apiErr.response?.data?.message || 'Không thể kết nối đến máy chủ.')
+              );
+              setLoading(false);
             }
-            // Fallback chỉ khi offline/network failure
-            const fallbackMock = getCourseBySlugOrId(courseSlug);
-            if (fallbackMock) {
-              apiCourse = fallbackMock;
-            } else {
-              if (isMounted) {
-                setCourse(null);
-                setErrorMessage(apiErr.response?.data?.message || 'Không thể kết nối đến máy chủ.');
-                setLoading(false);
-              }
-              return;
-            }
+            return;
           }
         }
 
@@ -145,10 +133,22 @@ export const CourseDetailPage = ({ courseSlug: courseSlugProp, onBack, onStartLe
           return;
         }
 
-        // 2. TÌM MOCK ĐỂ BỔ SUNG CÁC TRƯỜNG TRANG TRÍ PHỤ TRỢ (NẾU CÓ)
-        const mockMatch = getCourseBySlugOrId(courseSlug) || {};
+        // 2. NẠP DANH SÁCH CHƯƠNG & BÀI HỌC TỪ BACKEND
+        let fetchedSections = [];
+        try {
+          const secRes = await courseApi.getSectionsByCourse(apiCourse.id);
+          if (secRes.data && Array.isArray(secRes.data)) {
+            fetchedSections = secRes.data;
+          }
+        } catch (secErr) {
+          console.warn('[CourseDetail] Lỗi khi nạp chương học từ backend:', secErr);
+        }
 
-        // Default decorative fields for UI completeness (kể cả khóa học mới tạo chỉ có ở Backend)
+        // 3. Decorative defaults cho các trường phụ trợ hiển thị giao diện
+        const totalDurationHours = apiCourse.totalDurationMinutes
+          ? `${Math.round(apiCourse.totalDurationMinutes / 60) || 1} giờ`
+          : '20 giờ học';
+
         const decorativeDefaults = {
           whatYouWillLearn: [
             'Làm chủ toàn diện kiến thức và kỹ năng thực tế của chương trình đào tạo',
@@ -166,31 +166,27 @@ export const CourseDetailPage = ({ courseSlug: courseSlugProp, onBack, onStartLe
           ],
           language: 'Tiếng Việt',
           certificateAvailable: true,
-          rating: 5.0,
-          reviewCount: 1,
-          totalDuration: apiCourse.totalDurationMinutes ? `${Math.round(apiCourse.totalDurationMinutes / 60) || 1} giờ` : '20 giờ',
+          rating: 4.9,
+          reviewCount: 1420,
+          totalDuration: totalDurationHours,
         };
 
-        // 3. MERGE: apiCourse luôn GHI ĐÈ LÊN tất cả các field trùng tên
         const finalCourse = {
           ...decorativeDefaults,
-          ...mockMatch,
           ...apiCourse,
+          sections: fetchedSections,
         };
 
         if (isMounted) {
           setCourse(finalCourse);
+          setSections(fetchedSections);
 
-          // Nạp danh sách chương & bài học từ dữ liệu Backend
-          if (finalCourse.sections && finalCourse.sections.length > 0) {
-            setSections(finalCourse.sections);
+          if (fetchedSections.length > 0) {
             const initialOpen = {};
-            finalCourse.sections.slice(0, 2).forEach((s) => {
+            fetchedSections.slice(0, 2).forEach((s) => {
               initialOpen[s.id] = true;
             });
             setOpenSections(initialOpen);
-          } else {
-            setSections([]);
           }
         }
 

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePendingCourses, useApproveCourse, useRejectCourse } from '../../hooks/useAdmin';
-import { SAMPLE_COURSES } from '../../data/coursesData';
 import { 
   CheckCircle2, 
   XCircle, 
