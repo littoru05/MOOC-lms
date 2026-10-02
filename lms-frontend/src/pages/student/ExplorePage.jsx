@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePublishedCourses, useCategories } from '../../hooks/useCourses';
-import { FEATURED_INSTRUCTORS } from '../../mocks/courses';
+import { FEATURED_INSTRUCTORS } from '../../data/featuredInstructors';
 import { Carousel } from '../../components/common/Carousel';
 import { CourseCardWithPreview } from '../../components/course/CourseCardWithPreview';
 import { getImageUrl } from '../../utils/imageUrl';

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { courseApi } from '../../api/courseApi';
 import { learningApi } from '../../api/learningApi';
 import { quizApi } from '../../api/quizApi';
-import { getCourseBySlugOrId, getQuizzesByCourseId } from '../../mocks/courses';
 import { useAuth } from '../../context/AuthContext';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
@@ -62,39 +61,25 @@ export const CoursePlayerPage = ({ courseId: courseIdProp, onBack, onStartQuiz, 
   useEffect(() => {
     const fetchPlayerData = async () => {
       try {
-        const richCourse = getCourseBySlugOrId(courseId);
-        setCourse(richCourse);
+        // 1. Tải thông tin khóa học từ Backend
+        try {
+          const cRes = await courseApi.getCourseById(courseId);
+          if (cRes.data) {
+            setCourse(cRes.data);
+          }
+        } catch (cErr) {
+          console.warn('Không thể tải thông tin khóa học:', cErr);
+        }
 
-        // Fallback sections from rich course
-        let availableSections = richCourse?.sections || [];
-
-        // Try fetching live backend sections and intelligently merge lessons
+        // 2. Tải danh sách chương & bài học từ Backend
+        let availableSections = [];
         try {
           const secRes = await courseApi.getSectionsByCourse(courseId);
-          if (secRes.data && secRes.data.length > 0) {
-            const merged = secRes.data.map((apiSec, idx) => {
-              const matchMockSec = richCourse?.sections?.find(
-                (ms) => ms.id === apiSec.id || ms.orderIndex === apiSec.orderIndex || String(ms.title).trim() === String(apiSec.title).trim()
-              ) || richCourse?.sections?.[idx];
-
-              return {
-                ...apiSec,
-                lessons: (apiSec.lessons && apiSec.lessons.length > 0)
-                  ? apiSec.lessons
-                  : (matchMockSec?.lessons || [])
-              };
-            });
-
-            // If backend sections did not retain lessons, keep richCourse.sections
-            const mergedLessonsCount = merged.reduce((acc, s) => acc + (s.lessons?.length || 0), 0);
-            if (mergedLessonsCount > 0) {
-              availableSections = merged;
-            } else if (richCourse?.sections && richCourse.sections.length > 0) {
-              availableSections = richCourse.sections;
-            }
+          if (secRes.data && Array.isArray(secRes.data)) {
+            availableSections = secRes.data;
           }
         } catch (e) {
-          console.warn('Dùng dữ liệu đề cương bài giảng tiêu chuẩn từ Mock Data:', e);
+          console.warn('Lỗi khi tải đề cương bài giảng từ backend:', e);
         }
 
         setSections(availableSections);
@@ -134,17 +119,17 @@ export const CoursePlayerPage = ({ courseId: courseIdProp, onBack, onStartQuiz, 
           console.warn('Chưa có enrollment backend, tính tiến độ cục bộ');
         }
 
-        // Load quizzes from store & backend
-        const storeQuizzes = getQuizzesByCourseId(courseId);
+        // Load quizzes from backend
         try {
           const quizRes = await quizApi.getQuizzesByCourse(courseId);
-          if (quizRes.data && quizRes.data.length > 0) {
+          if (quizRes.data && Array.isArray(quizRes.data)) {
             setQuizzes(quizRes.data);
           } else {
-            setQuizzes(storeQuizzes);
+            setQuizzes([]);
           }
         } catch (e) {
-          setQuizzes(storeQuizzes);
+          console.warn('Lỗi khi tải bài quiz từ backend:', e);
+          setQuizzes([]);
         }
 
         // Auto select first lesson if available

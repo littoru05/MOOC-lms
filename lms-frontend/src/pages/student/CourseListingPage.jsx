@@ -20,7 +20,6 @@ import {
 } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { CourseCardWithPreview } from '../../components/course/CourseCardWithPreview';
-import { COURSES } from '../../mocks/courses';
 import { usePublishedCourses, useCategories } from '../../hooks/useCourses';
 import { formatCurrency } from '../../utils/format';
 import { findCategoryHierarchyBySlug } from '../../data/categoryMenu';
@@ -40,8 +39,8 @@ export const CourseListingPage = ({
   const minPrice = searchParams.get('minPrice') || '';
   const maxPrice = searchParams.get('maxPrice') || '';
 
-  // Load published courses and categories from Backend + Mock Cache via React Query
-  const { data: courses = COURSES } = usePublishedCourses();
+  // Load published courses and categories from Backend via React Query
+  const { data: courses = [] } = usePublishedCourses();
   const { data: categories = [] } = useCategories();
 
   // Parsing Category Info from Filter Query

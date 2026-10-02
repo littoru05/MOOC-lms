@@ -1,47 +1,17 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { courseApi } from '../api/courseApi';
 import { quizApi } from '../api/quizApi';
-import { COURSES } from '../mocks/courses';
 
 /**
  * 1. Query lấy danh sách toàn bộ khóa học đã xuất bản (Public)
- * Tự động đồng bộ với Mock Metadata nếu có và cache trong 5 phút.
+ * Lấy trực tiếp từ Backend API và cache trong 5 phút.
  */
 export function usePublishedCourses(params) {
   return useQuery({
     queryKey: ['courses', 'published', params],
     queryFn: async () => {
-      try {
-        const res = await courseApi.getPublishedCourses(params);
-        if (res.data && res.data.length > 0) {
-          const merged = res.data.map((apiCourse) => {
-            const richMatch = COURSES.find(
-              (sc) =>
-                String(sc.slug).toLowerCase() === String(apiCourse.slug).toLowerCase() ||
-                String(sc.id) === String(apiCourse.id)
-            );
-            return richMatch ? { ...richMatch, ...apiCourse } : apiCourse;
-          });
-
-          const allCourses = [...merged];
-          COURSES.forEach((sc) => {
-            if (
-              !allCourses.some(
-                (c) =>
-                  String(c.slug).toLowerCase() === String(sc.slug).toLowerCase() ||
-                  String(c.id) === String(sc.id)
-              )
-            ) {
-              allCourses.push(sc);
-            }
-          });
-          return allCourses;
-        }
-        return COURSES;
-      } catch (err) {
-        console.warn('Dùng dữ liệu khóa học chuẩn hóa nội bộ:', err);
-        return COURSES;
-      }
+      const res = await courseApi.getPublishedCourses(params);
+      return res.data || [];
     },
     staleTime: 5 * 60 * 1000, // 5 phút
   });

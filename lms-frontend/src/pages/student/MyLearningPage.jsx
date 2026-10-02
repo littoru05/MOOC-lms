@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { learningApi } from '../../api/learningApi';
-import { getCourseBySlugOrId } from '../../mocks/courses';
 import { BookOpen, Play, Award, CheckCircle2, Clock } from 'lucide-react';
 import { getImageUrl } from '../../utils/imageUrl';
 
@@ -23,35 +22,14 @@ export const MyLearningPage = ({ onStartLearning, onExplore }) => {
   const fetchEnrollments = async () => {
     try {
       const res = await learningApi.getMyEnrollments();
-      if (res.data && res.data.length > 0) {
-        // Merge with rich metadata
-        const enriched = res.data.map((e) => {
-          const richCourse = getCourseBySlugOrId(e.courseId || e.course?.id || e.course?.slug);
-          return {
-            ...e,
-            course: {
-              ...richCourse,
-              ...(e.course || {}),
-            },
-          };
-        });
-        setEnrollments(enriched);
+      if (res.data && Array.isArray(res.data)) {
+        setEnrollments(res.data);
       } else {
         setEnrollments([]);
       }
     } catch (err) {
       console.warn('Lỗi tải danh sách khóa học của tôi:', err);
-      // Fallback with course 1 for seamless experience
-      const defaultCourse = getCourseBySlugOrId(1);
-      setEnrollments([
-        {
-          id: 1,
-          courseId: 1,
-          progressPercent: 28,
-          isCompleted: false,
-          course: defaultCourse,
-        }
-      ]);
+      setEnrollments([]);
     } finally {
       setLoading(false);
     }
