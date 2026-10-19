@@ -18,6 +18,8 @@ WORKDIR /app
 RUN addgroup -S spring && adduser -S spring -G spring
 USER spring:spring
 
+RUN mkdir -p /app/uploads && chmod -R 777 /app/uploads
+
 # Copy built jar from builder stage
 COPY --from=builder /app/target/*.jar app.jar
 
