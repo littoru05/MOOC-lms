@@ -307,6 +307,7 @@ public class CourseService {
                 .enrolledCount(enrolledCount)
                 .categoryId(c.getCategory() != null ? c.getCategory().getId() : null)
                 .categoryName(c.getCategory() != null ? c.getCategory().getName() : null)
+                .categorySlug(c.getCategory() != null ? c.getCategory().getSlug() : null)
                 .instructorId(c.getInstructor() != null ? c.getInstructor().getId() : null)
                 .instructorName(c.getInstructor() != null ? c.getInstructor().getFullName() : null)
                 .createdAt(c.getCreatedAt())

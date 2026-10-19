@@ -109,7 +109,7 @@ export const MEGA_MENU_CATEGORIES = [
   },
   {
     id: 'ai-machine-learning',
-    name: 'Trí tuệ nhân tạo & Machine Learning',
+    name: 'Trí tuệ nhân tạo & Data Science',
     slug: 'ai-data-science',
     iconName: 'Cpu',
     badge: 'Xu hướng',
@@ -232,8 +232,8 @@ export const MEGA_MENU_CATEGORIES = [
   },
   {
     id: 'database-systems',
-    name: 'Cơ sở dữ liệu & Tối ưu hóa',
-    slug: 'co-so-du-lieu',
+    name: 'Cơ sở dữ liệu & Data Engineering',
+    slug: 'co-so-du-lieu-data-engineering',
     iconName: 'Database',
     subcategories: [
       {

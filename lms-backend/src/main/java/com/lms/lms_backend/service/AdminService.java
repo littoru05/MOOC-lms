@@ -9,7 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.lms.lms_backend.dto.admin.AdminUserResponse;
 import com.lms.lms_backend.dto.admin.DashboardStatsResponse;
 import com.lms.lms_backend.dto.course.CourseResponse;
-import com.lms.lms_backend.entity.Course;
 import com.lms.lms_backend.entity.CourseStatus;
 import com.lms.lms_backend.entity.Role;
 import com.lms.lms_backend.entity.User;
@@ -27,11 +26,18 @@ public class AdminService {
     private final CourseRepository courseRepository;
     private final EnrollmentRepository enrollmentRepository;
     private final CourseService courseService;
+    private final SectionService sectionService;
 
     // 1. Quản lý kiểm duyệt khóa học (SD06 & Deletion Request)
     public List<CourseResponse> getPendingCourses() {
         return courseRepository.findByStatusInAndIsDeletedFalse(List.of(CourseStatus.PENDING, CourseStatus.PENDING_DELETE)).stream()
-                .map(courseService::mapToResponse)
+                .map(course -> {
+                    CourseResponse res = courseService.mapToResponse(course);
+                    if (sectionService != null && course.getId() != null) {
+                        res.setSections(sectionService.getSectionsByCourse(course.getId()));
+                    }
+                    return res;
+                })
                 .collect(Collectors.toList());
     }
 

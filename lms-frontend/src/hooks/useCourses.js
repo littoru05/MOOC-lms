@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { courseApi } from '../api/courseApi';
 import { quizApi } from '../api/quizApi';
+import { learningApi } from '../api/learningApi';
 
 /**
  * 1. Query lấy danh sách toàn bộ khóa học đã xuất bản (Public)
@@ -180,6 +181,28 @@ export function useCourseQuizzes(courseId) {
 }
 
 /**
+ * 7b. Query lấy danh sách các chương học (sections) kèm bài học của khóa học
+ */
+export function useCourseSections(courseId) {
+  const isValidId = !isNaN(Number(courseId)) && Number(courseId) > 0;
+  return useQuery({
+    queryKey: ['sections', 'course', courseId],
+    queryFn: async () => {
+      if (!isValidId) return [];
+      try {
+        const res = await courseApi.getSectionsByCourse(courseId);
+        if (!res.data) return [];
+        return Array.isArray(res.data) ? res.data : [res.data];
+      } catch (e) {
+        console.warn('Lỗi tải chương học:', e);
+        return [];
+      }
+    },
+    enabled: isValidId,
+  });
+}
+
+/**
  * 8. Query lấy danh sách học viên và tiến độ học tập theo khóa học của Giảng viên
  */
 export function useInstructorStudents(courseId) {
@@ -190,5 +213,24 @@ export function useInstructorStudents(courseId) {
       return res.data || [];
     },
     staleTime: 30 * 1000,
+  });
+}
+
+/**
+ * 9. Query lấy danh sách ghi danh của học viên hiện tại (My Learning)
+ */
+export function useMyEnrollments(enabled = true) {
+  return useQuery({
+    queryKey: ['my-learning'],
+    queryFn: async () => {
+      try {
+        const res = await learningApi.getMyEnrollments();
+        return res.data || [];
+      } catch (err) {
+        return [];
+      }
+    },
+    enabled,
+    staleTime: 5 * 60 * 1000,
   });
 }

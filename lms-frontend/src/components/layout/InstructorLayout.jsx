@@ -159,7 +159,7 @@ export const InstructorLayout = ({ currentTab: currentTabProp, onNavigate, onCre
               className="w-9 h-9 rounded-full object-cover border-2 border-amber-400"
             />
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-bold text-white truncate">{user?.fullName || 'TS. Nguyễn Văn A'}</p>
+              <p className="text-xs font-bold text-white truncate">{user?.fullName || 'Giảng viên'}</p>
               <p className="text-[10px] text-amber-300 font-semibold">Giảng viên Chuyên môn →</p>
             </div>
           </Link>

@@ -166,8 +166,6 @@ export const CourseDetailPage = ({ courseSlug: courseSlugProp, onBack, onStartLe
           ],
           language: 'Tiếng Việt',
           certificateAvailable: true,
-          rating: 4.9,
-          reviewCount: 1420,
           totalDuration: totalDurationHours,
         };
 
@@ -307,7 +305,7 @@ export const CourseDetailPage = ({ courseSlug: courseSlugProp, onBack, onStartLe
             <ArrowLeft className="w-3.5 h-3.5" /> Khám phá
           </button>
           <span>/</span>
-          <span className="text-[#5E5E5E]">{course.category?.name || 'Khóa học'}</span>
+          <span className="text-[#5E5E5E]">{course.categoryName || course.category?.name || 'Khóa học'}</span>
           <span>/</span>
           <span className="text-[#1A1C1E] font-semibold truncate max-w-md">{course.title}</span>
         </div>
@@ -322,17 +320,20 @@ export const CourseDetailPage = ({ courseSlug: courseSlugProp, onBack, onStartLe
             
             {/* Badges */}
             <div className="flex flex-wrap items-center gap-2">
-              {course.category && (
+              {(course.categoryName || course.category?.name) && (
                 <span className="px-3 py-1 bg-white/10 border border-white/20 text-xs font-semibold text-blue-200 rounded-md">
-                  {course.category.name}
+                  {course.categoryName || course.category?.name}
                 </span>
               )}
-              <span className="px-2.5 py-1 bg-amber-500/20 border border-amber-400/30 text-amber-300 text-xs font-bold rounded-md flex items-center gap-1">
-                <Sparkles className="w-3.5 h-3.5" /> Khóa học Tiêu biểu
-              </span>
-              <span className="px-2.5 py-1 bg-white/10 text-slate-300 text-xs rounded-md">
-                Cấp độ: {course.level || 'Trung cấp'}
-              </span>
+              {isEnrolled ? (
+                <span className="px-2.5 py-1 bg-emerald-600 text-white text-xs font-bold rounded-md flex items-center gap-1 shadow-xs">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-white" /> Đã đăng ký
+                </span>
+              ) : course.level ? (
+                <span className="px-2.5 py-1 bg-white/10 text-slate-300 text-xs rounded-md">
+                  Cấp độ: {course.level}
+                </span>
+              ) : null}
             </div>
 
             {/* Title */}
@@ -347,21 +348,25 @@ export const CourseDetailPage = ({ courseSlug: courseSlugProp, onBack, onStartLe
 
             {/* Rating & Social Proof */}
             <div className="flex flex-wrap items-center gap-4 text-xs pt-1">
-              <div className="flex items-center gap-1.5 font-bold text-amber-400">
-                <span className="text-base text-amber-300">{course.rating || 4.9}</span>
-                <div className="flex text-amber-400">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                  ))}
+              {course.rating ? (
+                <div className="flex items-center gap-1.5 font-bold text-amber-400">
+                  <span className="text-base text-amber-300">{course.rating}</span>
+                  <div className="flex text-amber-400">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                    ))}
+                  </div>
+                  {course.reviewCount && (
+                    <span className="text-blue-200 font-normal underline cursor-pointer">
+                      ({course.reviewCount.toLocaleString()} đánh giá)
+                    </span>
+                  )}
                 </div>
-                <span className="text-blue-200 font-normal underline cursor-pointer">
-                  ({(course.reviewCount || 1420).toLocaleString()} đánh giá)
-                </span>
-              </div>
+              ) : null}
 
               <div className="flex items-center gap-1 text-slate-300">
                 <Users className="w-4 h-4 text-blue-300" />
-                <span>{(course.enrolledCount || 8650).toLocaleString()} học viên đã ghi danh</span>
+                <span>{(course.enrolledCount || 0).toLocaleString()} học viên đã ghi danh</span>
               </div>
             </div>
 
@@ -373,7 +378,7 @@ export const CourseDetailPage = ({ courseSlug: courseSlugProp, onBack, onStartLe
                   alt={course.instructor?.fullName}
                   className="w-6 h-6 rounded-full object-cover border border-white/30"
                 />
-                <span>Giảng viên: <strong className="text-white">{course.instructor?.fullName || 'TS. Nguyễn Văn A'}</strong></span>
+                <span>Giảng viên: <strong className="text-white">{course.instructor?.fullName || 'Giảng viên EduMOOC'}</strong></span>
               </div>
 
               <div className="flex items-center gap-1">
@@ -411,7 +416,16 @@ export const CourseDetailPage = ({ courseSlug: courseSlugProp, onBack, onStartLe
 
             {/* Price / Enrollment Status */}
             <div>
-              {Number(course.price) > 0 ? (
+              {isEnrolled ? (
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl font-bold font-serif text-emerald-700 flex items-center gap-1.5">
+                      <CheckCircle2 className="w-5 h-5 text-emerald-600" /> Bạn đã sở hữu khóa học
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-[#6B6B6B] mt-0.5">Truy cập trọn đời mọi tài liệu & bài giảng</p>
+                </div>
+              ) : Number(course.price) > 0 ? (
                 <div>
                   <div className="flex items-baseline gap-2">
                     <span className="text-2xl font-bold font-serif text-[#001D37]">
@@ -521,11 +535,11 @@ export const CourseDetailPage = ({ courseSlug: courseSlugProp, onBack, onStartLe
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 pt-2">
                 {(course.whatYouWillLearn || [
-                  "Thiết kế CSDL quan hệ chuẩn hóa 11 thực thể trên MySQL 8.0.",
-                  "Xây dựng Backend Monolithic 3-Layer chuẩn doanh nghiệp với Spring Boot.",
-                  "Hiện thực cơ chế bảo mật phân quyền Role-Based với Spring Security & JWT.",
-                  "Xây dựng Frontend Single Page Application với React 19 & Tailwind CSS.",
-                  "Tự động chấm điểm Quiz và cấp chứng chỉ số có mã băm UUID xác thực."
+                  "Nắm vững toàn diện kiến thức nền tảng và nâng cao theo đúng lộ trình chuẩn quốc tế.",
+                  "Hình thành tư duy phân tích, giải quyết bài toán thực tế và kỹ năng thực hành chuyên sâu.",
+                  "Trực tiếp thực hành qua các bài học, tình huống thực chiến và hệ thống bài kiểm tra khảo thí.",
+                  "Tự tin ứng dụng kiến thức vào công việc thực tế và định hướng phát triển nghề nghiệp lâu dài.",
+                  "Hoàn thành bài thi trắc nghiệm để nhận Chứng chỉ số tốt nghiệp có mã băm UUID xác thực toàn cầu."
                 ]).map((outcome, idx) => (
                   <div key={idx} className="flex items-start gap-2.5 text-xs text-[#1A1C1E] leading-relaxed">
                     <Check className="w-4 h-4 text-[#22C55E] shrink-0 mt-0.5" />
@@ -657,7 +671,7 @@ export const CourseDetailPage = ({ courseSlug: courseSlugProp, onBack, onStartLe
                   />
                   <div>
                     <h3 className="text-base font-bold font-serif text-[#001D37]">
-                      {course.instructor?.fullName || 'TS. Nguyễn Văn A'}
+                      {course.instructor?.fullName || 'Giảng viên EduMOOC'}
                     </h3>
                     <p className="text-xs text-[#16324F] font-medium mt-0.5">
                       {course.instructor?.title || 'Senior Software Architect & Giảng viên ĐH'}
@@ -734,7 +748,15 @@ export const CourseDetailPage = ({ courseSlug: courseSlugProp, onBack, onStartLe
                     avatarUrl: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100",
                     rating: 5,
                     date: "3 ngày trước",
-                    comment: "Khóa học cực kỳ chất lượng! Kiến trúc 3-Layer được giải thích chi tiết, code sạch sẽ và rất thực tế."
+                    comment: "Giáo trình bài bản, giảng viên giảng giải rất chi tiết và dễ hiểu! Bài tập thực hành sát với yêu cầu thực tế doanh nghiệp."
+                  },
+                  {
+                    id: 2,
+                    fullName: "Lê Minh Trang",
+                    avatarUrl: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100",
+                    rating: 5,
+                    date: "1 tuần trước",
+                    comment: "Quy trình làm bài thi trắc nghiệm và nhận chứng chỉ số có mã băm UUID tự động rất nhanh chóng và chuyên nghiệp."
                   }
                 ]).map((rev) => (
                   <div key={rev.id} className="bg-white border border-[#E4E4E0] rounded-xl p-5 shadow-xs space-y-2">

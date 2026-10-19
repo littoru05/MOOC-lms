@@ -15,6 +15,10 @@ export const mockCourses = [
       email: 'instructor@lms.com',
       avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
     },
+    instructorName: 'TS. Nguyễn Văn A',
+    categoryId: 1,
+    categoryName: 'Lập trình Web',
+    categorySlug: 'lap-trinh-web',
     category: {
       id: 1,
       name: 'Lập trình Web',
@@ -47,6 +51,10 @@ export const mockCourses = [
       fullName: 'TS. Nguyễn Văn A',
       email: 'instructor@lms.com',
     },
+    instructorName: 'TS. Nguyễn Văn A',
+    categoryId: 1,
+    categoryName: 'Lập trình Web',
+    categorySlug: 'lap-trinh-web',
     category: {
       id: 1,
       name: 'Lập trình Web',
@@ -231,6 +239,36 @@ export const handlers = [
       fullName,
       role: role || 'ROLE_STUDENT',
     });
+  }),
+
+  // 5a.2 Auth: Refresh Token
+  http.post('*/api/v1/auth/refresh', () => {
+    const storedToken = typeof localStorage !== 'undefined' ? localStorage.getItem('token') : null;
+    const storedUser = typeof localStorage !== 'undefined' ? localStorage.getItem('user_cache') : null;
+    if (storedToken || storedUser) {
+      let parsedUser = {};
+      try {
+        parsedUser = storedUser ? JSON.parse(storedUser) : {};
+      } catch (e) {
+        parsedUser = {};
+      }
+      return HttpResponse.json({
+        token: storedToken || 'mock-refreshed-token',
+        id: parsedUser.id || 3,
+        email: parsedUser.email || 'student@lms.com',
+        fullName: parsedUser.fullName || 'Trần Văn Học Viên',
+        role: parsedUser.role || 'ROLE_STUDENT',
+      });
+    }
+    return new HttpResponse(
+      JSON.stringify({ status: 401, error: 'Unauthorized', message: 'Refresh token không tồn tại' }),
+      { status: 401, headers: { 'Content-Type': 'application/json' } }
+    );
+  }),
+
+  // 5a.3 Auth: Logout
+  http.post('*/api/v1/auth/logout', () => {
+    return HttpResponse.json({ message: 'Đăng xuất thành công!' });
   }),
 
   // 5b. Auth: Get Current User (getMe)
@@ -462,6 +500,61 @@ export const handlers = [
   http.patch('*/api/v1/admin/users/:id/toggle-active', () => {
     return HttpResponse.json({
       message: 'Cập nhật trạng thái thành công',
+    });
+  }),
+
+  // Admin Pending Courses & Approvals
+  http.get('*/api/v1/admin/courses/pending', () => {
+    return HttpResponse.json([
+      {
+        id: 10,
+        title: 'Lập trình Flutter & Dart Xây dựng App Mobile',
+        slug: 'lap-trinh-flutter-dart-ecommerce-app',
+        description: 'Làm chủ Flutter Framework và phát triển ứng dụng di động đa nền tảng.',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1526470608268-f674ce90ebd4?w=800',
+        status: 'PENDING',
+        categoryId: 3,
+        categoryName: 'Lập trình Di động',
+        categorySlug: 'lap-trinh-di-dong',
+        instructorId: 2,
+        instructorName: 'TS. Nguyễn Văn A',
+        price: 299000,
+        sections: [
+          {
+            id: 21,
+            courseId: 10,
+            title: 'Nền tảng Ngôn ngữ Dart & Cấu trúc Widget',
+            orderIndex: 1,
+            lessons: [
+              {
+                id: 37,
+                sectionId: 21,
+                title: '1.1 Cài đặt Flutter SDK và tạo First App',
+                contentType: 'VIDEO',
+                contentUrl: 'https://www.youtube.com/embed/0-S5a0eXPoc',
+                durationMinutes: 20,
+                orderIndex: 1,
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+  }),
+
+  http.patch('*/api/v1/admin/courses/:id/approve', ({ params }) => {
+    return HttpResponse.json({
+      id: Number(params.id),
+      status: 'PUBLISHED',
+      message: 'Khóa học đã được phê duyệt thành công!',
+    });
+  }),
+
+  http.patch('*/api/v1/admin/courses/:id/reject', ({ params }) => {
+    return HttpResponse.json({
+      id: Number(params.id),
+      status: 'REJECTED',
+      message: 'Khóa học đã bị từ chối!',
     });
   }),
 

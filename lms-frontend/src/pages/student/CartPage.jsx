@@ -88,7 +88,7 @@ export const CartPage = () => {
                 Giỏ hàng của bạn đang trống
               </h2>
               <p className="text-xs text-[#5E5E5E] max-w-md mx-auto leading-relaxed">
-                Khám phá hàng trăm khóa học chất lượng cao từ các chuyên gia đầu ngành trên nền tảng EduMOOC ngay hôm nay!
+                Khám phá khóa học để bắt đầu.
               </p>
             </div>
             <button
@@ -96,7 +96,7 @@ export const CartPage = () => {
               className="inline-flex items-center gap-2 px-6 py-3 bg-[#16324F] hover:bg-[#001D37] text-white text-xs font-bold rounded-xl shadow-sm transition-all cursor-pointer hover:shadow-md"
             >
               <BookOpen className="w-4 h-4" />
-              <span>Khám phá khóa học ngay</span>
+              <span>Khám phá khóa học</span>
             </button>
           </div>
         ) : (
@@ -173,7 +173,7 @@ export const CartPage = () => {
             {/* Right: Order Summary */}
             <div className="lg:col-span-4 bg-white border border-[#E4E4E0] rounded-2xl p-6 shadow-xs space-y-6 sticky top-24">
               <h3 className="font-serif font-extrabold text-base text-[#001D37] border-b border-[#E4E4E0] pb-3">
-                Tổng quan thanh toán
+                Tóm tắt đơn hàng
               </h3>
 
               <div className="space-y-3 text-xs">
@@ -215,11 +215,11 @@ export const CartPage = () => {
               <div className="space-y-2 pt-2 border-t border-[#E4E4E0] text-[11px] text-[#5E5E5E]">
                 <div className="flex items-center gap-2">
                   <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>Bảo mật giao dịch chuẩn mã hóa SSL 256-bit</span>
+                  <span>Thanh toán an toàn và bảo mật</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-blue-600 shrink-0" />
-                  <span>Truy cập trọn đời sau khi hoàn tất thanh toán</span>
+                  <span>Truy cập trọn đời sau khi mua khóa học</span>
                 </div>
               </div>
             </div>

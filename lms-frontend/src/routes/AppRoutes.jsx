@@ -26,6 +26,7 @@ import { QuizResultPage } from '../pages/student/QuizResultPage';
 import { CartPage } from '../pages/student/CartPage';
 import { CheckoutPage } from '../pages/student/CheckoutPage';
 import { ConfirmPaymentPage } from '../pages/student/ConfirmPaymentPage';
+import { OrdersHistoryPage } from '../pages/student/OrdersHistoryPage';
 import { OrderSuccessPage } from '../pages/student/OrderSuccessPage';
 import { ProfileRouteDispatcher } from './ProfileRouteDispatcher';
 
@@ -109,6 +110,16 @@ export const AppRoutes = () => {
           element={
             <ProtectedRoute>
               <CheckoutPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/orders"
+          element={
+            <ProtectedRoute>
+              <RoleProtectedRoute allowedRoles={['ROLE_STUDENT', 'STUDENT']}>
+                <OrdersHistoryPage />
+              </RoleProtectedRoute>
             </ProtectedRoute>
           }
         />

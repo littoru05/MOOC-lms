@@ -18,8 +18,19 @@ public class JwtUtils {
     @Value("${jwt.secret:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}")
     private String jwtSecret;
 
-    @Value("${jwt.expiration:86400000}") // 1 ngày
+    @Value("${jwt.expiration:900000}") // 15 phút cho Access Token
     private long jwtExpirationMs;
+
+    @Value("${jwt.refresh-expiration:604800000}") // 7 ngày cho Refresh Token
+    private long jwtRefreshExpirationMs;
+
+    public long getJwtExpirationMs() {
+        return jwtExpirationMs;
+    }
+
+    public long getJwtRefreshExpirationMs() {
+        return jwtRefreshExpirationMs;
+    }
 
     private Key key() {
         return Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));

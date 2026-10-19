@@ -56,7 +56,7 @@ describe('CartPage Component with MSW and React Query', () => {
     await waitFor(() => {
       expect(screen.getByText('Kiến trúc Vi dịch vụ và Cloud Native')).toBeInTheDocument();
       expect(screen.getAllByText('499.000₫').length).toBeGreaterThan(0);
-      expect(screen.getByText('Tổng quan thanh toán')).toBeInTheDocument();
+      expect(screen.getByText('Tóm tắt đơn hàng')).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /Tiến hành thanh toán/i })).toBeInTheDocument();
     });
   });

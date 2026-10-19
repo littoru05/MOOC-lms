@@ -1,51 +1,74 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { authApi } from '../api/authApi';
+import { setAccessToken } from '../api/client';
 import { useToast } from './ToastContext';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem('token') || null);
+  const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
   const { showToast } = useToast();
 
   const clearAuth = useCallback(() => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user_cache');
+    setAccessToken(null);
     setToken(null);
     setUser(null);
+    localStorage.removeItem('token');
+    localStorage.removeItem('user_cache');
   }, []);
 
-  // Load user profile on startup if token exists; clear and notify if expired
+  // Khởi tạo phiên xác thực khi ứng dụng mount (F5) bằng cơ chế Silent Refresh qua HttpOnly Cookie
   useEffect(() => {
+    let isMounted = true;
+
     const initAuth = async () => {
-      const storedToken = localStorage.getItem('token');
-      if (storedToken) {
-        try {
-          const res = await authApi.getMe();
-          setUser(res.data);
-          setToken(storedToken);
-        } catch (err) {
-          console.warn('Phiên đăng nhập đã hết hạn hoặc không hợp lệ:', err);
-          clearAuth();
-          showToast?.('Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại.', 'error');
-          window.dispatchEvent(
-            new CustomEvent('auth:expired', {
-              detail: { message: 'Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại.' },
-            })
-          );
-        }
-      } else {
+      try {
+        const res = await authApi.refreshToken();
+        if (!isMounted) return;
+
+        const { token: newAccessToken, ...userData } = res.data;
+        setAccessToken(newAccessToken);
+        setToken(newAccessToken);
+        setUser(userData);
+      } catch (err) {
+        // Chưa đăng nhập hoặc cookie hết hạn (bình thường đối với khách vãng lai)
+        if (!isMounted) return;
         clearAuth();
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
       }
-      setLoading(false);
     };
 
     initAuth();
-  }, [clearAuth, showToast]);
 
-  // Listen for global auth expiration events (e.g. from Axios interceptors)
+    return () => {
+      isMounted = false;
+    };
+  }, [clearAuth]);
+
+  // Đồng bộ React state khi Axios interceptor ngầm refresh token thành công
+  useEffect(() => {
+    const handleAuthRefreshed = (event) => {
+      const newToken = event.detail?.token;
+      const newUserData = event.detail?.user;
+      if (newToken) {
+        setToken(newToken);
+      }
+      if (newUserData) {
+        const { token: _, ...userData } = newUserData;
+        setUser((prev) => ({ ...prev, ...userData }));
+      }
+    };
+
+    window.addEventListener('auth:refreshed', handleAuthRefreshed);
+    return () => window.removeEventListener('auth:refreshed', handleAuthRefreshed);
+  }, []);
+
+  // Lắng nghe sự kiện hết hạn phiên toàn cục (từ Axios interceptors)
   useEffect(() => {
     const handleAuthExpired = (event) => {
       clearAuth();
@@ -60,8 +83,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     const res = await authApi.login({ email, password });
     const { token: newToken, ...userData } = res.data;
-    localStorage.setItem('token', newToken);
-    localStorage.setItem('user_cache', JSON.stringify(userData));
+    setAccessToken(newToken);
     setToken(newToken);
     setUser(userData);
     return userData;
@@ -70,23 +92,27 @@ export const AuthProvider = ({ children }) => {
   const register = async (registerData) => {
     const res = await authApi.register(registerData);
     const { token: newToken, ...userData } = res.data;
-    localStorage.setItem('token', newToken);
-    localStorage.setItem('user_cache', JSON.stringify(userData));
+    setAccessToken(newToken);
     setToken(newToken);
     setUser(userData);
     return userData;
   };
 
-  const logout = () => {
-    clearAuth();
-    showToast?.('Đã đăng xuất khỏi tài khoản thành công.', 'info');
+  const logout = async () => {
+    try {
+      await authApi.logout();
+    } catch (err) {
+      console.warn('Lỗi khi gọi API logout backend:', err);
+    } finally {
+      clearAuth();
+      showToast?.('Đã đăng xuất khỏi tài khoản thành công.', 'info');
+    }
   };
 
   const updateProfile = async (profileData) => {
     const res = await authApi.updateProfile(profileData);
     const updatedUser = res.data;
     setUser(updatedUser);
-    localStorage.setItem('user_cache', JSON.stringify(updatedUser));
     return updatedUser;
   };
 

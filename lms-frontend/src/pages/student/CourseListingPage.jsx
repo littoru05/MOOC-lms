@@ -20,7 +20,8 @@ import {
 } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { CourseCardWithPreview } from '../../components/course/CourseCardWithPreview';
-import { usePublishedCourses, useCategories } from '../../hooks/useCourses';
+import { usePublishedCourses, useCategories, useMyEnrollments } from '../../hooks/useCourses';
+import { useAuth } from '../../context/AuthContext';
 import { formatCurrency } from '../../utils/format';
 import { findCategoryHierarchyBySlug } from '../../data/categoryMenu';
 
@@ -31,6 +32,7 @@ export const CourseListingPage = ({
 }) => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const { user } = useAuth();
   const filterQuery = filterQueryProp || searchParams.get('category') || searchParams.get('q') || '';
   const currentCategorySlug = searchParams.get('category') || (filterQuery !== 'all' ? filterQuery : '') || '';
 
@@ -39,29 +41,73 @@ export const CourseListingPage = ({
   const minPrice = searchParams.get('minPrice') || '';
   const maxPrice = searchParams.get('maxPrice') || '';
 
-  // Load published courses and categories from Backend via React Query
+  // Load published courses, categories, and student enrollments from Backend via React Query
   const { data: courses = [] } = usePublishedCourses();
   const { data: categories = [] } = useCategories();
+  const { data: myEnrollments = [] } = useMyEnrollments(Boolean(user));
 
-  // Parsing Category Info from Filter Query
+  // Set of enrolled course IDs for the logged-in student
+  const enrolledCourseIds = useMemo(() => {
+    const set = new Set();
+    myEnrollments.forEach((e) => {
+      const cid = e.courseId ?? e.course?.id;
+      if (cid != null) {
+        set.add(Number(cid));
+        set.add(String(cid));
+      }
+    });
+    return set;
+  }, [myEnrollments]);
+
+  // Parsing Category Info from Filter Query (Prioritizing Backend Categories)
   const categoryInfo = useMemo(() => {
+    if (!filterQuery || filterQuery === 'all') {
+      return {
+        level: 1,
+        type: 'all',
+        slug: 'all',
+        title: 'Tất cả chương trình đào tạo',
+        breadcrumbs: [
+          { name: 'Trang chủ', slug: 'home' },
+          { name: 'Tất cả khóa học', slug: 'all' }
+        ]
+      };
+    }
+
+    const found = categories?.find(
+      (c) =>
+        (c.slug && c.slug.toLowerCase() === filterQuery.toLowerCase()) ||
+        String(c.id) === filterQuery ||
+        (c.name && c.name.toLowerCase() === filterQuery.toLowerCase())
+    );
+
+    if (found) {
+      return {
+        level: 1,
+        type: 'category',
+        slug: found.slug,
+        title: found.name,
+        breadcrumbs: [
+          { name: 'Trang chủ', slug: 'home' },
+          { name: found.name, slug: found.slug }
+        ]
+      };
+    }
+
     return findCategoryHierarchyBySlug(filterQuery) || {
       level: 1,
-      type: 'all',
-      slug: 'all',
-      title: 'Tất cả chương trình đào tạo',
+      type: 'search',
+      slug: filterQuery,
+      title: `Kết quả tìm kiếm cho "${filterQuery}"`,
       breadcrumbs: [
         { name: 'Trang chủ', slug: 'home' },
-        { name: 'Tất cả khóa học', slug: 'all' }
+        { name: `Tìm kiếm: ${filterQuery}`, slug: filterQuery }
       ]
     };
-  }, [filterQuery]);
+  }, [filterQuery, categories]);
 
   // Filter States
-  const [selectedLevels, setSelectedLevels] = useState([]);
-  const [minRating, setMinRating] = useState(0);
-  const [selectedDurations, setSelectedDurations] = useState([]);
-  const [sortBy, setSortBy] = useState('popular'); // 'popular' | 'rating' | 'students' | 'newest'
+  const [sortBy, setSortBy] = useState('popular'); // 'popular' | 'students' | 'newest'
   const [searchKeywords, setSearchKeywords] = useState('');
   const [isSidebarOpenMobile, setIsSidebarOpenMobile] = useState(false);
 
@@ -111,17 +157,20 @@ export const CourseListingPage = ({
     setSearchParams(params);
   };
 
-  // Reset filters when filterQuery changes
+  // Reset search keyword when filterQuery changes
   useEffect(() => {
-    setSelectedLevels([]);
-    setMinRating(0);
-    setSelectedDurations([]);
     setSearchKeywords('');
   }, [filterQuery]);
 
   // Filter & Search Logic
   const filteredCourses = useMemo(() => {
     const q = (filterQuery || '').toLowerCase().trim();
+    const selectedCat = categories?.find(
+      (c) =>
+        (c.slug && c.slug.toLowerCase() === q) ||
+        String(c.id) === q ||
+        (c.name && c.name.toLowerCase() === q)
+    );
 
     return courses.filter((course) => {
       // 0. Price Filter
@@ -139,75 +188,43 @@ export const CourseListingPage = ({
         }
       }
 
-      // 1. Hierarchy Category / Tag matching
+      // 1. Hierarchy Category matching
       let matchesCategory = true;
       if (q && q !== 'all') {
-        const catSlug = course.category?.slug?.toLowerCase();
-        const catName = course.category?.name?.toLowerCase();
-        const subSlug = course.subcategory?.slug?.toLowerCase();
-        const subName = course.subcategory?.name?.toLowerCase();
-        const tags = (course.tags || []).map(t => t.toLowerCase());
+        const catSlug = course.categorySlug?.toLowerCase();
+        const catName = course.categoryName?.toLowerCase();
 
-        matchesCategory = 
-          catSlug === q || 
-          catName === q || 
-          subSlug === q || 
-          subName === q || 
-          tags.some(t => t.includes(q) || q.includes(t)) ||
-          course.title.toLowerCase().includes(q);
-      }
-
-      // 2. Level Filter
-      let matchesLevel = true;
-      if (selectedLevels.length > 0) {
-        matchesLevel = selectedLevels.some(lvl => 
-          course.level?.toLowerCase().includes(lvl.toLowerCase())
+        matchesCategory = Boolean(
+          catSlug === q ||
+          (selectedCat && course.categoryId === selectedCat.id) ||
+          catName === q ||
+          (selectedCat && catName === selectedCat.name?.toLowerCase()) ||
+          course.title?.toLowerCase().includes(q)
         );
       }
 
-      // 3. Rating Filter
-      let matchesRating = true;
-      if (minRating > 0) {
-        matchesRating = (course.rating || 0) >= minRating;
-      }
-
-      // 4. Duration Filter
-      let matchesDuration = true;
-      if (selectedDurations.length > 0) {
-        const hoursMatch = parseInt(course.totalDuration, 10) || 20;
-        matchesDuration = selectedDurations.some(range => {
-          if (range === 'under10') return hoursMatch < 10;
-          if (range === '10to30') return hoursMatch >= 10 && hoursMatch <= 30;
-          if (range === 'over30') return hoursMatch > 30;
-          return true;
-        });
-      }
-
-      // 5. Keyword search filter
+      // 2. Keyword search filter
       let matchesKeywords = true;
       if (searchKeywords.trim()) {
         const kw = searchKeywords.toLowerCase().trim();
         matchesKeywords = 
-          course.title.toLowerCase().includes(kw) ||
+          course.title?.toLowerCase().includes(kw) ||
           course.shortDescription?.toLowerCase().includes(kw) ||
-          course.instructor?.fullName?.toLowerCase().includes(kw) ||
-          (course.tags && course.tags.some(t => t.toLowerCase().includes(kw)));
+          course.description?.toLowerCase().includes(kw) ||
+          course.instructorName?.toLowerCase().includes(kw) ||
+          course.instructor?.fullName?.toLowerCase().includes(kw);
       }
 
-      return matchesPrice && matchesCategory && matchesLevel && matchesRating && matchesDuration && matchesKeywords;
+      return matchesPrice && matchesCategory && matchesKeywords;
     }).sort((a, b) => {
-      if (sortBy === 'rating') return (b.rating || 0) - (a.rating || 0);
       if (sortBy === 'students') return (b.enrolledCount || b.students || 0) - (a.enrolledCount || a.students || 0);
       if (sortBy === 'newest') return b.id - a.id;
-      // Default: Popular
-      return ((b.enrolledCount || 0) * (b.rating || 4.5)) - ((a.enrolledCount || 0) * (a.rating || 4.5));
+      // Default: Popular (sort by enrolled count desc)
+      return (b.enrolledCount || 0) - (a.enrolledCount || 0);
     });
-  }, [courses, filterQuery, priceType, minPrice, maxPrice, selectedLevels, minRating, selectedDurations, searchKeywords, sortBy]);
+  }, [courses, categories, filterQuery, priceType, minPrice, maxPrice, searchKeywords, sortBy]);
 
   const handleResetFilters = () => {
-    setSelectedLevels([]);
-    setMinRating(0);
-    setSelectedDurations([]);
     setSearchKeywords('');
     const params = new URLSearchParams(searchParams);
     params.delete('category');
@@ -219,26 +236,11 @@ export const CourseListingPage = ({
   };
 
   const hasActiveFilters = 
-    selectedLevels.length > 0 || 
-    minRating > 0 || 
-    selectedDurations.length > 0 || 
     searchKeywords !== '' ||
     Boolean(searchParams.get('category')) ||
     priceType !== 'all' ||
     minPrice !== '' ||
     maxPrice !== '';
-
-  const toggleLevel = (lvl) => {
-    setSelectedLevels(prev => 
-      prev.includes(lvl) ? prev.filter(l => l !== lvl) : [...prev, lvl]
-    );
-  };
-
-  const toggleDuration = (dur) => {
-    setSelectedDurations(prev => 
-      prev.includes(dur) ? prev.filter(d => d !== dur) : [...prev, dur]
-    );
-  };
 
   return (
     <div className="min-h-screen bg-[#FAF9FC] pb-24 text-[#1A1C1E]">
@@ -326,7 +328,7 @@ export const CourseListingPage = ({
             className="flex items-center gap-2 px-4 py-2.5 bg-white border border-[#E4E4E0] rounded-xl text-xs font-bold text-[#16324F] shadow-sm cursor-pointer active:scale-95"
           >
             <Filter className="w-4 h-4 text-[#16324F]" />
-            <span>Bộ lọc nâng cao {hasActiveFilters && `(${selectedLevels.length + (minRating > 0 ? 1 : 0) + selectedDurations.length})`}</span>
+            <span>Bộ lọc {hasActiveFilters && '(Đang lọc)'}</span>
           </button>
 
           {/* Sort Dropdown Mobile */}
@@ -338,7 +340,6 @@ export const CourseListingPage = ({
               className="bg-white border border-[#E4E4E0] rounded-xl px-3 py-2 text-xs font-bold text-[#16324F] focus:outline-none focus:border-[#16324F]"
             >
               <option value="popular">Phổ biến nhất</option>
-              <option value="rating">Đánh giá cao nhất</option>
               <option value="students">Học viên nhiều nhất</option>
               <option value="newest">Mới nhất</option>
             </select>
@@ -514,118 +515,6 @@ export const CourseListingPage = ({
               )}
             </div>
 
-            {/* Filter Group 1: Level (Cấp độ) */}
-            <div className="space-y-3 pt-4 border-t border-[#E4E4E0]">
-              <div className="flex items-center justify-between">
-                <h4 className="font-extrabold text-xs text-[#001D37] uppercase tracking-wider">
-                  Cấp độ khóa học
-                </h4>
-                {selectedLevels.length > 0 && (
-                  <span className="w-2 h-2 rounded-full bg-amber-500"></span>
-                )}
-              </div>
-              <div className="space-y-1">
-                {['Cơ bản', 'Trung cấp', 'Nâng cao'].map((lvl) => {
-                  const isChecked = selectedLevels.includes(lvl);
-                  return (
-                    <label 
-                      key={lvl}
-                      className={`flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-xs font-medium cursor-pointer select-none transition-all ${
-                        isChecked ? 'bg-[#F4F3F6] text-[#16324F] font-bold' : 'text-[#1A1C1E] hover:bg-[#FAF9FC]'
-                      }`}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={isChecked}
-                        onChange={() => toggleLevel(lvl)}
-                        className="w-4 h-4 rounded border-[#E4E4E0] text-[#16324F] focus:ring-[#16324F] accent-[#16324F] cursor-pointer"
-                      />
-                      <span>{lvl}</span>
-                    </label>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Filter Group 2: Rating (Đánh giá) */}
-            <div className="space-y-3 pt-4 border-t border-[#E4E4E0]">
-              <div className="flex items-center justify-between">
-                <h4 className="font-extrabold text-xs text-[#001D37] uppercase tracking-wider">
-                  Đánh giá chất lượng
-                </h4>
-                {minRating > 0 && (
-                  <span className="w-2 h-2 rounded-full bg-amber-500"></span>
-                )}
-              </div>
-              <div className="space-y-1">
-                {[
-                  { label: 'Từ 4.8 sao trở lên', value: 4.8 },
-                  { label: 'Từ 4.5 sao trở lên', value: 4.5 },
-                  { label: 'Từ 4.0 sao trở lên', value: 4.0 },
-                  { label: 'Tất cả đánh giá', value: 0 }
-                ].map((item) => {
-                  const isChecked = minRating === item.value;
-                  return (
-                    <label 
-                      key={item.value}
-                      className={`flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-xs font-medium cursor-pointer select-none transition-all ${
-                        isChecked ? 'bg-[#F4F3F6] text-[#16324F] font-bold' : 'text-[#1A1C1E] hover:bg-[#FAF9FC]'
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="rating-filter"
-                        checked={isChecked}
-                        onChange={() => setMinRating(item.value)}
-                        className="w-4 h-4 text-[#16324F] focus:ring-[#16324F] accent-[#16324F] cursor-pointer"
-                      />
-                      <div className="flex items-center gap-1.5">
-                        {item.value > 0 && <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />}
-                        <span>{item.label}</span>
-                      </div>
-                    </label>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Filter Group 3: Duration (Thời lượng) */}
-            <div className="space-y-3 pt-4 border-t border-[#E4E4E0]">
-              <div className="flex items-center justify-between">
-                <h4 className="font-extrabold text-xs text-[#001D37] uppercase tracking-wider">
-                  Thời lượng chương trình
-                </h4>
-                {selectedDurations.length > 0 && (
-                  <span className="w-2 h-2 rounded-full bg-amber-500"></span>
-                )}
-              </div>
-              <div className="space-y-1">
-                {[
-                  { id: 'under10', label: 'Dưới 10 giờ học' },
-                  { id: '10to30', label: '10 - 30 giờ học' },
-                  { id: 'over30', label: 'Trên 30 giờ chuyên sâu' }
-                ].map((dur) => {
-                  const isChecked = selectedDurations.includes(dur.id);
-                  return (
-                    <label 
-                      key={dur.id}
-                      className={`flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-xs font-medium cursor-pointer select-none transition-all ${
-                        isChecked ? 'bg-[#F4F3F6] text-[#16324F] font-bold' : 'text-[#1A1C1E] hover:bg-[#FAF9FC]'
-                      }`}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={isChecked}
-                        onChange={() => toggleDuration(dur.id)}
-                        className="w-4 h-4 rounded border-[#E4E4E0] text-[#16324F] focus:ring-[#16324F] accent-[#16324F] cursor-pointer"
-                      />
-                      <span>{dur.label}</span>
-                    </label>
-                  );
-                })}
-              </div>
-            </div>
-
             {/* Quick Actions */}
             <div className="pt-4 border-t border-[#E4E4E0]">
               <button
@@ -663,7 +552,6 @@ export const CourseListingPage = ({
                   className="bg-[#FAF9FC] border border-[#E4E4E0] rounded-xl px-3.5 py-2 text-xs font-bold text-[#16324F] hover:border-[#16324F] focus:outline-none focus:border-[#16324F] cursor-pointer shadow-2xs transition-colors"
                 >
                   <option value="popular">Phổ biến nhất</option>
-                  <option value="rating">Đánh giá cao nhất</option>
                   <option value="students">Học viên nhiều nhất</option>
                   <option value="newest">Mới cập nhật</option>
                 </select>
@@ -674,39 +562,34 @@ export const CourseListingPage = ({
             {hasActiveFilters && (
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-[11px] font-semibold text-[#5E5E5E]">Đang lọc:</span>
-                {selectedLevels.map(lvl => (
+                {Boolean(currentCategorySlug) && currentCategorySlug !== 'all' && (
                   <button
-                    key={lvl}
-                    onClick={() => toggleLevel(lvl)}
-                    className="inline-flex items-center gap-1 px-2.5 py-1 bg-white border border-[#E4E4E0] hover:border-rose-300 text-xs font-semibold text-[#16324F] rounded-lg shadow-2xs hover:text-rose-600 transition-colors"
+                    onClick={() => handleCategoryChange('all')}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 bg-white border border-[#E4E4E0] hover:border-rose-300 text-xs font-semibold text-[#16324F] rounded-lg shadow-2xs hover:text-rose-600 transition-colors cursor-pointer"
                   >
-                    <span>Cấp độ: {lvl}</span>
-                    <X className="w-3 h-3" />
-                  </button>
-                ))}
-                {minRating > 0 && (
-                  <button
-                    onClick={() => setMinRating(0)}
-                    className="inline-flex items-center gap-1 px-2.5 py-1 bg-white border border-[#E4E4E0] hover:border-rose-300 text-xs font-semibold text-[#16324F] rounded-lg shadow-2xs hover:text-rose-600 transition-colors"
-                  >
-                    <span>Đánh giá: ≥ {minRating}⭐</span>
+                    <span>Danh mục: {categoryInfo?.title || currentCategorySlug}</span>
                     <X className="w-3 h-3" />
                   </button>
                 )}
-                {selectedDurations.map(dur => (
+                {priceType !== 'all' && (
                   <button
-                    key={dur}
-                    onClick={() => toggleDuration(dur)}
-                    className="inline-flex items-center gap-1 px-2.5 py-1 bg-white border border-[#E4E4E0] hover:border-rose-300 text-xs font-semibold text-[#16324F] rounded-lg shadow-2xs hover:text-rose-600 transition-colors"
+                    onClick={() => handlePriceTypeChange('all')}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 bg-white border border-[#E4E4E0] hover:border-rose-300 text-xs font-semibold text-[#16324F] rounded-lg shadow-2xs hover:text-rose-600 transition-colors cursor-pointer"
                   >
-                    <span>Thời lượng</span>
+                    <span>
+                      {priceType === 'free'
+                        ? 'Học phí: Miễn phí'
+                        : minPrice || maxPrice
+                          ? `Học phí: ${minPrice ? formatCurrency(minPrice) : '0₫'} - ${maxPrice ? formatCurrency(maxPrice) : 'Tối đa'}`
+                          : 'Học phí: Có phí'}
+                    </span>
                     <X className="w-3 h-3" />
                   </button>
-                ))}
+                )}
                 {searchKeywords && (
                   <button
                     onClick={() => setSearchKeywords('')}
-                    className="inline-flex items-center gap-1 px-2.5 py-1 bg-white border border-[#E4E4E0] hover:border-rose-300 text-xs font-semibold text-[#16324F] rounded-lg shadow-2xs hover:text-rose-600 transition-colors"
+                    className="inline-flex items-center gap-1 px-2.5 py-1 bg-white border border-[#E4E4E0] hover:border-rose-300 text-xs font-semibold text-[#16324F] rounded-lg shadow-2xs hover:text-rose-600 transition-colors cursor-pointer"
                   >
                     <span>Từ khóa: "{searchKeywords}"</span>
                     <X className="w-3 h-3" />
@@ -732,6 +615,7 @@ export const CourseListingPage = ({
                   >
                     <CourseCardWithPreview
                       course={course}
+                      isEnrolled={enrolledCourseIds.has(course.id)}
                       onSelectCourse={onSelectCourse || ((slug) => navigate(`/courses/${slug}`))}
                     />
                   </div>

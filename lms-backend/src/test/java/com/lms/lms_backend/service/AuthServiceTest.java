@@ -27,13 +27,22 @@ import com.lms.lms_backend.dto.auth.RegisterRequest;
 import com.lms.lms_backend.entity.Role;
 import com.lms.lms_backend.entity.User;
 import com.lms.lms_backend.repository.UserRepository;
+import com.lms.lms_backend.entity.RefreshToken;
+import com.lms.lms_backend.repository.RefreshTokenRepository;
 import com.lms.lms_backend.security.JwtUtils;
+import org.springframework.security.authentication.BadCredentialsException;
 
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private RefreshTokenRepository refreshTokenRepository;
+
+    @Mock
+    private RefreshTokenService refreshTokenService;
 
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -193,5 +202,80 @@ class AuthServiceTest {
 
         assertTrue(ex.getMessage().contains("Mật khẩu hiện tại không chính xác"));
         verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Case (a): Refresh token không tìm thấy trong DB - ném 401 và KHÔNG thu hồi toàn bộ token")
+    void refreshToken_TokenNotFound_CaseA() {
+        when(refreshTokenRepository.findByToken("non-existent-token")).thenReturn(Optional.empty());
+
+        BadCredentialsException ex = assertThrows(BadCredentialsException.class, () ->
+                authService.refreshToken("non-existent-token", null)
+        );
+
+        assertTrue(ex.getMessage().contains("không hợp lệ hoặc đã hết hạn"));
+        verify(refreshTokenRepository, never()).revokeAllByUser(any());
+    }
+
+    @Test
+    @DisplayName("Case (b): Refresh token tìm thấy nhưng đã bị revoked - kích hoạt Reuse Detection thu hồi toàn bộ token của user")
+    void refreshToken_TokenRevoked_CaseB() {
+        RefreshToken revokedToken = RefreshToken.builder()
+                .id(10L)
+                .user(activeUser)
+                .token("stolen-revoked-token")
+                .expiryDate(java.time.LocalDateTime.now().plusDays(5))
+                .revoked(true)
+                .build();
+
+        when(refreshTokenRepository.findByToken("stolen-revoked-token")).thenReturn(Optional.of(revokedToken));
+
+        BadCredentialsException ex = assertThrows(BadCredentialsException.class, () ->
+                authService.refreshToken("stolen-revoked-token", null)
+        );
+
+        assertTrue(ex.getMessage().contains("Cảnh báo bảo mật"));
+        verify(refreshTokenService, times(1)).revokeAllTokensForUser(activeUser);
+    }
+
+    @Test
+    @DisplayName("Refresh token hợp lệ thành công - Xoay vòng token và cấp access token mới")
+    void refreshToken_Valid_Success() {
+        RefreshToken validToken = RefreshToken.builder()
+                .id(11L)
+                .user(activeUser)
+                .token("valid-token-123")
+                .expiryDate(java.time.LocalDateTime.now().plusDays(5))
+                .revoked(false)
+                .build();
+
+        when(refreshTokenRepository.findByToken("valid-token-123")).thenReturn(Optional.of(validToken));
+        when(jwtUtils.generateToken("student@lms.com")).thenReturn("new_access_token");
+
+        AuthResponse res = authService.refreshToken("valid-token-123", null);
+
+        assertNotNull(res);
+        assertEquals("new_access_token", res.getToken());
+        assertEquals("student@lms.com", res.getEmail());
+        assertTrue(validToken.getRevoked());
+        verify(refreshTokenRepository, times(1)).save(validToken);
+    }
+
+    @Test
+    @DisplayName("Đăng xuất thành công - Đánh dấu thu hồi token trong CSDL")
+    void logout_Success() {
+        RefreshToken token = RefreshToken.builder()
+                .id(12L)
+                .user(activeUser)
+                .token("logout-token")
+                .revoked(false)
+                .build();
+
+        when(refreshTokenRepository.findByToken("logout-token")).thenReturn(Optional.of(token));
+
+        authService.logout("logout-token", null);
+
+        assertTrue(token.getRevoked());
+        verify(refreshTokenRepository, times(1)).save(token);
     }
 }

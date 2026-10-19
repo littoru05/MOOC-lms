@@ -247,7 +247,7 @@ export const AuthModal = ({ isOpen, onClose, initialMode = 'login', onAuthSucces
 
           <div className="relative z-10 pt-6 border-t border-white/10 text-[11px] text-[#94A3B8] flex items-center justify-between">
             <span>© 2026 EduMOOC Platform</span>
-            <span className="flex items-center gap-1"><ShieldCheck className="w-3.5 h-3.5 text-[#22C55E]" /> Bảo mật JWT</span>
+            <span className="flex items-center gap-1"><ShieldCheck className="w-3.5 h-3.5 text-[#22C55E]" /> Bảo mật chuẩn SSL/TLS</span>
           </div>
         </div>
 

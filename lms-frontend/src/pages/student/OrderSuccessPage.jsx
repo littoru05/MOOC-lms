@@ -35,10 +35,10 @@ export const OrderSuccessPage = () => {
               Giao dịch hoàn tất
             </span>
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold font-serif">
-              Thanh toán đơn hàng thành công!
+              Thanh toán thành công
             </h1>
             <p className="text-xs sm:text-sm text-blue-100/80 max-w-lg mx-auto">
-              Cảm ơn bạn đã lựa chọn khóa học tại EduMOOC. Khóa học đã được tự động kích hoạt vào tài khoản học tập của bạn.
+              Khóa học đã sẵn sàng để học.
             </p>
           </div>
         </div>
@@ -76,7 +76,7 @@ export const OrderSuccessPage = () => {
                   Phương thức:
                 </span>
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-semibold text-[11px] bg-blue-50 text-blue-800 border border-blue-200">
-                  {order.paymentMethod === 'CARD' ? 'Đã thanh toán qua Thẻ (Demo)' : 'Đã thanh toán qua QR (Demo)'}
+                  {order.paymentMethod === 'CARD' ? 'Thẻ ngân hàng' : 'Chuyển khoản QR'}
                 </span>
               </div>
 
@@ -92,7 +92,7 @@ export const OrderSuccessPage = () => {
             <div className="space-y-3">
               <h2 className="font-serif font-bold text-sm text-[#001D37] flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-amber-500" />
-                <span>Khóa học đã sở hữu ({items.length}):</span>
+                <span>Khóa học đã mua ({items.length}):</span>
               </h2>
 
               <div className="divide-y divide-[#E4E4E0] border border-[#E4E4E0] rounded-xl overflow-hidden">
@@ -135,21 +135,30 @@ export const OrderSuccessPage = () => {
             </div>
 
             {/* Action Buttons */}
-            <div className="pt-4 border-t border-[#E4E4E0] flex flex-col sm:flex-row items-center justify-end gap-3">
+            <div className="pt-4 border-t border-[#E4E4E0] flex flex-col sm:flex-row items-center justify-between gap-3">
               <Link
-                to="/courses"
-                className="w-full sm:w-auto px-5 py-2.5 border border-[#16324F]/30 text-[#16324F] hover:bg-blue-50 text-xs font-semibold rounded-xl text-center transition-colors"
+                to="/orders"
+                className="w-full sm:w-auto px-5 py-2.5 border border-[#E4E4E0] hover:bg-[#FAF9FC] text-[#1A1C1E] text-xs font-semibold rounded-xl text-center transition-colors"
               >
-                Khám phá thêm
+                Xem lịch sử đơn hàng
               </Link>
 
-              <button
-                onClick={() => navigate('/my-learning')}
-                className="w-full sm:w-auto px-6 py-2.5 bg-[#16324F] hover:bg-[#001D37] text-white text-xs font-bold rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <BookOpen className="w-4 h-4" />
-                <span>Vào học ngay</span>
-              </button>
+              <div className="flex items-center gap-3 w-full sm:w-auto">
+                <Link
+                  to="/courses"
+                  className="w-full sm:w-auto px-5 py-2.5 border border-[#16324F]/30 text-[#16324F] hover:bg-blue-50 text-xs font-semibold rounded-xl text-center transition-colors"
+                >
+                  Khám phá thêm
+                </Link>
+
+                <button
+                  onClick={() => navigate('/my-learning')}
+                  className="w-full sm:w-auto px-6 py-2.5 bg-[#16324F] hover:bg-[#001D37] text-white text-xs font-bold rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <BookOpen className="w-4 h-4" />
+                  <span>Vào học ngay</span>
+                </button>
+              </div>
             </div>
           </div>
         ) : (
@@ -158,23 +167,23 @@ export const OrderSuccessPage = () => {
               <CheckCircle2 className="w-6 h-6" />
             </div>
             <h2 className="font-serif font-bold text-base text-[#001D37]">
-              Đơn hàng đã được ghi nhận
+              Thanh toán thành công
             </h2>
             <p className="text-xs text-[#5E5E5E] max-w-sm mx-auto">
-              Bạn có thể bắt đầu học tập và theo dõi tiến độ các khóa học trong mục Khóa học của tôi.
+              Khóa học đã sẵn sàng để học.
             </p>
             <div className="flex items-center justify-center gap-3 pt-2">
               <Link
-                to="/courses"
+                to="/orders"
                 className="px-5 py-2.5 border border-[#E4E4E0] hover:bg-[#FAF9FC] text-[#1A1C1E] text-xs font-semibold rounded-xl"
               >
-                Khám phá thêm
+                Xem lịch sử đơn hàng
               </Link>
               <Link
                 to="/my-learning"
                 className="px-5 py-2.5 bg-[#16324F] text-white text-xs font-bold rounded-xl shadow-xs"
               >
-                Khóa học của tôi
+                Vào học ngay
               </Link>
             </div>
           </div>

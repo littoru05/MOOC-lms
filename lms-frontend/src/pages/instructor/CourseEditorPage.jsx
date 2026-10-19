@@ -92,14 +92,13 @@ export const CourseEditorPage = ({ courseId: courseIdProp, onBack }) => {
 
   // Rich outcomes & requirements
   const [outcomes, setOutcomes] = useState([
-    'Thiết kế CSDL chuẩn hóa 11 thực thể trên MySQL 8.0.',
-    'Xây dựng kiến trúc Monolithic 3-Layer với Spring Boot 3 & Java 21.',
-    'Bảo mật JWT và phân quyền Role-Based (Student, Instructor, Admin).',
-    'Xây dựng giao diện Single Page Application với React 19 & Tailwind CSS.'
+    'Nắm vững kiến thức nền tảng và phương pháp thực hành chuyên sâu theo chủ đề.',
+    'Áp dụng kiến thức vào giải quyết các bài toán và dự án thực tế.',
+    'Tự tin làm chủ kỹ năng chuyên môn và triển khai vào công việc thực tế.'
   ]);
   const [requirements, setRequirements] = useState([
-    'Kiến thức căn bản về lập trình Java và JavaScript.',
-    'Hiểu biết cơ bản về cơ sở dữ liệu quan hệ SQL.'
+    'Kiến thức căn bản liên quan đến lĩnh vực khóa học.',
+    'Máy tính có kết nối Internet để tham gia học tập và thực hành.'
   ]);
 
   const [saving, setSaving] = useState(false);
@@ -112,7 +111,7 @@ export const CourseEditorPage = ({ courseId: courseIdProp, onBack }) => {
       setShortDescription(courseDetail.description || '');
       setFullDescription(courseDetail.description || '');
       setThumbnailUrl(courseDetail.thumbnailUrl || '');
-      setCategoryId(courseDetail.category?.id || '');
+      setCategoryId(courseDetail.categoryId || courseDetail.category?.id || '');
       setLevel(courseDetail.level || 'Trung cấp');
       setLanguage(courseDetail.language || 'Tiếng Việt');
       setPrice(courseDetail.price !== undefined && courseDetail.price !== null ? String(courseDetail.price) : '0');
@@ -723,7 +722,7 @@ export const CourseEditorPage = ({ courseId: courseIdProp, onBack }) => {
                   <h4 className="text-xs font-bold text-[#001D37]">Tạo Chương học mới</h4>
                   <input
                     type="text"
-                    placeholder="VD: Chương 1: Kiến trúc Nền tảng Spring Boot"
+                    placeholder="VD: Chương 1: Tổng quan & Khái niệm nền tảng"
                     value={newSectionTitle}
                     onChange={(e) => setNewSectionTitle(e.target.value)}
                     className="w-full px-3 py-2 text-xs border border-[#E4E4E0] rounded-lg focus:outline-none focus:border-[#16324F] bg-white"

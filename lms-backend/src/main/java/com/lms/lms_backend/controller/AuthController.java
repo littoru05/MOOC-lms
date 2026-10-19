@@ -28,13 +28,38 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
-        return ResponseEntity.ok(authService.register(request));
+    public ResponseEntity<AuthResponse> register(
+            @Valid @RequestBody RegisterRequest request,
+            jakarta.servlet.http.HttpServletResponse response
+    ) {
+        return ResponseEntity.ok(authService.register(request, response));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
-        return ResponseEntity.ok(authService.login(request));
+    public ResponseEntity<AuthResponse> login(
+            @Valid @RequestBody LoginRequest request,
+            jakarta.servlet.http.HttpServletResponse response
+    ) {
+        return ResponseEntity.ok(authService.login(request, response));
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthResponse> refresh(
+            @org.springframework.web.bind.annotation.CookieValue(name = "refreshToken", required = false) String refreshToken,
+            jakarta.servlet.http.HttpServletResponse response
+    ) {
+        return ResponseEntity.ok(authService.refreshToken(refreshToken, response));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<java.util.Map<String, String>> logout(
+            @org.springframework.web.bind.annotation.CookieValue(name = "refreshToken", required = false) String refreshToken,
+            jakarta.servlet.http.HttpServletResponse response
+    ) {
+        authService.logout(refreshToken, response);
+        java.util.Map<String, String> res = new java.util.HashMap<>();
+        res.put("message", "Đăng xuất thành công!");
+        return ResponseEntity.ok(res);
     }
 
     @GetMapping("/me")

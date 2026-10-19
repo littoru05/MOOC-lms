@@ -1,6 +1,9 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAdminStats } from '../../hooks/useAdmin';
+import { useAdminRevenueOverview } from '../../hooks/useAdminRevenue';
+import { useCategories } from '../../hooks/useCourses';
+import { formatCurrency } from '../../utils/format';
 import { 
   Users, 
   BookOpen, 
@@ -16,6 +19,8 @@ import {
 export const AdminOverviewPage = ({ onNavigateSubTab }) => {
   const navigate = useNavigate();
   const { data: apiStats, isLoading: loading } = useAdminStats();
+  const { data: revenueOverview } = useAdminRevenueOverview();
+  const { data: categories = [] } = useCategories();
 
   const stats = apiStats || {
     totalUsers: 0,
@@ -159,19 +164,56 @@ export const AdminOverviewPage = ({ onNavigateSubTab }) => {
           </div>
 
           <div className="bg-white border border-[#E4E4E0] rounded-xl p-6 shadow-xs space-y-4">
-            <h3 className="font-serif font-bold text-base text-[#001D37]">Cấu trúc Kiến trúc Backend</h3>
-            <div className="space-y-2 text-xs text-[#5E5E5E]">
-              <div className="flex justify-between py-1 border-b border-[#E4E4E0]">
-                <span>Mô hình:</span>
-                <span className="font-semibold text-[#1A1C1E]">Monolithic 3-Layer (Presentation - Service - Repository)</span>
+            <div className="flex items-center justify-between">
+              <h3 className="font-serif font-bold text-base text-[#001D37]">Chỉ số Vận hành & Tài chính Nền tảng</h3>
+              <button
+                onClick={() => navigate('/admin/revenue')}
+                className="text-xs font-semibold text-[#16324F] hover:underline flex items-center gap-1 cursor-pointer"
+              >
+                <span>Xem báo cáo</span>
+                <ArrowUpRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+            
+            <div className="space-y-3 text-xs text-[#5E5E5E]">
+              <div className="flex items-center justify-between py-1.5 border-b border-[#E4E4E0]">
+                <span className="flex items-center gap-1.5">
+                  <TrendingUp className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Tổng doanh thu toàn sàn:</span>
+                </span>
+                <span className="font-bold text-[#001D37]">
+                  {revenueOverview?.totalGrossRevenue != null ? formatCurrency(revenueOverview.totalGrossRevenue) : '0₫'}
+                </span>
               </div>
-              <div className="flex justify-between py-1 border-b border-[#E4E4E0]">
-                <span>Cơ sở dữ liệu:</span>
-                <span className="font-semibold text-[#1A1C1E]">MySQL 8.0 (11 JPA Entities)</span>
+
+              <div className="flex items-center justify-between py-1.5 border-b border-[#E4E4E0]">
+                <span className="flex items-center gap-1.5">
+                  <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
+                  <span>Hoa hồng sàn tích lũy:</span>
+                </span>
+                <span className="font-bold text-emerald-700">
+                  {revenueOverview?.totalPlatformCommission != null ? formatCurrency(revenueOverview.totalPlatformCommission) : '0₫'}
+                </span>
               </div>
-              <div className="flex justify-between py-1">
-                <span>Cơ chế bảo mật:</span>
-                <span className="font-semibold text-[#1A1C1E]">Spring Security 6 • Bearer JWT • RBAC</span>
+
+              <div className="flex items-center justify-between py-1.5 border-b border-[#E4E4E0]">
+                <span className="flex items-center gap-1.5">
+                  <Award className="w-3.5 h-3.5 text-amber-600" />
+                  <span>Đơn hàng thanh toán thành công:</span>
+                </span>
+                <span className="font-semibold text-[#1A1C1E]">
+                  {revenueOverview?.totalOrdersCount != null ? `${revenueOverview.totalOrdersCount.toLocaleString()} đơn hàng` : '0 đơn hàng'}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between py-1.5">
+                <span className="flex items-center gap-1.5">
+                  <BookOpen className="w-3.5 h-3.5 text-[#16324F]" />
+                  <span>Chuyên mục & Lĩnh vực đào tạo:</span>
+                </span>
+                <span className="font-semibold text-[#1A1C1E]">
+                  {categories.length > 0 ? `${categories.length} chuyên mục đang hoạt động` : '7 chuyên mục tiêu chuẩn'}
+                </span>
               </div>
             </div>
           </div>

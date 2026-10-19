@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Star, Users, Clock, ArrowRight } from 'lucide-react';
+import { Star, Users, Clock, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { getImageUrl } from '../../utils/imageUrl';
 import { formatCurrency } from '../../utils/format';
 
@@ -39,15 +39,22 @@ export const CourseCardWithPreview = ({
             className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500 ease-out"
           />
           
-          {/* Level Pill */}
-          <span className="absolute top-2.5 left-2.5 px-2 py-0.5 bg-white/95 backdrop-blur-xs border border-[#E4E4E0] text-[10px] font-bold text-[#16324F] rounded-md shadow-2xs">
-            {course.level || 'Trung cấp'}
-          </span>
+          {/* Active Enrolled Badge (Green) or real Course Level */}
+          {isEnrolled ? (
+            <span className="absolute top-2.5 left-2.5 px-2.5 py-0.5 bg-emerald-600 text-white text-[10px] font-bold rounded-md shadow-xs flex items-center gap-1 backdrop-blur-xs z-10">
+              <CheckCircle2 className="w-3 h-3 text-white" />
+              <span>Đã đăng ký</span>
+            </span>
+          ) : course.level ? (
+            <span className="absolute top-2.5 left-2.5 px-2 py-0.5 bg-white/95 backdrop-blur-xs border border-[#E4E4E0] text-[10px] font-bold text-[#16324F] rounded-md shadow-2xs">
+              {course.level}
+            </span>
+          ) : null}
 
           {/* Category Tag */}
-          {course.category && (
+          {(course.categoryName || course.category?.name) && (
             <span className="absolute top-2.5 right-2.5 px-2 py-0.5 bg-[#001D37]/90 text-white text-[9px] font-semibold rounded-md backdrop-blur-xs">
-              {course.category.name}
+              {course.categoryName || course.category?.name}
             </span>
           )}
         </div>
@@ -68,11 +75,11 @@ export const CourseCardWithPreview = ({
           <div className="flex items-center gap-2 pt-1 text-xs">
             <img
               src={getImageUrl(course.instructor?.avatarUrl, 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150')}
-              alt={course.instructor?.fullName}
+              alt={course.instructor?.fullName || course.instructorName}
               className="w-4 h-4 rounded-full object-cover border border-[#E4E4E0]"
             />
             <span className="text-[11px] font-medium text-[#1A1C1E] truncate">
-              {course.instructor?.fullName || 'TS. Nguyễn Văn A'}
+              {course.instructor?.fullName || course.instructorName || 'Giảng viên EduMOOC'}
             </span>
           </div>
         </div>
@@ -80,19 +87,34 @@ export const CourseCardWithPreview = ({
 
       {/* Card Footer */}
       <div className="px-4 py-2.5 bg-[#FAF9FC] border-t border-[#E4E4E0] flex items-center justify-between text-[11px] text-[#5E5E5E]">
-        <div className="flex items-center gap-1 font-bold text-amber-600">
-          <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
-          <span>{course.rating || 4.9}</span>
-          <span className="text-[#6B6B6B] font-normal text-[10px]">
-            ({(course.reviewCount || 1200).toLocaleString()})
-          </span>
-        </div>
+        {course.rating ? (
+          <div className="flex items-center gap-1 font-bold text-amber-600">
+            <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
+            <span>{course.rating}</span>
+            {course.reviewCount && (
+              <span className="text-[#6B6B6B] font-normal text-[10px]">
+                ({course.reviewCount.toLocaleString()})
+              </span>
+            )}
+          </div>
+        ) : (
+          <div className="flex items-center gap-1.5 text-[#5E5E5E] font-medium text-[11px]">
+            <Users className="w-3.5 h-3.5 text-slate-400" />
+            <span>{(course.enrolledCount || 0).toLocaleString()} <span className="text-[#767676] text-[10px]">học viên</span></span>
+          </div>
+        )}
 
-        {/* Price Tag */}
+        {/* Price Tag or Enrolled status */}
         <div className="text-right">
-          <span className={`text-xs font-bold ${Number(course.price) > 0 ? 'text-[#BA1A1A]' : 'text-emerald-700 font-semibold'}`}>
-            {formatCurrency(course.price)}
-          </span>
+          {isEnrolled ? (
+            <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+              Đang học
+            </span>
+          ) : (
+            <span className={`text-xs font-bold ${Number(course.price) > 0 ? 'text-[#BA1A1A]' : 'text-emerald-700 font-semibold'}`}>
+              {formatCurrency(course.price)}
+            </span>
+          )}
         </div>
       </div>
     </div>

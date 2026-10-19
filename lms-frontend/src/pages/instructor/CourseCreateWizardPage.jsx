@@ -189,7 +189,7 @@ export const CourseCreateWizardPage = ({ onBack, onCourseCreated }) => {
                   required
                   value={title}
                   onChange={(e) => handleTitleChange(e.target.value)}
-                  placeholder="Ví dụ: Lập trình Web Fullstack với Spring Boot 3 & React 19"
+                  placeholder="Ví dụ: Khóa học Lập trình Web Toàn diện từ Cơ bản đến Nâng cao"
                   className="w-full px-3.5 py-2.5 text-xs border border-[#E4E4E0] rounded-xl focus:outline-none focus:border-[#16324F] bg-white font-medium"
                 />
               </div>
@@ -203,7 +203,7 @@ export const CourseCreateWizardPage = ({ onBack, onCourseCreated }) => {
                   type="text"
                   value={slug}
                   onChange={(e) => setSlug(e.target.value)}
-                  placeholder="lap-trinh-web-fullstack-spring-boot-react"
+                  placeholder="khoa-hoc-lap-trinh-web-toan-dien"
                   className="w-full px-3.5 py-2 text-xs border border-[#E4E4E0] rounded-xl bg-[#FAF9FC] text-[#5E5E5E] font-mono"
                 />
               </div>

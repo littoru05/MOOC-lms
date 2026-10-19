@@ -265,9 +265,9 @@ export const InstructorDashboard = ({ onEditCourse, onCreateCourse, onBuildQuiz 
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
                       {getStatusBadge(c.status)}
-                      {c.category && (
+                      {(c.categoryName || c.category?.name) && (
                         <span className="text-[11px] font-semibold text-[#16324F] bg-[#F4F3F6] px-2.5 py-0.5 rounded-md border border-[#E4E4E0]">
-                          {c.category.name}
+                          {c.categoryName || c.category?.name}
                         </span>
                       )}
                       {(c.enrolledCount > 0 || c.studentsCount > 0) && (

@@ -17,8 +17,7 @@ import {
   Clock, 
   Server, 
   CheckCircle2, 
-  Terminal, 
-  Database 
+  Terminal
 } from 'lucide-react';
 
 export const AdminProfilePage = () => {
@@ -168,7 +167,7 @@ export const AdminProfilePage = () => {
               <CheckCircle2 className="w-3 h-3" /> Trạng thái: Active (Toàn quyền)
             </span>
             <span className="px-2.5 py-0.5 bg-blue-50 border border-blue-200 text-[11px] text-blue-800 rounded-md font-semibold flex items-center gap-1">
-              <Database className="w-3 h-3" /> MySQL 8.0 SuperAdmin
+              <ShieldCheck className="w-3 h-3" /> Quản trị viên Cấp cao
             </span>
           </div>
 
@@ -199,7 +198,7 @@ export const AdminProfilePage = () => {
               <span>Đăng nhập gần nhất:</span>
             </div>
             <p className="text-sm font-bold font-mono text-[#001D37] pt-1">22/08/2026 • 15:10</p>
-            <p className="text-[11px] text-[#5E5E5E]">IP: 127.0.0.1 (Docker Bridge)</p>
+            <p className="text-[11px] text-[#5E5E5E]">Mạng nội bộ an toàn (SSL/TLS Encrypted)</p>
           </div>
 
           <div className="bg-white border border-[#E4E4E0] rounded-xl p-5 shadow-xs space-y-1">
@@ -217,7 +216,7 @@ export const AdminProfilePage = () => {
               <span>Ngày khởi tạo:</span>
             </div>
             <p className="text-sm font-bold font-mono text-[#001D37] pt-1">01/01/2026</p>
-            <p className="text-[11px] text-[#5E5E5E]">Khởi tạo qua DataInitializer</p>
+            <p className="text-[11px] text-[#5E5E5E]">Tài khoản Quản trị viên Cấp cao</p>
           </div>
         </div>
       </div>

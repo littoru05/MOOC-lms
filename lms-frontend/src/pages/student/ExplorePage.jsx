@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { usePublishedCourses, useCategories } from '../../hooks/useCourses';
+import { usePublishedCourses, useCategories, useMyEnrollments } from '../../hooks/useCourses';
+import { useAuth } from '../../context/AuthContext';
 import { FEATURED_INSTRUCTORS } from '../../data/featuredInstructors';
 import { Carousel } from '../../components/common/Carousel';
 import { CourseCardWithPreview } from '../../components/course/CourseCardWithPreview';
+import { Pagination } from '../../components/common/Pagination';
 import { getImageUrl } from '../../utils/imageUrl';
 import { 
   Search, 
@@ -45,12 +47,27 @@ const getCategoryIcon = (iconName) => {
 };
 
 export const ExplorePage = ({ onSelectCourse, initialFilterQuery = '' }) => {
+  const { user } = useAuth();
   const { data: courses = [], isLoading: loadingCourses } = usePublishedCourses();
   const { data: categories = [], isLoading: loadingCategories } = useCategories();
+  const { data: myEnrollments = [] } = useMyEnrollments(Boolean(user));
+
+  const enrolledCourseIds = useMemo(() => {
+    const set = new Set();
+    myEnrollments.forEach((e) => {
+      const cid = e.courseId ?? e.course?.id;
+      if (cid != null) {
+        set.add(Number(cid));
+        set.add(String(cid));
+      }
+    });
+    return set;
+  }, [myEnrollments]);
 
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [selectedLevel, setSelectedLevel] = useState('all');
   const [searchQuery, setSearchQuery] = useState(initialFilterQuery || '');
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 6;
 
   useEffect(() => {
     if (initialFilterQuery) {
@@ -58,21 +75,57 @@ export const ExplorePage = ({ onSelectCourse, initialFilterQuery = '' }) => {
     }
   }, [initialFilterQuery]);
 
-  const filteredCourses = courses.filter((c) => {
-    const matchCat =
-      selectedCategory === 'all' ||
-      c.category?.slug === selectedCategory ||
-      c.category?.name === selectedCategory;
-    const matchLevel =
-      selectedLevel === 'all' ||
-      c.level?.toLowerCase().includes(selectedLevel.toLowerCase());
-    const matchSearch =
-      c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      c.shortDescription?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      c.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      c.instructor?.fullName?.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchCat && matchLevel && matchSearch;
-  });
+  // Reset ve trang 1 khi thay doi danh muc hoac tu khoa tim kiem
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCategory, searchQuery]);
+
+  const filteredCourses = useMemo(() => {
+    return courses.filter((c) => {
+      const selectedCat = categories?.find(
+        (cat) =>
+          cat.slug?.toLowerCase() === selectedCategory.toLowerCase() ||
+          String(cat.id) === selectedCategory ||
+          cat.name?.toLowerCase() === selectedCategory.toLowerCase()
+      );
+
+      const matchCat =
+        selectedCategory === 'all' ||
+        (c.categorySlug && c.categorySlug.toLowerCase() === selectedCategory.toLowerCase()) ||
+        (selectedCat && c.categoryId === selectedCat.id) ||
+        (c.categoryName && c.categoryName.toLowerCase() === selectedCategory.toLowerCase()) ||
+        (c.category && (c.category.slug === selectedCategory || c.category.name === selectedCategory));
+      const matchSearch =
+        c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        c.shortDescription?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        c.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (c.instructorName && c.instructorName.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (c.instructor?.fullName && c.instructor.fullName.toLowerCase().includes(searchQuery.toLowerCase()));
+      return matchCat && matchSearch;
+    });
+  }, [courses, categories, selectedCategory, searchQuery]);
+
+  const totalPages = Math.ceil(filteredCourses.length / PAGE_SIZE) || 1;
+
+  // Dam bao currentPage luon nam trong gioi han hop le
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(1);
+    }
+  }, [currentPage, totalPages]);
+
+  const paginatedCourses = useMemo(() => {
+    const startIndex = (currentPage - 1) * PAGE_SIZE;
+    return filteredCourses.slice(startIndex, startIndex + PAGE_SIZE);
+  }, [filteredCourses, currentPage, PAGE_SIZE]);
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+    const catalogEl = document.getElementById('course-catalog-section');
+    if (catalogEl && typeof catalogEl.scrollIntoView === 'function') {
+      catalogEl.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
   const navigate = useNavigate();
 
@@ -240,6 +293,7 @@ export const ExplorePage = ({ onSelectCourse, initialFilterQuery = '' }) => {
           renderItem={(course) => (
             <CourseCardWithPreview
               course={course}
+              isEnrolled={enrolledCourseIds.has(course.id)}
               onSelectCourse={onSelectCourse}
             />
           )}
@@ -343,28 +397,23 @@ export const ExplorePage = ({ onSelectCourse, initialFilterQuery = '' }) => {
               </button>
             ))}
           </div>
-
-          {/* Level Filter Dropdown */}
-          <div className="flex items-center gap-2 shrink-0">
-            <span className="text-xs text-[#5E5E5E]">Cấp độ:</span>
-            <select
-              value={selectedLevel}
-              onChange={(e) => setSelectedLevel(e.target.value)}
-              className="px-3 py-1.5 text-xs bg-white border border-[#E4E4E0] rounded-lg text-[#1A1C1E] focus:outline-none focus:border-[#16324F]"
-            >
-              <option value="all">Tất cả cấp độ</option>
-              <option value="Cơ bản">Cơ bản</option>
-              <option value="Trung cấp">Trung cấp</option>
-              <option value="Nâng cao">Nâng cao</option>
-            </select>
-          </div>
-
         </div>
 
         {/* Results Counter */}
         <div className="flex items-center justify-between mb-6">
           <p className="text-xs text-[#5E5E5E]">
-            Hiển thị <span className="font-bold text-[#1A1C1E]">{filteredCourses.length}</span> khóa học tiêu chuẩn
+            Hiển thị{' '}
+            <span className="font-bold text-[#1A1C1E]">
+              {filteredCourses.length === 0
+                ? 0
+                : `${(currentPage - 1) * PAGE_SIZE + 1} - ${Math.min(currentPage * PAGE_SIZE, filteredCourses.length)}`}
+            </span>{' '}
+            trong tổng số <span className="font-bold text-[#1A1C1E]">{filteredCourses.length}</span> khóa học tiêu chuẩn
+            {totalPages > 1 && (
+              <span className="ml-2 px-2 py-0.5 bg-[#FAF9FC] border border-[#E4E4E0] rounded-md text-[11px] font-semibold text-[#16324F]">
+                Trang {currentPage}/{totalPages}
+              </span>
+            )}
           </p>
         </div>
 
@@ -376,14 +425,28 @@ export const ExplorePage = ({ onSelectCourse, initialFilterQuery = '' }) => {
             <p className="text-xs text-[#5E5E5E] mt-1">Vui lòng thử lại với từ khóa hoặc bộ lọc danh mục khác.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7">
-            {filteredCourses.map((course) => (
-              <CourseCardWithPreview
-                key={course.id}
-                course={course}
-                onSelectCourse={onSelectCourse || ((slug) => navigate(`/courses/${slug}`))}
+          <div className="space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7">
+              {paginatedCourses.map((course) => (
+                <CourseCardWithPreview
+                  key={course.id}
+                  course={course}
+                  isEnrolled={enrolledCourseIds.has(course.id)}
+                  onSelectCourse={onSelectCourse || ((slug) => navigate(`/courses/${slug}`))}
+                />
+              ))}
+            </div>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <Pagination
+                currentPage={currentPage}
+                totalItems={filteredCourses.length}
+                pageSize={PAGE_SIZE}
+                onPageChange={handlePageChange}
+                className="rounded-2xl border border-[#E4E4E0] shadow-xs overflow-hidden"
               />
-            ))}
+            )}
           </div>
         )}
 

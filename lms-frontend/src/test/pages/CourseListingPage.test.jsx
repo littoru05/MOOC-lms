@@ -97,4 +97,31 @@ describe('CourseListingPage Component with Price Filtering', () => {
       expect(select.value).toBe('lap-trinh-web');
     });
   });
+
+  it('lọc hiển thị đúng khóa học và badge danh mục khi chọn danh mục', async () => {
+    renderCourseListingPage('/courses?category=lap-trinh-web');
+
+    await waitFor(() => {
+      expect(screen.getByText('Lập trình Fullstack Web hiện đại với React và Spring Boot')).toBeInTheDocument();
+      expect(screen.getByText('Kiến trúc Vi dịch vụ và Cloud Native')).toBeInTheDocument();
+      // Badge danh mục trên card khóa học hiển thị "Lập trình Web"
+      expect(screen.getAllByText('Lập trình Web').length).toBeGreaterThan(0);
+    });
+  });
+
+  it('khi đang lọc giá, chuyển sang lọc danh mục thì danh sách khóa học hiển thị đúng thay vì bị rỗng', async () => {
+    renderCourseListingPage('/courses?priceType=paid');
+
+    const select = screen.getByLabelText('Chọn danh mục');
+    // Chuyển sang lọc danh mục lap-trinh-web và bấm Tất cả giá
+    fireEvent.change(select, { target: { value: 'lap-trinh-web' } });
+    const allPriceBtn = screen.getByRole('button', { name: 'Tất cả' });
+    fireEvent.click(allPriceBtn);
+
+    await waitFor(() => {
+      // Phải có khóa học hiển thị, không bị rơi vào Empty state "Chưa có khóa học nào trong chủ đề này"
+      expect(screen.queryByText('Chưa có khóa học nào trong chủ đề này')).not.toBeInTheDocument();
+      expect(screen.getByText('Lập trình Fullstack Web hiện đại với React và Spring Boot')).toBeInTheDocument();
+    });
+  });
 });

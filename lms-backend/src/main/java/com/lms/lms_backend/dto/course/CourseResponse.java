@@ -1,7 +1,9 @@
 package com.lms.lms_backend.dto.course;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
+import com.lms.lms_backend.dto.section.SectionResponse;
 import com.lms.lms_backend.entity.CourseStatus;
 
 import lombok.AllArgsConstructor;
@@ -22,6 +24,7 @@ public class CourseResponse {
     private CourseStatus status;
     private Long categoryId;
     private String categoryName;
+    private String categorySlug;
     private Long instructorId;
     private String instructorName;
     private java.math.BigDecimal price;
@@ -29,4 +32,5 @@ public class CourseResponse {
     private LocalDateTime deletedAt;
     private Long enrolledCount;
     private LocalDateTime createdAt;
+    private List<SectionResponse> sections;
 }

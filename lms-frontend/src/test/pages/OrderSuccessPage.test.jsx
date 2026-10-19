@@ -28,11 +28,13 @@ describe('OrderSuccessPage Component', () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByText('Thanh toán đơn hàng thành công!')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Thanh toán thành công' })).toBeInTheDocument();
+    expect(screen.getByText('Khóa học đã sẵn sàng để học.')).toBeInTheDocument();
     expect(screen.getByText('ORD-TEST999')).toBeInTheDocument();
     expect(screen.getByText('Khóa học Spring Boot Nâng cao')).toBeInTheDocument();
     expect(screen.getByText('Vào học ngay')).toBeInTheDocument();
-    expect(screen.getByText('Đã thanh toán qua QR (Demo)')).toBeInTheDocument();
+    expect(screen.getByText('Xem lịch sử đơn hàng')).toBeInTheDocument();
+    expect(screen.getByText('Chuyển khoản QR')).toBeInTheDocument();
   });
 
   it('hiển thị nhãn thanh toán qua thẻ khi order.paymentMethod là CARD', () => {
@@ -59,6 +61,6 @@ describe('OrderSuccessPage Component', () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByText('Đã thanh toán qua Thẻ (Demo)')).toBeInTheDocument();
+    expect(screen.getByText('Thẻ ngân hàng')).toBeInTheDocument();
   });
 });
