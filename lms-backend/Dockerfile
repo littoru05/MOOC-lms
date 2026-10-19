@@ -14,11 +14,13 @@ RUN mvn clean package -DskipTests
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 
+
+RUN mkdir -p /app/uploads && chmod -R 777 /app/uploads
+
 # Run with non-root user for security
 RUN addgroup -S spring && adduser -S spring -G spring
 USER spring:spring
 
-RUN mkdir -p /app/uploads && chmod -R 777 /app/uploads
 
 # Copy built jar from builder stage
 COPY --from=builder /app/target/*.jar app.jar
