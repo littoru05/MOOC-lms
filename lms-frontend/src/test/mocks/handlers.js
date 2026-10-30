@@ -429,6 +429,21 @@ export const handlers = [
     });
   }),
 
+  // 9b. Certificate by Enrollment
+  http.get('*/api/v1/certificates/enrollment/:enrollmentId', ({ params }) => {
+    if (params.enrollmentId === 'passed-enrollment' || params.enrollmentId === '999') {
+      return HttpResponse.json({
+        id: 50,
+        certificateCode: 'CERT-12345',
+        pdfUrl: '/api/v1/certificates/download/CERT-12345',
+        finalScore: 90,
+        studentName: 'Học viên Test',
+        issuedAt: new Date().toISOString(),
+      });
+    }
+    return new HttpResponse(JSON.stringify({ message: 'Chưa có chứng chỉ' }), { status: 404 });
+  }),
+
   // 10. Create/Update Quiz
   http.post('*/api/v1/quizzes', async ({ request }) => {
     const body = await request.json();

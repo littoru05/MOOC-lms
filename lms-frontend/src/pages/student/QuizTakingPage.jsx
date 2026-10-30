@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { quizApi } from '../../api/quizApi';
-import { Clock, HelpCircle, ArrowLeft, CheckCircle2, AlertCircle } from 'lucide-react';
+import { certificateApi } from '../../api/certificateApi';
+import { Clock, ArrowLeft } from 'lucide-react';
 
 export const QuizTakingPage = ({ quizId: quizIdProp, enrollmentId: enrollmentIdProp, onBack, onCompleteQuiz }) => {
   const { quizId: paramQuizId } = useParams();
@@ -11,24 +12,72 @@ export const QuizTakingPage = ({ quizId: quizIdProp, enrollmentId: enrollmentIdP
   const quizId = quizIdProp || paramQuizId || 1;
   const enrollmentId = enrollmentIdProp || searchParams.get('enrollmentId');
 
-  const handleBack = () => {
-    if (onBack) onBack();
-    else navigate(`/quiz/${quizId}`);
-  };
-
-  const handleComplete = (resultData) => {
-    if (onCompleteQuiz) {
-      onCompleteQuiz(resultData);
-    } else {
-      navigate(`/quiz/${quizId}/result`, { state: { result: resultData } });
-    }
-  };
   const [quiz, setQuiz] = useState(null);
   const [selectedAnswers, setSelectedAnswers] = useState({});
   const [timeLeft, setTimeLeft] = useState(900); // 15 mins default
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
+  // Nút Back trong giao diện: Hỏi xác nhận khi đang làm bài
+  const handleBack = () => {
+    if (onBack) {
+      onBack();
+      return;
+    }
+    const confirmLeave = window.confirm('Rời khỏi bài thi? Bài làm hiện tại sẽ không được lưu.');
+    if (confirmLeave) {
+      if (quiz?.courseId) {
+        navigate(`/learn/${quiz.courseId}`, { replace: true });
+      } else {
+        navigate('/my-learning', { replace: true });
+      }
+    }
+  };
+
+  const handleComplete = (resultData) => {
+    if (onCompleteQuiz) {
+      onCompleteQuiz(resultData);
+    } else {
+      navigate(`/quiz/${quizId}/result${enrollmentId ? `?enrollmentId=${enrollmentId}` : ''}`, {
+        replace: true,
+        state: { result: resultData, enrollmentId }
+      });
+    }
+  };
+
+  // 1. Kiểm tra nếu học viên ĐÃ ĐẠT quiz (đã có chứng chỉ), chuyển thẳng sang Result
+  useEffect(() => {
+    if (!enrollmentId) return;
+    let isMounted = true;
+    certificateApi.getCertificateByEnrollment(enrollmentId)
+      .then((res) => {
+        if (isMounted && res.data && res.data.certificateCode) {
+          navigate(`/quiz/${quizId}/result?enrollmentId=${enrollmentId}`, {
+            replace: true,
+            state: {
+              result: {
+                passed: true,
+                score: res.data.finalScore || 100,
+                totalScore: 100,
+                passingScore: 80,
+                message: 'Bạn đã hoàn thành và đạt bài kiểm tra này.',
+                certificate: res.data,
+                courseId: quiz?.courseId,
+              },
+              enrollmentId
+            }
+          });
+        }
+      })
+      .catch(() => {
+        // Chưa có chứng chỉ (chưa đạt hoặc chưa thi) -> Cho phép làm bài như hiện tại
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, [enrollmentId, quizId, navigate, quiz?.courseId]);
+
+  // 2. Tải thông tin đề thi Quiz
   useEffect(() => {
     const fetchQuiz = async () => {
       try {
@@ -47,14 +96,40 @@ export const QuizTakingPage = ({ quizId: quizIdProp, enrollmentId: enrollmentIdP
     fetchQuiz();
   }, [quizId]);
 
-  // Countdown timer
+  // 3. Xử lý nút Back trình duyệt khi ĐANG làm bài (popstate)
   useEffect(() => {
-    if (timeLeft <= 0) return;
+    if (submitting) return;
+
+    window.history.pushState({ inQuiz: true }, '');
+
+    const handlePopState = () => {
+      if (submitting) return;
+      const confirmLeave = window.confirm('Rời khỏi bài thi? Bài làm hiện tại sẽ không được lưu.');
+      if (confirmLeave) {
+        if (quiz?.courseId) {
+          navigate(`/learn/${quiz.courseId}`, { replace: true });
+        } else {
+          navigate('/my-learning', { replace: true });
+        }
+      } else {
+        window.history.pushState({ inQuiz: true }, '');
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [quiz?.courseId, submitting, navigate]);
+
+  // 4. Đồng hồ đếm ngược - Dừng và dọn dẹp khi rời trang
+  useEffect(() => {
+    if (timeLeft <= 0 || submitting) return;
     const timer = setInterval(() => {
       setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
     }, 1000);
     return () => clearInterval(timer);
-  }, [timeLeft]);
+  }, [timeLeft, submitting]);
 
   const handleSelectAnswer = (questionId, answerId) => {
     setSelectedAnswers((prev) => ({
@@ -83,10 +158,12 @@ export const QuizTakingPage = ({ quizId: quizIdProp, enrollmentId: enrollmentIdP
         enrollmentId,
         studentAnswers,
       });
-      handleComplete(res.data);
+      handleComplete({
+        ...res.data,
+        courseId: quiz.courseId
+      });
     } catch (err) {
       alert(err.response?.data?.message || 'Lỗi khi nộp bài thi!');
-    } finally {
       setSubmitting(false);
     }
   };
@@ -120,6 +197,7 @@ export const QuizTakingPage = ({ quizId: quizIdProp, enrollmentId: enrollmentIdP
           <button
             onClick={handleBack}
             className="p-1.5 hover:bg-[#F4F3F6] rounded text-[#5E5E5E] cursor-pointer"
+            aria-label="Quay lại bài học"
           >
             <ArrowLeft className="w-4 h-4" />
           </button>
@@ -143,7 +221,7 @@ export const QuizTakingPage = ({ quizId: quizIdProp, enrollmentId: enrollmentIdP
           <button
             onClick={handleSubmit}
             disabled={submitting}
-            className="px-5 py-2 bg-[#16324F] hover:bg-[#001D37] text-white text-xs font-semibold rounded-lg transition-colors shadow-xs disabled:opacity-50"
+            className="px-5 py-2 bg-[#16324F] hover:bg-[#001D37] text-white text-xs font-semibold rounded-lg transition-colors shadow-xs disabled:opacity-50 cursor-pointer"
           >
             {submitting ? 'Đang chấm điểm...' : 'Nộp bài thi'}
           </button>
@@ -181,7 +259,7 @@ export const QuizTakingPage = ({ quizId: quizIdProp, enrollmentId: enrollmentIdP
                     key={ans.id}
                     type="button"
                     onClick={() => handleSelectAnswer(q.id, ans.id)}
-                    className={`w-full p-3.5 rounded-lg border text-left text-xs transition-all flex items-center gap-3 ${
+                    className={`w-full p-3.5 rounded-lg border text-left text-xs transition-all flex items-center gap-3 cursor-pointer ${
                       isSelected
                         ? 'border-[#16324F] bg-[#F4F3F6] text-[#001D37] font-medium'
                         : 'border-[#E4E4E0] hover:bg-[#FAF9FC] text-[#1A1C1E]'
@@ -210,7 +288,7 @@ export const QuizTakingPage = ({ quizId: quizIdProp, enrollmentId: enrollmentIdP
           <button
             onClick={handleSubmit}
             disabled={submitting}
-            className="px-8 py-3 bg-[#16324F] hover:bg-[#001D37] text-white text-xs font-bold rounded-lg transition-colors shadow-sm disabled:opacity-50"
+            className="px-8 py-3 bg-[#16324F] hover:bg-[#001D37] text-white text-xs font-bold rounded-lg transition-colors shadow-sm disabled:opacity-50 cursor-pointer"
           >
             {submitting ? 'Đang chấm điểm...' : 'Hoàn tất & Nộp bài kiểm tra'}
           </button>

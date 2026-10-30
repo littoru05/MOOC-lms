@@ -1,37 +1,120 @@
-import React from 'react';
-import { useLocation, useParams, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useLocation, useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { certificateApi } from '../../api/certificateApi';
+import { quizApi } from '../../api/quizApi';
 import { Award, CheckCircle, XCircle, ArrowLeft, Download, ExternalLink, RefreshCw } from 'lucide-react';
 
 export const QuizResultPage = ({ result: resultProp, onBackToCourse, onRetryQuiz, onViewCertificate }) => {
   const location = useLocation();
   const { quizId } = useParams();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  const result = resultProp || location.state?.result;
+  const enrollmentId = searchParams.get('enrollmentId') || location.state?.enrollmentId;
+  const initialResult = resultProp || location.state?.result || null;
+  const [result, setResult] = useState(initialResult);
+  const [loading, setLoading] = useState(!initialResult && Boolean(enrollmentId));
+  const [quizInfo, setQuizInfo] = useState(null);
 
+  // Tải thông tin quiz để lấy courseId nếu chưa có
+  useEffect(() => {
+    if (quizId) {
+      quizApi.getQuizById(quizId)
+        .then((res) => setQuizInfo(res.data))
+        .catch((err) => console.warn('Lỗi khi tải thông tin quiz:', err));
+    }
+  }, [quizId]);
+
+  // Phục hồi kết quả nếu location.state không có (ví dụ khi F5 reload trang)
+  useEffect(() => {
+    if (result) {
+      setLoading(false);
+      return;
+    }
+
+    if (enrollmentId) {
+      setLoading(true);
+      certificateApi.getCertificateByEnrollment(enrollmentId)
+        .then((res) => {
+          if (res.data && res.data.certificateCode) {
+            setResult({
+              passed: true,
+              score: res.data.finalScore || 100,
+              totalScore: 100,
+              passingScore: quizInfo?.passingScore || 80,
+              message: 'Chúc mừng bạn đã hoàn thành xuất sắc bài kiểm tra và được cấp chứng chỉ!',
+              certificate: res.data,
+              courseId: quizInfo?.courseId,
+            });
+          } else {
+            setResult(null);
+          }
+        })
+        .catch(() => {
+          setResult(null);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    } else {
+      setLoading(false);
+    }
+  }, [result, enrollmentId, quizInfo]);
+
+  // Điều hướng về phòng học /learn/:courseId bằng replace
   const handleBackToCourse = () => {
-    if (onBackToCourse) onBackToCourse();
-    else navigate('/my-learning');
+    if (onBackToCourse) {
+      onBackToCourse();
+      return;
+    }
+    const targetCourseId = result?.courseId || quizInfo?.courseId;
+    if (targetCourseId) {
+      navigate(`/learn/${targetCourseId}`, { replace: true });
+    } else {
+      navigate('/my-learning', { replace: true });
+    }
   };
 
   const handleRetry = () => {
-    if (onRetryQuiz) onRetryQuiz();
-    else navigate(`/quiz/${quizId || 1}`);
+    if (onRetryQuiz) {
+      onRetryQuiz();
+      return;
+    }
+    navigate(`/quiz/${quizId || 1}${enrollmentId ? `?enrollmentId=${enrollmentId}` : ''}`, { replace: true });
   };
 
   const handleViewCert = (certCode) => {
-    if (onViewCertificate) onViewCertificate(certCode);
-    else navigate(`/certificates?code=${encodeURIComponent(certCode)}`);
+    if (onViewCertificate) {
+      onViewCertificate(certCode);
+    } else {
+      navigate(`/certificates?code=${encodeURIComponent(certCode)}`);
+    }
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-[70vh] flex flex-col items-center justify-center space-y-3 bg-[#FAF9FC]">
+        <div className="w-8 h-8 border-3 border-[#16324F] border-t-transparent rounded-full animate-spin"></div>
+        <p className="text-xs text-[#5E5E5E]">Đang tải dữ liệu kết quả bài thi...</p>
+      </div>
+    );
+  }
+
+  // Thông báo thân thiện khi không tìm thấy kết quả nộp bài (ví dụ học viên trượt và F5)
   if (!result) {
     return (
-      <div className="max-w-2xl mx-auto py-20 text-center">
-        <p className="text-sm font-semibold text-[#1A1C1E]">Chưa có dữ liệu kết quả bài thi.</p>
-        <button onClick={handleBackToCourse} className="mt-4 px-4 py-2 text-xs bg-[#16324F] text-white rounded-lg cursor-pointer">
-          Quay lại khóa học
-        </button>
+      <div className="max-w-2xl mx-auto py-20 text-center px-6">
+        <div className="bg-white border border-[#E4E4E0] rounded-2xl p-8 shadow-xs space-y-4">
+          <p className="text-sm font-semibold text-[#1A1C1E]">
+            Không tìm thấy kết quả. Quay lại bài học để làm bài thi.
+          </p>
+          <button 
+            onClick={handleBackToCourse} 
+            className="px-5 py-2.5 bg-[#16324F] hover:bg-[#001D37] text-white text-xs font-semibold rounded-lg transition-colors cursor-pointer"
+          >
+            Quay lại bài học
+          </button>
+        </div>
       </div>
     );
   }
@@ -76,7 +159,6 @@ export const QuizResultPage = ({ result: resultProp, onBackToCourse, onRetryQuiz
               Điểm số ({result.score}%) • Cần đạt: {result.passingScore}%
             </p>
           </div>
-
 
           {/* Actions */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">

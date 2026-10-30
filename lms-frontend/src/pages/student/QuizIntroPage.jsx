@@ -26,7 +26,11 @@ export const QuizIntroPage = ({ quizId: quizIdProp, enrollmentId: enrollmentIdPr
 
   const handleCancel = () => {
     if (onCancel) onCancel();
-    else navigate(-1);
+    else if (quiz?.courseId || course?.id) {
+      navigate(`/learn/${quiz?.courseId || course?.id}`, { replace: true });
+    } else {
+      navigate('/my-learning', { replace: true });
+    }
   };
 
   const handleConfirm = (qId, enrollId) => {
@@ -88,7 +92,7 @@ export const QuizIntroPage = ({ quizId: quizIdProp, enrollmentId: enrollmentIdPr
         
         {/* Back navigation */}
         <button
-          onClick={onCancel}
+          onClick={handleCancel}
           className="inline-flex items-center gap-2 text-xs font-semibold text-[#5E5E5E] hover:text-[#001D37] transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
