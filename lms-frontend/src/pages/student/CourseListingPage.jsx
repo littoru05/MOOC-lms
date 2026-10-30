@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { 
   Search, 
   Filter, 
@@ -20,10 +20,13 @@ import {
 } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { CourseCardWithPreview } from '../../components/course/CourseCardWithPreview';
+import { Pagination } from '../../components/common/Pagination';
 import { usePublishedCourses, useCategories, useMyEnrollments } from '../../hooks/useCourses';
 import { useAuth } from '../../context/AuthContext';
 import { formatCurrency } from '../../utils/format';
 import { findCategoryHierarchyBySlug } from '../../data/categoryMenu';
+
+const PAGE_SIZE = 9;
 
 export const CourseListingPage = ({ 
   filterQuery: filterQueryProp = '', 
@@ -33,6 +36,8 @@ export const CourseListingPage = ({
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useAuth();
+  const courseListRef = useRef(null);
+  const urlSearch = searchParams.get('search') || '';
   const filterQuery = filterQueryProp || searchParams.get('category') || searchParams.get('q') || '';
   const currentCategorySlug = searchParams.get('category') || (filterQuery !== 'all' ? filterQuery : '') || '';
 
@@ -108,8 +113,33 @@ export const CourseListingPage = ({
 
   // Filter States
   const [sortBy, setSortBy] = useState('popular'); // 'popular' | 'students' | 'newest'
-  const [searchKeywords, setSearchKeywords] = useState('');
+  const [searchKeywords, setSearchKeywords] = useState(urlSearch);
   const [isSidebarOpenMobile, setIsSidebarOpenMobile] = useState(false);
+
+  // Sync search input with URL search param
+  useEffect(() => {
+    setSearchKeywords(urlSearch);
+  }, [urlSearch]);
+
+  const handleSearchChange = (val) => {
+    setSearchKeywords(val);
+    const params = new URLSearchParams(searchParams);
+    if (val.trim()) {
+      params.set('search', val.trim());
+    } else {
+      params.delete('search');
+    }
+    params.delete('page');
+    setSearchParams(params, { replace: true });
+  };
+
+  const handleClearSearch = () => {
+    setSearchKeywords('');
+    const params = new URLSearchParams(searchParams);
+    params.delete('search');
+    params.delete('page');
+    setSearchParams(params);
+  };
 
   // Sync / Update Category in URL Search Params
   const handleCategoryChange = (catSlug) => {
@@ -121,6 +151,7 @@ export const CourseListingPage = ({
       params.set('category', catSlug);
       params.delete('q');
     }
+    params.delete('page');
     setSearchParams(params);
   };
 
@@ -138,6 +169,7 @@ export const CourseListingPage = ({
     } else {
       params.set('priceType', 'paid');
     }
+    params.delete('page');
     setSearchParams(params);
   };
 
@@ -154,6 +186,7 @@ export const CourseListingPage = ({
     } else {
       params.delete('maxPrice');
     }
+    params.delete('page');
     setSearchParams(params);
   };
 
@@ -205,8 +238,8 @@ export const CourseListingPage = ({
 
       // 2. Keyword search filter
       let matchesKeywords = true;
-      if (searchKeywords.trim()) {
-        const kw = searchKeywords.toLowerCase().trim();
+      const kw = (searchKeywords || urlSearch || '').toLowerCase().trim();
+      if (kw) {
         matchesKeywords = 
           course.title?.toLowerCase().includes(kw) ||
           course.shortDescription?.toLowerCase().includes(kw) ||
@@ -222,7 +255,64 @@ export const CourseListingPage = ({
       // Default: Popular (sort by enrolled count desc)
       return (b.enrolledCount || 0) - (a.enrolledCount || 0);
     });
-  }, [courses, categories, filterQuery, priceType, minPrice, maxPrice, searchKeywords, sortBy]);
+  }, [courses, categories, filterQuery, priceType, minPrice, maxPrice, searchKeywords, urlSearch, sortBy]);
+
+  const totalItems = filteredCourses.length;
+  const totalPages = Math.ceil(totalItems / PAGE_SIZE) || 1;
+
+  // Read ?page from URL
+  const pageParam = parseInt(searchParams.get('page'), 10);
+  const rawPage = !isNaN(pageParam) && pageParam > 0 ? pageParam : 1;
+
+  // Clamp current page between 1 and totalPages when totalItems > 0
+  const currentPage = totalItems === 0 ? 1 : Math.min(Math.max(1, rawPage), totalPages);
+
+  // Clamp URL ?page to last valid page if ?page exceeds totalPages
+  useEffect(() => {
+    if (totalItems > 0 && rawPage > totalPages) {
+      const params = new URLSearchParams(searchParams);
+      if (totalPages > 1) {
+        params.set('page', String(totalPages));
+      } else {
+        params.delete('page');
+      }
+      setSearchParams(params, { replace: true });
+    }
+  }, [rawPage, totalPages, totalItems, searchParams, setSearchParams]);
+
+  // Paginated items
+  const paginatedCourses = useMemo(() => {
+    const startIndex = (currentPage - 1) * PAGE_SIZE;
+    return filteredCourses.slice(startIndex, startIndex + PAGE_SIZE);
+  }, [filteredCourses, currentPage]);
+
+  const startItem = totalItems === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
+  const endItem = Math.min(currentPage * PAGE_SIZE, totalItems);
+
+  const scrollToTopOfList = () => {
+    if (!courseListRef.current) return;
+    if (typeof courseListRef.current.getBoundingClientRect === 'function') {
+      const rect = courseListRef.current.getBoundingClientRect();
+      const isVisible = rect.top >= 0 && rect.top <= window.innerHeight;
+      if (!isVisible && typeof courseListRef.current.scrollIntoView === 'function') {
+        courseListRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    } else if (typeof courseListRef.current.scrollIntoView === 'function') {
+      courseListRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  const handlePageChange = (newPage) => {
+    const params = new URLSearchParams(searchParams);
+    if (newPage <= 1) {
+      params.delete('page');
+    } else {
+      params.set('page', String(newPage));
+    }
+    setSearchParams(params);
+    scrollToTopOfList();
+  };
+
 
   const handleResetFilters = () => {
     setSearchKeywords('');
@@ -232,11 +322,14 @@ export const CourseListingPage = ({
     params.delete('priceType');
     params.delete('minPrice');
     params.delete('maxPrice');
+    params.delete('search');
+    params.delete('page');
     setSearchParams(params);
   };
 
-  const hasActiveFilters = 
-    searchKeywords !== '' ||
+  const hasActiveFilters =
+    Boolean(searchKeywords.trim()) ||
+    Boolean(urlSearch) ||
     Boolean(searchParams.get('category')) ||
     priceType !== 'all' ||
     minPrice !== '' ||
@@ -303,12 +396,12 @@ export const CourseListingPage = ({
               <input
                 type="text"
                 value={searchKeywords}
-                onChange={(e) => setSearchKeywords(e.target.value)}
+                onChange={(e) => handleSearchChange(e.target.value)}
                 placeholder="Lọc nhanh khóa học trong mục này..."
                 className="w-full text-xs sm:text-sm bg-transparent focus:outline-none text-[#1A1C1E] placeholder:text-[#8E8E93]"
               />
               {searchKeywords && (
-                <button onClick={() => setSearchKeywords('')} className="p-0.5 text-[#8E8E93] hover:text-[#1A1C1E] cursor-pointer">
+                <button onClick={handleClearSearch} className="p-0.5 text-[#8E8E93] hover:text-[#1A1C1E] cursor-pointer">
                   <X className="w-4 h-4" />
                 </button>
               )}
@@ -529,12 +622,14 @@ export const CourseListingPage = ({
           </aside>
 
           {/* RIGHT RESULTS COLUMN */}
-          <main className="lg:col-span-9 space-y-6">
+          <main ref={courseListRef} className="lg:col-span-9 space-y-6 scroll-mt-24">
             
             {/* Desktop Top Results Toolbar */}
-            <div className="hidden lg:flex items-center justify-between bg-white border border-[#E4E4E0] rounded-2xl px-5 py-3.5 shadow-sm">
+            <div className="flex items-center justify-between bg-white border border-[#E4E4E0] rounded-2xl px-5 py-3.5 shadow-sm">
               <div className="flex items-center gap-2.5 text-xs text-[#5E5E5E]">
-                <span>Hiển thị <strong className="text-[#001D37] font-bold text-sm">{filteredCourses.length}</strong> kết quả</span>
+                <span className="text-xs font-semibold text-[#16324F]">
+                  {totalItems === 0 ? 'Hiển thị 0 khóa học' : `Hiển thị ${startItem}-${endItem} trong ${totalItems} khóa học`}
+                </span>
                 {hasActiveFilters && (
                   <span className="px-2.5 py-0.5 bg-amber-50 text-amber-800 border border-amber-200 rounded-full text-[10px] font-bold inline-flex items-center gap-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
@@ -586,12 +681,12 @@ export const CourseListingPage = ({
                     <X className="w-3 h-3" />
                   </button>
                 )}
-                {searchKeywords && (
+                {(searchKeywords || urlSearch) && (
                   <button
-                    onClick={() => setSearchKeywords('')}
+                    onClick={handleClearSearch}
                     className="inline-flex items-center gap-1 px-2.5 py-1 bg-white border border-[#E4E4E0] hover:border-rose-300 text-xs font-semibold text-[#16324F] rounded-lg shadow-2xs hover:text-rose-600 transition-colors cursor-pointer"
                   >
-                    <span>Từ khóa: "{searchKeywords}"</span>
+                    <span>Từ khóa: "{searchKeywords || urlSearch}"</span>
                     <X className="w-3 h-3" />
                   </button>
                 )}
@@ -605,9 +700,10 @@ export const CourseListingPage = ({
             )}
 
             {/* RESULTS GRID OR EMPTY STATE */}
-            {filteredCourses.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {filteredCourses.map((course, idx) => (
+            {totalItems > 0 ? (
+              <div className="space-y-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                  {paginatedCourses.map((course, idx) => (
                   <div 
                     key={course.id} 
                     className="h-full animate-card-entry"
@@ -620,6 +716,19 @@ export const CourseListingPage = ({
                     />
                   </div>
                 ))}
+                </div>
+
+                {/* Pagination Component */}
+                {totalItems > PAGE_SIZE && (
+                  <div className="bg-white border border-[#E4E4E0] rounded-2xl overflow-hidden shadow-sm">
+                    <Pagination
+                      currentPage={currentPage}
+                      totalItems={totalItems}
+                      pageSize={PAGE_SIZE}
+                      onPageChange={handlePageChange}
+                    />
+                  </div>
+                )}
               </div>
             ) : (
               /* EMPTY STATE */
