@@ -12,12 +12,11 @@ import {
   AlertCircle, 
   Loader2, 
   ArrowRight,
-  ShieldCheck,
-  Sparkles
+  ShieldCheck
 } from 'lucide-react';
 
 export const AuthModal = ({ isOpen, onClose, initialMode = 'login', onAuthSuccess }) => {
-  const { login, register, quickSwitchRole } = useAuth();
+  const { login, register } = useAuth();
   const { showToast } = useToast();
 
   const [mode, setMode] = useState(initialMode); // 'login' | 'register'
@@ -163,25 +162,6 @@ export const AuthModal = ({ isOpen, onClose, initialMode = 'login', onAuthSucces
         err.response?.data?.message ||
         'Đăng ký không thành công. Email có thể đã được sử dụng!'
       );
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Quick Switch for Demo
-  const handleQuickSwitch = async (targetRole) => {
-    setServerError('');
-    setLoading(true);
-    try {
-      await quickSwitchRole(targetRole);
-      showToast(`Đã chuyển sang vai trò ${targetRole === 'ROLE_ADMIN' ? 'Quản trị viên' : targetRole === 'ROLE_INSTRUCTOR' ? 'Giảng viên' : 'Học viên'}!`, 'info');
-      if (onAuthSuccess) {
-        onAuthSuccess(targetRole);
-      } else {
-        onClose();
-      }
-    } catch (err) {
-      setServerError('Lỗi khi chuyển tài khoản mẫu');
     } finally {
       setLoading(false);
     }
@@ -633,37 +613,6 @@ export const AuthModal = ({ isOpen, onClose, initialMode = 'login', onAuthSucces
                   </button>
                 </span>
               )}
-            </div>
-
-            {/* Quick Demo Helper Section (Discrete bottom bar for evaluator testing) */}
-            <div className="bg-[#FAF9FC] border border-[#E4E4E0] rounded-xl p-3 space-y-2">
-              <div className="text-[11px] font-semibold text-[#5E5E5E] flex items-center gap-1">
-                <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-                <span>Tài khoản trải nghiệm mẫu nhanh:</span>
-              </div>
-              <div className="grid grid-cols-3 gap-1.5">
-                <button
-                  type="button"
-                  onClick={() => handleQuickSwitch('ROLE_STUDENT')}
-                  className="px-2 py-1.5 bg-white border border-[#E4E4E0] hover:border-[#16324F] rounded-lg text-[11px] font-medium text-[#1A1C1E] transition-colors text-center"
-                >
-                  Học viên
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleQuickSwitch('ROLE_INSTRUCTOR')}
-                  className="px-2 py-1.5 bg-white border border-[#E4E4E0] hover:border-[#16324F] rounded-lg text-[11px] font-medium text-[#1A1C1E] transition-colors text-center"
-                >
-                  Giảng viên
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleQuickSwitch('ROLE_ADMIN')}
-                  className="px-2 py-1.5 bg-white border border-[#E4E4E0] hover:border-[#16324F] rounded-lg text-[11px] font-medium text-[#1A1C1E] transition-colors text-center"
-                >
-                  Admin
-                </button>
-              </div>
             </div>
 
           </div>

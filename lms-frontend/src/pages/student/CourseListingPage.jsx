@@ -474,8 +474,42 @@ export const CourseListingPage = ({
               </div>
             </div>
 
-            {/* Filter Group: Category (Danh mục đào tạo) */}
+            {/* Filter Group: Course Name (Tên khóa học) */}
             <div className="space-y-2.5">
+              <div className="flex items-center justify-between">
+                <h4 className="font-extrabold text-xs text-[#001D37] uppercase tracking-wider flex items-center gap-1.5">
+                  <BookOpen className="w-3.5 h-3.5 text-[#16324F]" />
+                  <span>Tên khóa học</span>
+                </h4>
+                {Boolean(searchKeywords.trim()) && (
+                  <span className="w-2 h-2 rounded-full bg-amber-500"></span>
+                )}
+              </div>
+
+              <div className="flex items-center bg-[#FAF9FC] hover:bg-white border border-[#E4E4E0] focus-within:border-[#16324F] focus-within:bg-white focus-within:ring-1 focus-within:ring-[#16324F]/20 rounded-xl px-3 py-2 transition-all shadow-2xs">
+                <Search className="w-3.5 h-3.5 text-[#5E5E5E] mr-2 shrink-0" />
+                <input
+                  type="text"
+                  value={searchKeywords}
+                  onChange={(e) => handleSearchChange(e.target.value)}
+                  placeholder="Nhập tên khóa học..."
+                  className="w-full bg-transparent text-xs font-medium text-[#1A1C1E] focus:outline-none placeholder:text-[#8E8E93]"
+                />
+                {searchKeywords && (
+                  <button
+                    type="button"
+                    onClick={handleClearSearch}
+                    className="p-0.5 text-[#5E5E5E] hover:text-[#1A1C1E] cursor-pointer shrink-0 ml-1"
+                    title="Xóa lọc tên khóa học"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Filter Group: Category (Danh mục đào tạo) */}
+            <div className="space-y-2.5 pt-4 border-t border-[#E4E4E0]">
               <div className="flex items-center justify-between">
                 <h4 className="font-extrabold text-xs text-[#001D37] uppercase tracking-wider flex items-center gap-1.5">
                   <Layers className="w-3.5 h-3.5 text-[#16324F]" />

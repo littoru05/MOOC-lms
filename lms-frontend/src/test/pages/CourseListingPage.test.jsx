@@ -337,4 +337,63 @@ describe('CourseListingPage Component with Price Filtering & Pagination', () => 
       expect(screen.queryByText('Khóa học thử nghiệm số 10')).not.toBeInTheDocument();
     });
   });
+
+  it('lọc danh sách khóa học theo tên khóa học từ ô tìm kiếm trong sidebar', async () => {
+    const mockCourses = [
+      {
+        id: 1,
+        title: 'Lập trình ReactJS chuyên sâu',
+        slug: 'lap-trinh-reactjs-chuyen-sau',
+        description: 'Khóa học React nâng cao',
+        price: 200000,
+        status: 'PUBLISHED',
+        categorySlug: 'lap-trinh-web',
+        categoryName: 'Lập trình Web',
+        enrolledCount: 50,
+      },
+      {
+        id: 2,
+        title: 'Lập trình Python cơ bản',
+        slug: 'lap-trinh-python-co-ban',
+        description: 'Khóa học Python cho người mới',
+        price: 150000,
+        status: 'PUBLISHED',
+        categorySlug: 'lap-trinh-phan-mem',
+        categoryName: 'Lập trình Phần mềm',
+        enrolledCount: 30,
+      },
+    ];
+
+    server.use(
+      http.get('*/api/v1/courses/public', () => {
+        return HttpResponse.json(mockCourses);
+      })
+    );
+
+    renderCourseListingPage();
+
+    await waitFor(() => {
+      expect(screen.getByText('Lập trình ReactJS chuyên sâu')).toBeInTheDocument();
+      expect(screen.getByText('Lập trình Python cơ bản')).toBeInTheDocument();
+    });
+
+    const searchInput = screen.getByPlaceholderText('Nhập tên khóa học...');
+    expect(searchInput).toBeInTheDocument();
+
+    fireEvent.change(searchInput, { target: { value: 'ReactJS' } });
+
+    await waitFor(() => {
+      expect(screen.getByText('Lập trình ReactJS chuyên sâu')).toBeInTheDocument();
+      expect(screen.queryByText('Lập trình Python cơ bản')).not.toBeInTheDocument();
+    });
+
+    const clearButton = screen.getByTitle('Xóa lọc tên khóa học');
+    expect(clearButton).toBeInTheDocument();
+    fireEvent.click(clearButton);
+
+    await waitFor(() => {
+      expect(screen.getByText('Lập trình ReactJS chuyên sâu')).toBeInTheDocument();
+      expect(screen.getByText('Lập trình Python cơ bản')).toBeInTheDocument();
+    });
+  });
 });
