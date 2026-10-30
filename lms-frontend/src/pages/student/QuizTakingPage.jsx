@@ -155,7 +155,7 @@ export const QuizTakingPage = ({ quizId: quizIdProp, enrollmentId: enrollmentIdP
     setSubmitting(true);
     try {
       const res = await quizApi.submitQuiz(quizId, {
-        enrollmentId,
+        enrollmentId: enrollmentId ? Number(enrollmentId) : null,
         studentAnswers,
       });
       handleComplete({

@@ -20,12 +20,16 @@ import {
 } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { getImageUrl } from '../../utils/imageUrl';
+import { Pagination } from '../../components/common/Pagination';
+
+const PAGE_SIZE = 10;
 
 export const UserManagementPage = ({ onBack }) => {
   const navigate = useNavigate();
   const { showToast, confirm } = useToast();
   const [activeTab, setActiveTab] = useState('ALL'); // 'ALL', 'INSTRUCTOR', 'STUDENT', 'ADMIN'
   const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
   const [togglingId, setTogglingId] = useState(null);
 
   const { data: users = [], isLoading: loading, refetch } = useUsers();
@@ -34,6 +38,16 @@ export const UserManagementPage = ({ onBack }) => {
   const handleBack = () => {
     if (onBack) onBack();
     else navigate('/admin/dashboard');
+  };
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    setCurrentPage(1);
+  };
+
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+    setCurrentPage(1);
   };
 
   const handleToggleActive = (userId, currentActive) => {
@@ -71,6 +85,12 @@ export const UserManagementPage = ({ onBack }) => {
     if (activeTab === 'ADMIN') return u.role === 'ROLE_ADMIN' || u.role === 'ADMIN';
     return true;
   });
+
+  // Client-side pagination logic
+  const totalPages = Math.ceil(filteredUsers.length / PAGE_SIZE) || 1;
+  const safeCurrentPage = Math.min(Math.max(1, currentPage), totalPages);
+  const startIndex = (safeCurrentPage - 1) * PAGE_SIZE;
+  const paginatedUsers = filteredUsers.slice(startIndex, startIndex + PAGE_SIZE);
 
   const getRoleBadge = (role) => {
     switch (role) {
@@ -128,7 +148,7 @@ export const UserManagementPage = ({ onBack }) => {
               <input
                 type="text"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={handleSearchChange}
                 placeholder="Tìm theo tên, email, username..."
                 className="w-full text-xs bg-transparent focus:outline-none text-[#1A1C1E]"
               />
@@ -146,7 +166,7 @@ export const UserManagementPage = ({ onBack }) => {
         {/* Filter Navigation Tabs */}
         <div className="flex flex-wrap items-center gap-2 border-b border-[#E4E4E0] pb-1">
           <button
-            onClick={() => setActiveTab('ALL')}
+            onClick={() => handleTabChange('ALL')}
             className={`px-4 py-2 text-xs font-semibold rounded-lg transition-colors cursor-pointer ${
               activeTab === 'ALL'
                 ? 'bg-[#16324F] text-white shadow-xs'
@@ -157,7 +177,7 @@ export const UserManagementPage = ({ onBack }) => {
           </button>
 
           <button
-            onClick={() => setActiveTab('INSTRUCTOR')}
+            onClick={() => handleTabChange('INSTRUCTOR')}
             className={`px-4 py-2 text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer ${
               activeTab === 'INSTRUCTOR'
                 ? 'bg-[#16324F] text-white shadow-xs'
@@ -169,7 +189,7 @@ export const UserManagementPage = ({ onBack }) => {
           </button>
 
           <button
-            onClick={() => setActiveTab('STUDENT')}
+            onClick={() => handleTabChange('STUDENT')}
             className={`px-4 py-2 text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer ${
               activeTab === 'STUDENT'
                 ? 'bg-[#16324F] text-white shadow-xs'
@@ -181,7 +201,7 @@ export const UserManagementPage = ({ onBack }) => {
           </button>
 
           <button
-            onClick={() => setActiveTab('ADMIN')}
+            onClick={() => handleTabChange('ADMIN')}
             className={`px-4 py-2 text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer ${
               activeTab === 'ADMIN'
                 ? 'bg-[#16324F] text-white shadow-xs'
@@ -219,7 +239,7 @@ export const UserManagementPage = ({ onBack }) => {
                   </td>
                 </tr>
               ) : (
-                filteredUsers.map((u) => (
+                paginatedUsers.map((u) => (
                   <tr key={u.id} className="hover:bg-[#FAF9FC] transition-colors">
                     {/* Name & Email */}
                     <td className="py-3.5 px-6 flex items-center gap-3">
@@ -289,6 +309,16 @@ export const UserManagementPage = ({ onBack }) => {
               )}
             </tbody>
           </table>
+
+          {/* Phân trang */}
+          {!loading && filteredUsers.length > 0 && (
+            <Pagination
+              currentPage={safeCurrentPage}
+              totalItems={filteredUsers.length}
+              pageSize={PAGE_SIZE}
+              onPageChange={(page) => setCurrentPage(page)}
+            />
+          )}
         </div>
 
       </div>
