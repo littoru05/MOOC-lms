@@ -75,9 +75,13 @@ describe('QuizTakingPage Component with MSW', () => {
     const ans2 = screen.getByText(/Cú pháp mở rộng JavaScript/i);
     await user.click(ans2);
 
-    // Bấm Nộp bài thi
+    // Bấm Nộp bài thi -> Hiện modal xác nhận trên màn hình
     const submitBtn = screen.getByRole('button', { name: /Hoàn tất & Nộp bài kiểm tra/i });
     await user.click(submitBtn);
+
+    // Bấm xác nhận nộp bài trong modal
+    const confirmSubmitBtn = screen.getByRole('button', { name: /Xác nhận nộp bài/i });
+    await user.click(confirmSubmitBtn);
 
     await waitFor(() => {
       expect(handleComplete).toHaveBeenCalled();
@@ -85,9 +89,7 @@ describe('QuizTakingPage Component with MSW', () => {
   });
 
   // (c) Bấm Back giữa lúc làm bài thì có hộp xác nhận
-  it('(c) bấm Back giữa lúc làm bài thì hiện hộp thoại xác nhận rời khỏi bài thi', async () => {
-    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false);
-
+  it('(c) bấm Back giữa lúc làm bài thì hiện hộp thoại xác nhận rời khỏi bài thi trên màn hình', async () => {
     render(
       <MemoryRouter initialEntries={['/quiz/1/take?enrollmentId=100']}>
         <ToastProvider>
@@ -107,7 +109,10 @@ describe('QuizTakingPage Component with MSW', () => {
     const backBtn = screen.getByRole('button', { name: 'Quay lại bài học' });
     fireEvent.click(backBtn);
 
-    expect(confirmSpy).toHaveBeenCalledWith('Rời khỏi bài thi? Bài làm hiện tại sẽ không được lưu.');
+    // Modal xác nhận rời khỏi bài thi xuất hiện trên màn hình
+    expect(screen.getByText('Rời khỏi bài thi?')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Ở lại làm tiếp' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Rời khỏi bài thi' })).toBeInTheDocument();
   });
 
   // (e) Đã đạt thì vào lại Take bị chuyển sang Result
@@ -173,9 +178,12 @@ describe('QuizTakingPage Component with MSW', () => {
     await user.click(screen.getByText('8080'));
     await user.click(screen.getByText(/Cú pháp mở rộng JavaScript/i));
 
-    // Nộp bài
+    // Nộp bài -> Hiện modal xác nhận -> Bấm xác nhận
     const submitBtn = screen.getByRole('button', { name: /Hoàn tất & Nộp bài kiểm tra/i });
     await user.click(submitBtn);
+
+    const confirmSubmitBtn = screen.getByRole('button', { name: /Xác nhận nộp bài/i });
+    await user.click(confirmSubmitBtn);
 
     // Đã chuyển sang trang kết quả bằng replace
     await waitFor(() => {
@@ -310,5 +318,84 @@ describe('QuizTakingPage Component with MSW', () => {
     await waitFor(() => {
       expect(screen.getByText('Trang Course Player ID 1')).toBeInTheDocument();
     });
+  });
+  it('học viên nộp bài khi chưa chọn câu trả lời nào: hiển thị thẻ xác nhận trên màn hình, nộp bài thành công với điểm 0', async () => {
+    const user = userEvent.setup();
+
+    const router = createMemoryRouter(
+      [
+        {
+          path: '/quiz/:quizId/take',
+          element: <QuizTakingPage />,
+        },
+        {
+          path: '/quiz/:quizId/result',
+          element: <QuizResultPage />,
+        },
+      ],
+      {
+        initialEntries: ['/quiz/1/take?enrollmentId=100'],
+        initialIndex: 0,
+      }
+    );
+
+    renderWithRouter(router);
+
+    await waitFor(() => {
+      expect(screen.getByText('8080')).toBeInTheDocument();
+    });
+
+    // Bấm Nộp bài thi ngay khi chưa chọn câu trả lời nào
+    const submitBtn = screen.getByRole('button', { name: /Hoàn tất & Nộp bài kiểm tra/i });
+    await user.click(submitBtn);
+
+
+    // Kiểm tra ô modal xác nhận xuất hiện trực tiếp trên màn hình
+    expect(screen.getByText('Xác nhận nộp bài thi')).toBeInTheDocument();
+    expect(screen.getByText(/chưa chọn bất kỳ câu trả lời nào/i)).toBeInTheDocument();
+
+    // Bấm nút "Xác nhận nộp bài" trong modal
+    const confirmBtn = screen.getByRole('button', { name: /Xác nhận nộp bài/i });
+    await user.click(confirmBtn);
+
+    // Chuyển sang màn hình kết quả thông báo trượt (0 điểm)
+    await waitFor(() => {
+      expect(screen.getByText(/Rất tiếc, bạn chưa đạt điểm yêu cầu!/i)).toBeInTheDocument();
+      expect(screen.getByText(/0 \/ 100/i)).toBeInTheDocument();
+    });
+  });
+
+  it('học viên hủy nộp bài tại modal xác nhận thì vẫn ở lại màn hình làm bài', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <MemoryRouter initialEntries={['/quiz/1/take?enrollmentId=100']}>
+        <ToastProvider>
+          <AuthProvider>
+            <Routes>
+              <Route path="/quiz/:quizId/take" element={<QuizTakingPage />} />
+            </Routes>
+          </AuthProvider>
+        </ToastProvider>
+      </MemoryRouter>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('8080')).toBeInTheDocument();
+    });
+
+    const submitBtn = screen.getByRole('button', { name: /Hoàn tất & Nộp bài kiểm tra/i });
+    await user.click(submitBtn);
+
+    // Modal xuất hiện
+    expect(screen.getByText('Xác nhận nộp bài thi')).toBeInTheDocument();
+
+    // Bấm nút "Tiếp tục làm bài"
+    const cancelBtn = screen.getByRole('button', { name: /Tiếp tục làm bài/i });
+    await user.click(cancelBtn);
+
+    // Vẫn ở lại màn hình làm bài
+    expect(screen.getByText(/Bài thi tổng kết kiến thức/i)).toBeInTheDocument();
+    expect(screen.getByText('8080')).toBeInTheDocument();
   });
 });

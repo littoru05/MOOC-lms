@@ -21,10 +21,9 @@ import {
 } from 'lucide-react';
 
 export const StudentLayout = ({ currentTab: currentTabProp, onNavigate, onOpenAuthModal, children }) => {
-  const { user, logout, quickSwitchRole, currentRole, isAdmin, isInstructor } = useAuth();
+  const { user, logout, currentRole, isAdmin, isInstructor } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [showRoleMenu, setShowRoleMenu] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
 
@@ -128,26 +127,7 @@ export const StudentLayout = ({ currentTab: currentTabProp, onNavigate, onOpenAu
                 Chứng chỉ & Xác thực
               </Link>
 
-              {/* Quick Links for Instructor / Admin */}
-              {(isInstructor || isAdmin) && (
-                <Link
-                  to="/instructor/dashboard"
-                  className="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-[#16324F] bg-blue-50 border border-blue-200 hover:bg-blue-100 transition-colors flex items-center gap-1.5 font-bold cursor-pointer"
-                >
-                  <LayoutDashboard className="w-3.5 h-3.5 text-[#16324F]" />
-                  <span>Giảng dạy</span>
-                </Link>
-              )}
 
-              {isAdmin && (
-                <Link
-                  to="/admin/dashboard"
-                  className="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-[#16324F] bg-amber-50 border border-amber-200 hover:bg-amber-100 transition-colors flex items-center gap-1.5 font-bold cursor-pointer"
-                >
-                  <ShieldCheck className="w-3.5 h-3.5 text-[#16324F]" />
-                  <span>Quản trị</span>
-                </Link>
-              )}
             </nav>
           </div>
 
@@ -163,13 +143,9 @@ export const StudentLayout = ({ currentTab: currentTabProp, onNavigate, onOpenAu
               {mobileDrawerOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
             
-            {/* Quick Demo Switcher */}
-            <div className="relative">
-              <button
-                onClick={() => setShowRoleMenu(!showRoleMenu)}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-[#EFEDF0] border border-[#E4E4E0] text-[#16324F] rounded-lg hover:bg-[#E3E2E5] transition-colors cursor-pointer shadow-2xs"
-                title="Chuyển đổi giao diện vai trò"
-              >
+            {/* Role Badge Indicator (Chỉ hiển thị vai trò hiện tại, không cho chuyển sang portal khác) */}
+            {user && (
+              <div className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-[#EFEDF0] border border-[#E4E4E0] text-[#16324F] rounded-lg shadow-2xs">
                 <Sparkles className="w-3.5 h-3.5 text-amber-600" />
                 <span>
                   {currentRole === 'ROLE_ADMIN'
@@ -178,53 +154,8 @@ export const StudentLayout = ({ currentTab: currentTabProp, onNavigate, onOpenAu
                     ? 'Portal: Giảng viên'
                     : 'Portal: Học viên'}
                 </span>
-                <ChevronDown className="w-3 h-3 text-[#16324F]" />
-              </button>
-
-              {showRoleMenu && (
-                <div className="absolute right-0 mt-1 w-52 bg-white border border-[#E4E4E0] rounded-lg shadow-sm py-1 z-50">
-                  <div className="px-3 py-1 text-[10px] font-semibold text-[#6B6B6B] uppercase tracking-wider">
-                    Chuyển sang Không gian:
-                  </div>
-                  <button
-                    onClick={async () => {
-                      await quickSwitchRole('ROLE_STUDENT');
-                      navigate('/');
-                      setShowRoleMenu(false);
-                    }}
-                    className={`w-full text-left px-3 py-1.5 text-xs flex items-center gap-2 ${
-                      currentRole === 'ROLE_STUDENT' ? 'font-bold text-[#16324F] bg-[#F4F3F6]' : 'text-[#1A1C1E] hover:bg-[#FAF9FC]'
-                    }`}
-                  >
-                    <GraduationCap className="w-3.5 h-3.5" /> Giao diện Học viên
-                  </button>
-                  <button
-                    onClick={async () => {
-                      await quickSwitchRole('ROLE_INSTRUCTOR');
-                      navigate('/instructor/dashboard');
-                      setShowRoleMenu(false);
-                    }}
-                    className={`w-full text-left px-3 py-1.5 text-xs flex items-center gap-2 ${
-                      currentRole === 'ROLE_INSTRUCTOR' ? 'font-bold text-[#16324F] bg-[#F4F3F6]' : 'text-[#1A1C1E] hover:bg-[#FAF9FC]'
-                    }`}
-                  >
-                    <LayoutDashboard className="w-3.5 h-3.5 text-blue-600" /> Portal Giảng viên
-                  </button>
-                  <button
-                    onClick={async () => {
-                      await quickSwitchRole('ROLE_ADMIN');
-                      navigate('/admin/dashboard');
-                      setShowRoleMenu(false);
-                    }}
-                    className={`w-full text-left px-3 py-1.5 text-xs flex items-center gap-2 ${
-                      currentRole === 'ROLE_ADMIN' ? 'font-bold text-[#16324F] bg-[#F4F3F6]' : 'text-[#1A1C1E] hover:bg-[#FAF9FC]'
-                    }`}
-                  >
-                    <ShieldCheck className="w-3.5 h-3.5 text-[#16324F]" /> Portal Quản trị viên
-                  </button>
-                </div>
-              )}
-            </div>
+              </div>
+            )}
 
             {/* User Account / Login */}
             {user ? (

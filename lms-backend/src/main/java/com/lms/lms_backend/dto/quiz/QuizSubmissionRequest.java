@@ -11,6 +11,6 @@ public class QuizSubmissionRequest {
     @NotNull(message = "Enrollment ID không được để trống")
     private Long enrollmentId;
 
-    @NotEmpty(message = "Danh sách câu trả lời không được để trống")
+    @NotNull(message = "Danh sách câu trả lời không được null")
     private List<StudentAnswerDto> studentAnswers;
 }

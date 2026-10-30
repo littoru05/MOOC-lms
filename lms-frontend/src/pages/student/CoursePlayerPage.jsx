@@ -3,22 +3,24 @@ import { courseApi } from '../../api/courseApi';
 import { learningApi } from '../../api/learningApi';
 import { quizApi } from '../../api/quizApi';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 import { useParams, useNavigate } from 'react-router-dom';
-import { 
-  CheckCircle, 
-  Circle, 
-  Play, 
-  FileText, 
-  Video, 
-  Clock, 
-  Award, 
-  ArrowLeft, 
-  ChevronRight, 
-  ChevronLeft, 
-  HelpCircle, 
-  ExternalLink, 
-  BookOpen, 
-  Sparkles 
+import {
+  CheckCircle,
+  Circle,
+  Play,
+  FileText,
+  Video,
+  Clock,
+  Award,
+  ArrowLeft,
+  ChevronRight,
+  ChevronLeft,
+  HelpCircle,
+  ExternalLink,
+  BookOpen,
+  Sparkles,
+  Lock
 } from 'lucide-react';
 
 export const CoursePlayerPage = ({ courseId: courseIdProp, onBack, onStartQuiz, onViewCertificate }) => {
@@ -27,6 +29,7 @@ export const CoursePlayerPage = ({ courseId: courseIdProp, onBack, onStartQuiz, 
   const courseId = courseIdProp || paramCourseId || 1;
 
   const { user } = useAuth();
+  const { showToast } = useToast() || {};
   const [course, setCourse] = useState(null);
   const [sections, setSections] = useState([]);
   const [enrollment, setEnrollment] = useState(null);
@@ -97,7 +100,7 @@ export const CoursePlayerPage = ({ courseId: courseIdProp, onBack, onStartQuiz, 
             );
             if (currentEnrollment) {
               setEnrollment(currentEnrollment);
-              
+
               const progRes = await learningApi.getProgress(currentEnrollment.id);
               if (progRes.data && progRes.data.length > 0) {
                 const dbCompleted = new Set(
@@ -194,7 +197,7 @@ export const CoursePlayerPage = ({ courseId: courseIdProp, onBack, onStartQuiz, 
 
   return (
     <div className="min-h-screen bg-[#FAF9FC] flex flex-col">
-      
+
       {/* Top Learning Navigation Bar */}
       <header className="bg-white border-b border-[#E4E4E0] h-14 px-6 flex items-center justify-between sticky top-0 z-30 shadow-xs">
         <div className="flex items-center gap-3">
@@ -223,27 +226,17 @@ export const CoursePlayerPage = ({ courseId: courseIdProp, onBack, onStartQuiz, 
             </div>
             <span className="text-xs font-bold text-[#16324F]">{progressPercent}%</span>
           </div>
-
-          {quizzes.length > 0 && (
-            <button
-              onClick={() => handleStartQuiz(quizzes[0].id, enrollment?.id)}
-              className="px-3.5 py-1.5 bg-[#16324F] hover:bg-[#001D37] text-white text-xs font-semibold rounded-md flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer"
-            >
-              <HelpCircle className="w-3.5 h-3.5 text-amber-300" />
-              <span>Thi trắc nghiệm Quiz</span>
-            </button>
-          )}
         </div>
       </header>
 
       {/* Main Workspace Layout */}
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-4 overflow-hidden">
-        
+
         {/* Left: Multimedia Player & Content (3 Columns) */}
         <main className="lg:col-span-3 p-6 overflow-y-auto max-h-[calc(100vh-3.5rem)] space-y-6">
           {activeLesson ? (
             <div className="max-w-4xl mx-auto space-y-6">
-              
+
               {/* Media Player Container */}
               <div className="bg-black rounded-xl overflow-hidden shadow-md aspect-video flex items-center justify-center relative">
                 {isYouTubeUrl(activeLesson.contentUrl) ? (
@@ -317,19 +310,18 @@ export const CoursePlayerPage = ({ courseId: courseIdProp, onBack, onStartQuiz, 
                   <button
                     onClick={handleCompleteLesson}
                     disabled={completing || isCurrentCompleted}
-                    className={`px-4 py-2 text-xs font-semibold rounded-lg flex items-center gap-2 transition-all ${
-                      isCurrentCompleted
+                    className={`px-4 py-2 text-xs font-semibold rounded-lg flex items-center gap-2 transition-all ${isCurrentCompleted
                         ? 'bg-[#22C55E]/10 border border-[#22C55E]/30 text-[#15803D] cursor-default'
                         : 'bg-[#16324F] hover:bg-[#001D37] text-white shadow-xs'
-                    }`}
+                      }`}
                   >
                     <CheckCircle className="w-4 h-4" />
                     <span>
                       {isCurrentCompleted
                         ? 'Đã hoàn thành bài học'
                         : completing
-                        ? 'Đang cập nhật...'
-                        : 'Đánh dấu đã hoàn thành'}
+                          ? 'Đang cập nhật...'
+                          : 'Đánh dấu đã hoàn thành'}
                     </span>
                   </button>
 
@@ -404,7 +396,7 @@ export const CoursePlayerPage = ({ courseId: courseIdProp, onBack, onStartQuiz, 
                     <p className="text-[11px] font-bold text-[#6B6B6B] uppercase tracking-wider">
                       Chương {secIdx + 1}: {section.title}
                     </p>
-                    
+
                     {!hasLessons ? (
                       <div className="p-3 bg-[#FAF9FC] border border-dashed border-[#E4E4E0] rounded-xl text-center my-1.5">
                         <p className="text-[11px] text-[#6B6B6B] italic">Chương này chưa có nội dung bài học</p>
@@ -419,11 +411,10 @@ export const CoursePlayerPage = ({ courseId: courseIdProp, onBack, onStartQuiz, 
                             <button
                               key={lesson.id}
                               onClick={() => setActiveLesson(lesson)}
-                              className={`w-full p-2.5 rounded-lg text-left flex items-start gap-2.5 text-xs transition-colors ${
-                                isActive
+                              className={`w-full p-2.5 rounded-lg text-left flex items-start gap-2.5 text-xs transition-colors ${isActive
                                   ? 'bg-[#F4F3F6] border border-[#16324F]/30 text-[#16324F] font-semibold'
                                   : 'hover:bg-[#FAF9FC] text-[#1A1C1E]'
-                              }`}
+                                }`}
                             >
                               <div className="mt-0.5 shrink-0">
                                 {isCompleted ? (
@@ -460,11 +451,30 @@ export const CoursePlayerPage = ({ courseId: courseIdProp, onBack, onStartQuiz, 
             </p>
             {quizzes.length > 0 && (
               <button
-                onClick={() => handleStartQuiz(quizzes[0].id, enrollment?.id)}
-                className="w-full py-2 bg-[#16324F] hover:bg-[#001D37] text-white text-xs font-semibold rounded-lg transition-colors flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
+                onClick={() => {
+                  if (progressPercent < 100) {
+                    showToast?.(`Bạn cần hoàn thành 100% bài học trước khi làm bài Quiz (hiện tại: ${progressPercent}%).`, 'warning');
+                    return;
+                  }
+                  handleStartQuiz(quizzes[0].id, enrollment?.id);
+                }}
+                className={`w-full py-2 text-xs font-semibold rounded-lg transition-all flex items-center justify-center gap-1.5 shadow-xs cursor-pointer ${progressPercent >= 100
+                    ? 'bg-[#16324F] hover:bg-[#001D37] text-white'
+                    : 'bg-[#E4E4E0] text-[#5E5E5E] hover:bg-[#D5D5D0]'
+                  }`}
+                title={progressPercent < 100 ? `Cần học 100% để mở bài thi (hiện tại: ${progressPercent}%)` : 'Bắt đầu làm bài thi'}
               >
-                <HelpCircle className="w-3.5 h-3.5 text-amber-300" />
-                <span>Vào làm bài Quiz cuối khóa</span>
+                {progressPercent >= 100 ? (
+                  <>
+                    <HelpCircle className="w-3.5 h-3.5 text-amber-300" />
+                    <span>Vào làm bài Quiz cuối khóa</span>
+                  </>
+                ) : (
+                  <>
+                    <Lock className="w-3.5 h-3.5 text-amber-600" />
+                    <span>Vào làm bài Quiz ({progressPercent}% / 100%)</span>
+                  </>
+                )}
               </button>
             )}
           </div>

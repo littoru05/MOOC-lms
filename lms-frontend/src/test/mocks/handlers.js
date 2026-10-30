@@ -413,7 +413,23 @@ export const handlers = [
   }),
 
   // 9. Submit Quiz
-  http.post('*/api/v1/quizzes/:id/submit', () => {
+  http.post('*/api/v1/quizzes/:id/submit', async ({ request }) => {
+    let body = {};
+    try {
+      body = await request.json();
+    } catch {
+      body = {};
+    }
+    const studentAnswers = body.studentAnswers || [];
+    if (studentAnswers.length === 0) {
+      return HttpResponse.json({
+        passed: false,
+        score: 0,
+        totalScore: 100,
+        passingScore: 80,
+        message: 'Bạn chưa đạt điểm yêu cầu (0%).',
+      });
+    }
     return HttpResponse.json({
       passed: true,
       score: 100,

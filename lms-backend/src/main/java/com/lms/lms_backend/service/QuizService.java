@@ -141,8 +141,12 @@ public class QuizService {
         }
 
         // Chấm điểm tự động
-        Map<Long, Long> submissionMap = req.getStudentAnswers().stream()
-                .collect(Collectors.toMap(StudentAnswerDto::getQuestionId, StudentAnswerDto::getSelectedAnswerId, (a, b) -> b));
+        Map<Long, Long> submissionMap = (req.getStudentAnswers() != null)
+                ? req.getStudentAnswers().stream()
+                        .filter(a -> a.getQuestionId() != null && a.getSelectedAnswerId() != null)
+                        .collect(Collectors.toMap(StudentAnswerDto::getQuestionId, StudentAnswerDto::getSelectedAnswerId, (a, b) -> b))
+                : java.util.Collections.emptyMap();
+
 
         int totalScore = 0;
         int earnedScore = 0;
