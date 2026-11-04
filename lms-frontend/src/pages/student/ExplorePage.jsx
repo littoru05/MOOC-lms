@@ -29,7 +29,9 @@ import {
   Database, 
   Layout,
   Loader2,
-  ChevronRight
+  ChevronRight,
+  ChevronLeft,
+  Flame
 } from 'lucide-react';
 
 const getCategoryIcon = (iconName) => {
@@ -94,13 +96,22 @@ export const ExplorePage = ({ onSelectCourse, initialFilterQuery = '' }) => {
         (c.categorySlug && c.categorySlug.toLowerCase() === selectedCategory.toLowerCase()) ||
         (selectedCat && c.categoryId === selectedCat.id) ||
         (c.categoryName && c.categoryName.toLowerCase() === selectedCategory.toLowerCase()) ||
-        (c.category && (c.category.slug === selectedCategory || c.category.name === selectedCategory));
+        (c.category && (c.category.slug?.toLowerCase() === selectedCategory.toLowerCase() || c.category.name?.toLowerCase() === selectedCategory.toLowerCase()));
+
+      const q = searchQuery.trim().toLowerCase();
+      if (!q) return matchCat;
+
       const matchSearch =
-        c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        c.shortDescription?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        c.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (c.instructorName && c.instructorName.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        (c.instructor?.fullName && c.instructor.fullName.toLowerCase().includes(searchQuery.toLowerCase()));
+        c.title.toLowerCase().includes(q) ||
+        c.shortDescription?.toLowerCase().includes(q) ||
+        c.description?.toLowerCase().includes(q) ||
+        (c.instructorName && c.instructorName.toLowerCase().includes(q)) ||
+        (c.instructor?.fullName && c.instructor.fullName.toLowerCase().includes(q)) ||
+        (c.categoryName && c.categoryName.toLowerCase().includes(q)) ||
+        (c.categorySlug && c.categorySlug.toLowerCase().includes(q)) ||
+        (c.category?.name && c.category.name.toLowerCase().includes(q)) ||
+        (c.category?.slug && c.category.slug.toLowerCase().includes(q));
+
       return matchCat && matchSearch;
     });
   }, [courses, categories, selectedCategory, searchQuery]);
@@ -129,42 +140,87 @@ export const ExplorePage = ({ onSelectCourse, initialFilterQuery = '' }) => {
 
   const navigate = useNavigate();
 
+  // Top Featured Courses Showcase on Hero Banner (up to 3 courses with auto-advance)
+  const [featuredHeroIndex, setFeaturedHeroIndex] = useState(0);
+  const [isHeroPaused, setIsHeroPaused] = useState(false);
+
+  const featuredCourses = useMemo(() => {
+    return courses && courses.length > 0 ? courses.slice(0, 3) : [];
+  }, [courses]);
+
+  const currentFeatured = featuredCourses[featuredHeroIndex] || courses[0] || null;
+
+  useEffect(() => {
+    if (isHeroPaused || featuredCourses.length <= 1) return;
+    const timer = setInterval(() => {
+      setFeaturedHeroIndex((prev) => (prev + 1) % featuredCourses.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [isHeroPaused, featuredCourses.length]);
+
+  const bannerCategories = useMemo(() => {
+    if (categories && categories.length > 0) {
+      return categories.slice(0, 6);
+    }
+    return [
+      { id: 1, name: 'Lập trình Web', slug: 'lap-trinh-web' },
+      { id: 2, name: 'Trí tuệ nhân tạo', slug: 'ai-data-science' },
+      { id: 3, name: 'Lập trình Di động', slug: 'lap-trinh-di-dong' },
+      { id: 4, name: 'DevOps & Cloud', slug: 'devops-cloud' },
+      { id: 5, name: 'Thiết kế UI/UX', slug: 'thiet-ke-ui-ux' },
+      { id: 6, name: 'An ninh mạng', slug: 'an-ninh-mang' },
+    ];
+  }, [categories]);
+
   return (
     <div className="min-h-screen pb-20 space-y-12">
       
       {/* Scholarly Hero Banner - Deep Navy Luxury Gradient & High Contrast */}
-      <section className="bg-gradient-to-br from-[#001D37] via-[#16324F] to-[#0A2540] text-white py-16 sm:py-20 relative overflow-hidden border-b border-[#001D37] shadow-md">
-        {/* Subtle Ambient Radial Lighting */}
+      <section className="bg-gradient-to-br from-[#001428] via-[#0A2540] to-[#001D37] text-white py-14 sm:py-18 relative overflow-hidden border-b border-[#001D37] shadow-md">
+        {/* Geometric dot texture overlay & ambient glow */}
+        <div className="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:24px_24px]"></div>
+        <div className="absolute top-0 left-10 w-80 h-80 bg-blue-500/15 rounded-full blur-3xl pointer-events-none"></div>
         <div className="absolute top-0 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
-        <div className="absolute bottom-0 right-0 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div className="absolute bottom-0 right-0 w-80 h-80 bg-amber-500/15 rounded-full blur-3xl pointer-events-none"></div>
 
         <div className="max-w-[1280px] mx-auto px-6 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
             
             {/* Left Content Column */}
-            <div className="lg:col-span-7 space-y-6">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-white/10 backdrop-blur-md border border-white/20 rounded-full text-xs font-bold text-amber-300 shadow-sm">
-                <Award className="w-4 h-4 text-amber-400" />
-                <span>Tiêu chuẩn Đào tạo MOOC Quốc tế • Cấp Chứng chỉ số UUID</span>
+            <div className="lg:col-span-7 space-y-5">
+              {/* Live Status Pill with Pulsing Glow */}
+              <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 bg-white/[0.08] backdrop-blur-md border border-amber-400/30 rounded-full text-xs font-semibold text-amber-300 shadow-xs">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
+                </span>
+                <span>1,450+ học viên đang học trực tuyến • Cấp Chứng chỉ số UUID</span>
               </div>
 
-              <h1 className="text-4xl sm:text-5xl lg:text-[54px] font-extrabold font-serif text-white tracking-tight leading-[1.15]">
+              {/* High-Impact Main Heading */}
+              <h1 className="text-3xl sm:text-4xl lg:text-[46px] font-black text-white tracking-tight leading-[1.18]">
                 Khám phá tri thức, làm chủ công nghệ tương lai
               </h1>
 
-              <p className="text-[#E0E7F1] text-sm sm:text-base md:text-lg leading-relaxed max-w-2xl font-normal">
-                Các chương trình đào tạo thực chiến từ nền tảng đến kiến trúc doanh nghiệp được biên soạn bởi các chuyên gia đầu ngành. Khảo thí trực tuyến tự động và cấp chứng nhận số có giá trị xác thực toàn cầu.
+              {/* Sub-headline */}
+              <p className="text-[#D0DCED] text-sm sm:text-base leading-relaxed max-w-xl font-normal">
+                Học tập theo lộ trình thực chiến từ chuyên gia đầu ngành. Khảo thí trắc nghiệm tự động, tương tác bài giảng thực tiễn và cấp chứng chỉ số có giá trị xác thực toàn cầu.
               </p>
 
-              {/* High-Contrast Search & CTA Action Bar */}
-              <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-3 max-w-xl">
+              {/* Search & Explore Action Bar */}
+              <div className="pt-1 flex flex-col sm:flex-row items-stretch sm:items-center gap-3 max-w-xl">
                 <div className="flex-1 flex items-center bg-white rounded-xl px-4 py-3 shadow-lg focus-within:ring-2 focus-within:ring-amber-400 text-[#1A1C1E] transition-all">
                   <Search className="w-4 h-4 text-[#6B6B6B] mr-2.5 shrink-0" />
                   <input
                     type="text"
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Tìm khóa học, công nghệ (React, Spring Boot, AI)..."
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      if (selectedCategory !== 'all') {
+                        setSelectedCategory('all');
+                      }
+                    }}
+                    placeholder="Tìm khóa học, danh mục (React, Spring Boot, AI)..."
                     className="w-full text-xs sm:text-sm bg-transparent focus:outline-none text-[#1A1C1E] placeholder:text-[#8E8E93]"
                   />
                 </div>
@@ -172,56 +228,229 @@ export const ExplorePage = ({ onSelectCourse, initialFilterQuery = '' }) => {
                 <button
                   onClick={() => {
                     const catalogEl = document.getElementById('course-catalog-section');
-                    if (catalogEl) catalogEl.scrollIntoView({ behavior: 'smooth' });
+                    if (catalogEl && typeof catalogEl.scrollIntoView === 'function') {
+                      catalogEl.scrollIntoView({ behavior: 'smooth' });
+                    }
                   }}
-                  className="px-6 py-3.5 bg-amber-500 hover:bg-amber-400 text-[#001D37] font-extrabold text-xs sm:text-sm rounded-xl shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 shrink-0 cursor-pointer"
+                  className="px-6 py-3.5 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-[#001D37] font-bold text-xs sm:text-sm rounded-xl shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 shrink-0 cursor-pointer"
                 >
                   <span>Khám phá ngay</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
+
+              {/* Category Filter Chips (Directly Filters by Category) */}
+              <div className="flex items-center gap-2 flex-wrap pt-0.5 text-xs">
+                <span className="text-amber-300 font-semibold flex items-center gap-1 shrink-0">
+                  <Flame className="w-3.5 h-3.5 text-amber-400" />
+                  Danh mục nổi bật:
+                </span>
+                {bannerCategories.map((cat) => {
+                  const isSelected = selectedCategory.toLowerCase() === (cat.slug || cat.name || '').toLowerCase();
+                  return (
+                    <button
+                      key={cat.id || cat.slug || cat.name}
+                      type="button"
+                      onClick={() => {
+                        setSearchQuery('');
+                        const newCat = isSelected ? 'all' : (cat.slug || cat.name);
+                        setSelectedCategory(newCat);
+                        const catalogEl = document.getElementById('course-catalog-section');
+                        if (catalogEl && typeof catalogEl.scrollIntoView === 'function') {
+                          catalogEl.scrollIntoView({ behavior: 'smooth' });
+                        }
+                      }}
+                      className={`px-3 py-1 rounded-lg border transition-all text-xs font-medium cursor-pointer ${
+                        isSelected
+                          ? 'bg-amber-400 text-[#001D37] border-amber-400 font-bold shadow-md scale-105'
+                          : 'bg-white/10 hover:bg-white/20 border-white/20 text-white hover:border-amber-300'
+                      }`}
+                    >
+                      {cat.name}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Community Social Proof & Trust Badges */}
+              <div className="pt-3 border-t border-white/15 flex flex-col sm:flex-row sm:items-center gap-4 text-xs max-w-xl">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex -space-x-2">
+                    <img className="w-7 h-7 rounded-full border-2 border-[#0A2540] object-cover" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=64" alt="Learner" />
+                    <img className="w-7 h-7 rounded-full border-2 border-[#0A2540] object-cover" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=64" alt="Learner" />
+                    <img className="w-7 h-7 rounded-full border-2 border-[#0A2540] object-cover" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=64" alt="Learner" />
+                    <div className="w-7 h-7 rounded-full border-2 border-[#0A2540] bg-amber-500 text-[#001D37] font-bold text-[10px] flex items-center justify-center">
+                      +45k
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-1 text-amber-300 font-bold text-[11px]">
+                      <span>★ 4.9 / 5.0</span>
+                      <span className="text-white/60 font-normal text-[10px]">(12,400+ đánh giá)</span>
+                    </div>
+                    <span className="text-[10px] text-white/70">Cộng đồng học viên MOOC năng động</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 sm:ml-auto text-[11px] text-white/80">
+                  <span className="inline-flex items-center gap-1">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Chuẩn quốc tế
+                  </span>
+                  <span className="inline-flex items-center gap-1">
+                    <ShieldCheck className="w-3.5 h-3.5 text-cyan-400" /> Xác thực UUID
+                  </span>
+                </div>
+              </div>
             </div>
 
-            {/* Right Visual Highlight Cards (Desktop Only) */}
-            <div className="hidden lg:grid lg:col-span-5 grid-cols-2 gap-4">
-              <div className="bg-white/10 backdrop-blur-md border border-white/15 p-5 rounded-2xl space-y-2 hover:bg-white/15 transition-all">
-                <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-300 flex items-center justify-center">
-                  <Star className="w-5 h-5 fill-amber-400 text-amber-400" />
+            {/* Right Hero Showcase Column - High-End Interactive Featured Course Card & Ambient Badges */}
+            <div className="lg:col-span-5 w-full">
+              <div 
+                onMouseEnter={() => setIsHeroPaused(true)}
+                onMouseLeave={() => setIsHeroPaused(false)}
+                className="relative"
+              >
+                {/* Floating Badge 1 - Top Right (UUID Verification Trust) */}
+                <div className="absolute -top-4 -right-2 z-20 hidden sm:flex items-center gap-2.5 px-3.5 py-2 rounded-2xl bg-[#001D37]/90 border border-amber-400/30 backdrop-blur-md shadow-xl animate-float-slow">
+                  <div className="w-8 h-8 rounded-xl bg-amber-400/20 text-amber-300 border border-amber-400/40 flex items-center justify-center shrink-0">
+                    <Award className="w-4 h-4 text-amber-400" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-amber-300 font-bold block uppercase tracking-wider">Chứng chỉ số UUID</span>
+                    <span className="text-[11px] text-white/90 font-medium">Bảo chứng toàn cầu</span>
+                  </div>
                 </div>
-                <h4 className="text-2xl font-bold font-serif text-white">4.9 / 5.0</h4>
-                <p className="text-xs text-[#E0E7F1] leading-relaxed">
-                  Đánh giá chất lượng từ hơn 45,000+ học viên trên cả nước.
-                </p>
-              </div>
 
-              <div className="bg-white/10 backdrop-blur-md border border-white/15 p-5 rounded-2xl space-y-2 hover:bg-white/15 transition-all">
-                <div className="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-300 flex items-center justify-center">
-                  <GraduationCap className="w-5 h-5 text-blue-300" />
+                {/* Floating Badge 2 - Bottom Left (Completion & Satisfaction Rate) */}
+                <div className="absolute -bottom-4 -left-3 z-20 hidden sm:flex items-center gap-2.5 px-3.5 py-2 rounded-2xl bg-[#001D37]/90 border border-emerald-400/30 backdrop-blur-md shadow-xl animate-float-reverse">
+                  <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 flex items-center justify-center shrink-0">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-emerald-400 font-bold block uppercase tracking-wider">98.5% Hoàn thành</span>
+                    <span className="text-[11px] text-white/90 font-medium">Đạt chuẩn doanh nghiệp</span>
+                  </div>
                 </div>
-                <h4 className="text-2xl font-bold font-serif text-white">100%</h4>
-                <p className="text-xs text-[#E0E7F1] leading-relaxed">
-                  Giảng viên là Tiến sĩ, Kiến trúc sư trưởng đầu ngành trực tiếp giảng dạy.
-                </p>
-              </div>
 
-              <div className="bg-white/10 backdrop-blur-md border border-white/15 p-5 rounded-2xl space-y-2 hover:bg-white/15 transition-all">
-                <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-300 flex items-center justify-center">
-                  <ShieldCheck className="w-5 h-5 text-emerald-300" />
-                </div>
-                <h4 className="text-2xl font-bold font-serif text-white">UUID Hash</h4>
-                <p className="text-xs text-[#E0E7F1] leading-relaxed">
-                  Chứng chỉ số xác thực bằng mã băm toàn cầu chống làm giả.
-                </p>
-              </div>
+                {/* Main Featured Showcase Card */}
+                <div className="bg-white/[0.08] backdrop-blur-xl border border-white/20 rounded-3xl p-5 shadow-2xl overflow-hidden group hover:border-white/30 transition-all">
+                  {/* Course Media Thumbnail with Visual Overlay */}
+                  <div className="relative aspect-[16/9] rounded-2xl overflow-hidden bg-[#0A2540] border border-white/10 shadow-inner">
+                    <img
+                      src={getImageUrl(
+                        currentFeatured?.thumbnailUrl,
+                        'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800'
+                      )}
+                      alt={currentFeatured?.title || 'Khóa học tiêu biểu'}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#001428] via-[#001428]/40 to-transparent"></div>
 
-              <div className="bg-white/10 backdrop-blur-md border border-white/15 p-5 rounded-2xl space-y-2 hover:bg-white/15 transition-all">
-                <div className="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-300 flex items-center justify-center">
-                  <Sparkles className="w-5 h-5 text-purple-300" />
+                    {/* Top Floating Category & Status Badges */}
+                    <div className="absolute top-3 left-3 right-3 flex items-center justify-between">
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#001D37]/85 backdrop-blur-md text-amber-300 border border-amber-400/30 rounded-full text-[11px] font-bold shadow-md">
+                        <Flame className="w-3.5 h-3.5 text-amber-400" />
+                        <span>{currentFeatured?.categoryName || 'Khóa học tiêu biểu'}</span>
+                      </span>
+                      <span className="px-2.5 py-1 bg-emerald-500/90 text-white rounded-full text-[10px] font-bold shadow-md">
+                        Đang mở ghi danh
+                      </span>
+                    </div>
+
+                    {/* Center Interactive Play / Explore Button */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (currentFeatured?.slug || currentFeatured?.id) {
+                          navigate(`/courses/${currentFeatured.slug || currentFeatured.id}`);
+                        }
+                      }}
+                      className="absolute inset-0 m-auto w-12 h-12 rounded-full bg-white/90 hover:bg-amber-400 text-[#001D37] flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all cursor-pointer"
+                      aria-label="Xem chi tiết khóa học"
+                    >
+                      <BookOpen className="w-5 h-5 ml-0.5" />
+                    </button>
+
+                    {/* Bottom Overlay Info on Thumbnail */}
+                    <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-xs text-white/90">
+                      <span className="flex items-center gap-1 text-amber-300 font-bold">
+                        <Star className="w-3.5 h-3.5 fill-amber-300 text-amber-300" /> 4.9/5.0
+                      </span>
+                      <span className="flex items-center gap-1 text-white/80">
+                        <Users className="w-3.5 h-3.5 text-cyan-300" /> {currentFeatured?.enrolledCount || '3,850'}+ học viên
+                      </span>
+                      <span className="flex items-center gap-1 text-white/80">
+                        <Clock className="w-3.5 h-3.5 text-cyan-300" /> {currentFeatured?.totalDurationMinutes ? `${Math.round(currentFeatured.totalDurationMinutes / 60)} giờ` : '32 giờ'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Course Details & Action Section */}
+                  <div className="pt-4 space-y-3">
+                    <div>
+                      <h3 
+                        onClick={() => {
+                          if (currentFeatured?.slug || currentFeatured?.id) {
+                            navigate(`/courses/${currentFeatured.slug || currentFeatured.id}`);
+                          }
+                        }}
+                        className="text-base sm:text-lg font-bold text-white hover:text-amber-300 transition-colors line-clamp-2 cursor-pointer"
+                      >
+                        {currentFeatured?.title || 'Lập trình Fullstack Web hiện đại với React và Spring Boot'}
+                      </h3>
+                      <p className="text-xs text-[#CBD5E1] mt-1 line-clamp-1">
+                        {currentFeatured?.instructorName ? `Giảng viên: ${currentFeatured.instructorName}` : 'TS. Nguyễn Văn A • Kiến trúc sư trưởng'}
+                      </p>
+                    </div>
+
+                    {/* Footer Bar with Price & CTA */}
+                    <div className="pt-2 border-t border-white/10 flex items-center justify-between">
+                      <div>
+                        <span className="text-[10px] text-[#A6C8FF] block">Học phí</span>
+                        <span className="text-sm font-bold text-amber-300">
+                          {currentFeatured?.price ? `${currentFeatured.price.toLocaleString('vi-VN')} đ` : 'Miễn phí học thử'}
+                        </span>
+                      </div>
+
+                      <button
+                        onClick={() => {
+                          if (currentFeatured?.slug || currentFeatured?.id) {
+                            navigate(`/courses/${currentFeatured.slug || currentFeatured.id}`);
+                          } else {
+                            navigate('/courses');
+                          }
+                        }}
+                        className="px-4 py-2 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-[#001D37] font-bold text-xs rounded-xl shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <span>Khám phá khóa học</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Featured Courses Switcher Dots */}
+                  {featuredCourses.length > 1 && (
+                    <div className="pt-3 mt-3 border-t border-white/10 flex items-center justify-between">
+                      <span className="text-[11px] text-[#A6C8FF]">Khóa học nổi bật ({featuredHeroIndex + 1}/{featuredCourses.length})</span>
+                      <div className="flex items-center gap-1.5">
+                        {featuredCourses.map((_, idx) => (
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={() => setFeaturedHeroIndex(idx)}
+                            className={`h-1.5 rounded-full transition-all cursor-pointer ${
+                              featuredHeroIndex === idx
+                                ? 'w-6 bg-amber-400'
+                                : 'w-2 bg-white/30 hover:bg-white/60'
+                            }`}
+                            aria-label={`Xem khóa học ${idx + 1}`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                 </div>
-                <h4 className="text-2xl font-bold font-serif text-white">Tự động hóa</h4>
-                <p className="text-xs text-[#E0E7F1] leading-relaxed">
-                  Thi trắc nghiệm trực tuyến chấm điểm và cấp chứng chỉ tức thì.
-                </p>
               </div>
             </div>
 
@@ -267,7 +496,7 @@ export const ExplorePage = ({ onSelectCourse, initialFilterQuery = '' }) => {
                   <div className="w-10 h-10 rounded-xl bg-[#F4F3F6] border border-[#E4E4E0] flex items-center justify-center group-hover:bg-[#16324F]/10 group-hover:scale-105 transition-all">
                     {getCategoryIcon(cat.icon || 'BookOpen')}
                   </div>
-                  <ChevronRight className="w-4 h-4 text-[#8C8C8C] group-hover:text-[#16324F] group-hover:translate-x-0.5 transition-transform" />
+  <ChevronRight className="w-4 h-4 text-[#8C8C8C] group-hover:text-[#16324F] group-hover:translate-x-0.5 transition-transform" />
                 </div>
                 <div className="mt-3">
                   <h3 className="text-xs sm:text-sm font-bold text-[#001D37] group-hover:text-[#16324F] transition-colors truncate">

@@ -154,6 +154,7 @@ export function useUpdateCourse() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['courses'] });
       queryClient.invalidateQueries({ queryKey: ['courses', 'detail', variables.id] });
+      queryClient.invalidateQueries({ queryKey: ['sections', 'course', variables.id] });
     },
   });
 }

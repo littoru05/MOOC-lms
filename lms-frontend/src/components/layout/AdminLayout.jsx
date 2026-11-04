@@ -137,9 +137,9 @@ export const AdminLayout = ({ currentTab: currentTabProp, onNavigate, children }
           </Link>
 
           <button
-            onClick={() => {
-              logout();
-              navigate('/');
+            onClick={async () => {
+              await logout();
+              navigate('/login', { replace: true, state: { loggedOut: true } });
             }}
             className="w-full py-1.5 px-3 bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/30 text-xs font-semibold rounded-md flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
           >

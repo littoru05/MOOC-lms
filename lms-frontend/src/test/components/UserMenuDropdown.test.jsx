@@ -1,6 +1,6 @@
 import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { UserMenuDropdown } from '../../components/common/UserMenuDropdown';
 import * as AuthContextModule from '../../context/AuthContext';
@@ -134,5 +134,29 @@ describe('UserMenuDropdown Component', () => {
     fireEvent.click(screen.getByRole('button'));
     fireEvent.click(screen.getByText('Lịch sử đơn hàng'));
     expect(mockNavigate).toHaveBeenCalledWith('/orders');
+  });
+  it('calls logout and navigates to /login with replace and loggedOut state on logout click', async () => {
+    const mockLogout = vi.fn().mockResolvedValue();
+    vi.spyOn(AuthContextModule, 'useAuth').mockReturnValue({
+      user: { id: 3, fullName: 'Học viên Test', email: 'student@lms.com', role: 'ROLE_STUDENT' },
+      logout: mockLogout,
+      isStudent: true,
+      isInstructor: false,
+      isAdmin: false,
+      currentRole: 'ROLE_STUDENT',
+    });
+
+    renderDropdown();
+
+    fireEvent.click(screen.getByRole('button'));
+    fireEvent.click(screen.getByText('Đăng xuất'));
+
+    expect(mockLogout).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith('/login', {
+        replace: true,
+        state: { loggedOut: true },
+      });
+    });
   });
 });

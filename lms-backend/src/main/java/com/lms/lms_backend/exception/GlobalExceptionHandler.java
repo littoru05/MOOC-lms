@@ -12,6 +12,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -38,7 +39,12 @@ public class GlobalExceptionHandler {
         body.put("timestamp", LocalDateTime.now());
         body.put("status", HttpStatus.FORBIDDEN.value());
         body.put("error", "Không có quyền truy cập");
-        body.put("message", "Tài khoản của bạn không đủ quyền để thực hiện thao tác này! Cần quyền ROLE_INSTRUCTOR hoặc ROLE_ADMIN.");
+        String message = (ex.getMessage() != null && !ex.getMessage().trim().isEmpty() 
+                && !ex.getMessage().equalsIgnoreCase("Access is denied") 
+                && !ex.getMessage().equalsIgnoreCase("Access Denied"))
+                ? ex.getMessage()
+                : "Tài khoản của bạn không đủ quyền để thực hiện thao tác này! Cần quyền ROLE_INSTRUCTOR hoặc ROLE_ADMIN.";
+        body.put("message", message);
 
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(body);
     }
@@ -52,6 +58,28 @@ public class GlobalExceptionHandler {
         body.put("message", ex.getMessage());
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(body);
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<Map<String, Object>> handleMaxUploadSizeExceeded(MaxUploadSizeExceededException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.BAD_REQUEST.value());
+        body.put("error", "Dung lượng tệp vượt quá giới hạn");
+        body.put("message", "Dung lượng tệp tải lên vượt quá giới hạn tối đa cho phép!");
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Map<String, Object>> handleIllegalArgumentException(IllegalArgumentException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.BAD_REQUEST.value());
+        body.put("error", "Yêu cầu không hợp lệ");
+        body.put("message", ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
 
     @ExceptionHandler(RuntimeException.class)

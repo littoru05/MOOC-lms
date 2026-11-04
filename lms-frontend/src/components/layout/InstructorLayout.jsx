@@ -165,9 +165,9 @@ export const InstructorLayout = ({ currentTab: currentTabProp, onNavigate, onCre
           </Link>
 
           <button
-            onClick={() => {
-              logout();
-              navigate('/');
+            onClick={async () => {
+              await logout();
+              navigate('/login', { replace: true, state: { loggedOut: true } });
             }}
             className="w-full py-2 px-3 bg-red-500/20 hover:bg-red-500/30 text-red-300 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition-all border border-red-500/30 cursor-pointer"
           >

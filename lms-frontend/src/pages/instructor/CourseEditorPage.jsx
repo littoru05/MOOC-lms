@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { courseApi } from '../../api/courseApi';
 import { 
   useCourseDetail, 
+  useCourseSections,
   useCategories, 
   useUpdateCourse, 
   useTeachingCourses,
@@ -10,6 +11,7 @@ import {
 } from '../../hooks/useCourses';
 import { useToast } from '../../context/ToastContext';
 import { ImageUploadInput } from '../../components/common/ImageUploadInput';
+import { LessonFileUpload } from '../../components/instructor/LessonFileUpload';
 import { 
   ArrowLeft, 
   Plus, 
@@ -45,6 +47,7 @@ export const CourseEditorPage = ({ courseId: courseIdProp, onBack }) => {
   const courseId = courseIdProp || queryCourseId || (teachingCourses[0]?.id ? String(teachingCourses[0].id) : null);
 
   const { data: courseDetail, isLoading: loadingCourse, isError: isErrorCourse } = useCourseDetail(courseId);
+  const { data: fetchedSections, isLoading: loadingSections } = useCourseSections(courseId);
   const updateCourseMutation = useUpdateCourse();
   const submitReviewMutation = useSubmitForReview();
 
@@ -115,9 +118,6 @@ export const CourseEditorPage = ({ courseId: courseIdProp, onBack }) => {
       setLevel(courseDetail.level || 'Trung cấp');
       setLanguage(courseDetail.language || 'Tiếng Việt');
       setPrice(courseDetail.price !== undefined && courseDetail.price !== null ? String(courseDetail.price) : '0');
-      if (courseDetail.sections && courseDetail.sections.length > 0) {
-        setSections(courseDetail.sections);
-      }
     }
   }, [courseDetail]);
 
@@ -132,22 +132,14 @@ export const CourseEditorPage = ({ courseId: courseIdProp, onBack }) => {
   const [newLessonUrl, setNewLessonUrl] = useState('');
   const [newLessonDuration, setNewLessonDuration] = useState(15);
   const [showAddLesson, setShowAddLesson] = useState(false);
+  const [isUploadingLesson, setIsUploadingLesson] = useState(false);
 
-  // Fetch sections from API when courseId changes
+  // Synchronize sections state from useCourseSections query
   useEffect(() => {
-    const fetchSections = async () => {
-      if (!courseId) return;
-      try {
-        const res = await courseApi.getCourseSections(courseId);
-        if (res.data && res.data.length > 0) {
-          setSections(res.data);
-        }
-      } catch (err) {
-        console.error('Lỗi khi tải danh sách chương/bài học:', err);
-      }
-    };
-    fetchSections();
-  }, [courseId]);
+    if (fetchedSections && Array.isArray(fetchedSections)) {
+      setSections(fetchedSections);
+    }
+  }, [fetchedSections]);
 
   const handleSaveCourse = async (e) => {
     e?.preventDefault();
@@ -814,21 +806,21 @@ export const CourseEditorPage = ({ courseId: courseIdProp, onBack }) => {
                                 onChange={(e) => setNewLessonType(e.target.value)}
                                 className="w-full px-3 py-1.5 text-xs border border-[#E4E4E0] rounded-lg bg-white focus:outline-none focus:border-[#16324F] cursor-pointer"
                               >
-                                <option value="VIDEO">Video MP4 / HLS</option>
-                                <option value="DOCUMENT">Tài liệu Đọc / Markdown</option>
+                                <option value="VIDEO">Video bài giảng</option>
+                                <option value="DOCUMENT">Tài liệu (PDF)</option>
                               </select>
                             </div>
                           </div>
 
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                             <div className="md:col-span-2">
-                              <label className="block text-[11px] font-medium text-[#1A1C1E] mb-1">URL Video / Nội dung tài liệu</label>
-                              <input
-                                type="text"
-                                placeholder="VD: https://www.w3schools.com/html/mov_bbb.mp4"
+                              <LessonFileUpload
+                                contentType={newLessonType}
                                 value={newLessonUrl}
-                                onChange={(e) => setNewLessonUrl(e.target.value)}
-                                className="w-full px-3 py-1.5 text-xs border border-[#E4E4E0] rounded-lg bg-white focus:outline-none focus:border-[#16324F]"
+                                onChange={(url) => setNewLessonUrl(url)}
+                                onDurationDetected={(mins) => setNewLessonDuration(mins)}
+                                onUploadStateChange={setIsUploadingLesson}
+                                disabled={saving}
                               />
                             </div>
                             <div>
@@ -856,10 +848,15 @@ export const CourseEditorPage = ({ courseId: courseIdProp, onBack }) => {
                             </button>
                             <button
                               type="button"
+                              disabled={saving || isUploadingLesson}
                               onClick={handleAddLesson}
-                              className="px-4 py-1.5 bg-[#16324F] text-white text-xs font-semibold rounded-lg cursor-pointer"
+                              className={`px-4 py-1.5 text-white text-xs font-semibold rounded-lg transition-colors ${
+                                (saving || isUploadingLesson)
+                                  ? 'bg-[#16324F]/50 cursor-not-allowed'
+                                  : 'bg-[#16324F] hover:bg-[#001D37] cursor-pointer'
+                              }`}
                             >
-                              Lưu bài giảng
+                              {isUploadingLesson ? 'Đang tải tệp...' : 'Lưu bài giảng'}
                             </button>
                           </div>
                         </div>
@@ -886,20 +883,21 @@ export const CourseEditorPage = ({ courseId: courseIdProp, onBack }) => {
                                 onChange={(e) => setEditingLesson({ ...editingLesson, contentType: e.target.value })}
                                 className="w-full px-3 py-1.5 text-xs border border-[#E4E4E0] rounded-lg bg-white focus:outline-none focus:border-[#16324F] cursor-pointer"
                               >
-                                <option value="VIDEO">Video MP4 / HLS</option>
-                                <option value="DOCUMENT">Tài liệu Đọc / Markdown</option>
+                                <option value="VIDEO">Video bài giảng</option>
+                                <option value="DOCUMENT">Tài liệu (PDF)</option>
                               </select>
                             </div>
                           </div>
 
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                             <div className="md:col-span-2">
-                              <label className="block text-[11px] font-medium text-[#1A1C1E] mb-1">URL Video / Nội dung tài liệu</label>
-                              <input
-                                type="text"
+                              <LessonFileUpload
+                                contentType={editingLesson.contentType}
                                 value={editingLesson.contentUrl}
-                                onChange={(e) => setEditingLesson({ ...editingLesson, contentUrl: e.target.value })}
-                                className="w-full px-3 py-1.5 text-xs border border-[#E4E4E0] rounded-lg bg-white focus:outline-none focus:border-[#16324F]"
+                                onChange={(url) => setEditingLesson({ ...editingLesson, contentUrl: url })}
+                                onDurationDetected={(mins) => setEditingLesson((prev) => ({ ...prev, durationMinutes: mins }))}
+                                onUploadStateChange={setIsUploadingLesson}
+                                disabled={saving}
                               />
                             </div>
                             <div>
@@ -924,10 +922,15 @@ export const CourseEditorPage = ({ courseId: courseIdProp, onBack }) => {
                             </button>
                             <button
                               type="button"
+                              disabled={saving || isUploadingLesson}
                               onClick={handleSaveEditedLesson}
-                              className="px-4 py-1.5 bg-[#16324F] text-white text-xs font-semibold rounded-lg cursor-pointer"
+                              className={`px-4 py-1.5 text-white text-xs font-semibold rounded-lg transition-colors ${
+                                (saving || isUploadingLesson)
+                                  ? 'bg-[#16324F]/50 cursor-not-allowed'
+                                  : 'bg-[#16324F] hover:bg-[#001D37] cursor-pointer'
+                              }`}
                             >
-                              Cập nhật bài giảng
+                              {isUploadingLesson ? 'Đang tải tệp...' : 'Cập nhật bài giảng'}
                             </button>
                           </div>
                         </div>

@@ -6,8 +6,8 @@ spring:
 
   servlet:
     multipart:
-      max-file-size: 5MB
-      max-request-size: 5MB
+      max-file-size: ${SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE:200MB}
+      max-request-size: ${SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE:200MB}
 
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3307}/${DB_NAME:lms_db}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&createDatabaseIfNotExist=true}
@@ -40,6 +40,7 @@ jwt:
 app:
   upload:
     dir: ${UPLOAD_DIR:uploads}
+    max-video-mb: ${UPLOAD_MAX_VIDEO_MB:200}
   data:
     seed:
       enabled: false

@@ -604,10 +604,15 @@ export const handlers = [
   }),
 
   // 13. File Upload
-  http.post('*/api/v1/files/upload', () => {
+  http.post('*/api/v1/files/upload', ({ request }) => {
+    const url = new URL(request.url);
+    const type = url.searchParams.get('type') || 'image';
+    let filename = 'mock-uploaded-image.png';
+    if (type === 'video') filename = 'mock-uploaded-video.mp4';
+    else if (type === 'document') filename = 'mock-uploaded-document.pdf';
     return HttpResponse.json({
-      url: '/api/v1/files/mock-uploaded-image.png',
-      filename: 'mock-uploaded-image.png',
+      url: `/api/v1/files/${filename}`,
+      filename,
     });
   }),
 

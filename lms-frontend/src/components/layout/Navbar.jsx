@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { getImageUrl } from '../../utils/imageUrl';
 import { 
@@ -16,6 +17,7 @@ import {
 
 export const Navbar = ({ currentTab, onNavigate, onOpenAuthModal }) => {
   const { user, logout, quickSwitchRole, currentRole, isAdmin, isInstructor } = useAuth();
+  const navigate = useNavigate();
   const [showRoleMenu, setShowRoleMenu] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
 
@@ -211,9 +213,10 @@ export const Navbar = ({ currentTab, onNavigate, onOpenAuthModal }) => {
                   </button>
                   <div className="border-t border-[#E4E4E0] my-1"></div>
                   <button
-                    onClick={() => {
-                      logout();
+                    onClick={async () => {
                       setShowUserMenu(false);
+                      await logout();
+                      navigate('/login', { replace: true, state: { loggedOut: true } });
                     }}
                     className="w-full text-left px-4 py-2 text-xs text-[#BA1A1A] hover:bg-[#FFDAD6] flex items-center gap-2"
                   >

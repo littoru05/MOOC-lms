@@ -120,7 +120,7 @@ export const MyCertificatesPage = ({ initialCode: initialCodeProp }) => {
 
         {/* Verified Certificate Display (Scholarly Diploma Card) */}
         {verifiedCert && (
-          <div className="bg-white border-4 border-double border-[#16324F] rounded-2xl p-8 md:p-12 shadow-md relative print:border-black print:m-0 space-y-8">
+          <div data-certificate="true" className="diploma-card bg-white border-4 border-double border-[#16324F] rounded-2xl p-8 md:p-12 shadow-md relative print:border-black print:m-0 space-y-8">
             
             {/* Diploma Brand Header */}
             <div className="text-center border-b border-[#E4E4E0] pb-6">

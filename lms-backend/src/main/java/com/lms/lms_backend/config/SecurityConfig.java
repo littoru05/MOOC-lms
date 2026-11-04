@@ -87,10 +87,16 @@ public class SecurityConfig {
                     "/api/certificates/preview/**",
                     "/api/v1/payment-sessions/*/status",
                     "/api/v1/payment-sessions/*/confirm",
-                    "/api/v1/files/**",
-                    "/api/files/**",
                     "/error"
                 ).permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.GET,
+                    "/api/v1/files/**",
+                    "/api/files/**"
+                ).permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.POST,
+                    "/api/v1/files/upload",
+                    "/api/files/upload"
+                ).authenticated()
                 .anyRequest().authenticated()
             );
 
@@ -110,11 +116,10 @@ public class SecurityConfig {
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
-        config.setExposedHeaders(List.of("Set-Cookie", "Authorization"));
+        config.setExposedHeaders(List.of("Set-Cookie", "Authorization", "Accept-Ranges", "Content-Range", "Content-Length"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;
     }
 }
-

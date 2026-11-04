@@ -24,6 +24,7 @@ export const courseApi = {
 
   // Sections & Lessons
   getSectionsByCourse: (courseId) => client.get(`/api/v1/sections/course/${courseId}`),
+  getCourseSections: (courseId) => client.get(`/api/v1/sections/course/${courseId}`),
   createSection: (data) => client.post('/api/v1/sections', data),
   updateSection: (id, data) => client.put(`/api/v1/sections/${id}`, data),
   deleteSection: (id) => client.delete(`/api/v1/sections/${id}`),

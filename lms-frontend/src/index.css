@@ -3,6 +3,7 @@
 @theme {
   --font-serif: Arial, Helvetica, sans-serif;
   --font-sans: Arial, Helvetica, sans-serif;
+  --font-mono: Arial, Helvetica, sans-serif;
 }
 
 @layer base {
@@ -21,11 +22,46 @@
     --color-danger: #ba1a1a;
   }
 
+  /* Universal Arial typography for student, instructor, admin pages */
+  *, *::before, *::after {
+    font-family: Arial, Helvetica, sans-serif;
+  }
+
+  html, body, button, input, select, textarea, optgroup {
+    font-family: Arial, Helvetica, sans-serif;
+  }
+
   body {
     font-family: Arial, Helvetica, sans-serif;
     background-color: var(--color-canvas);
     color: var(--color-text-main);
   }
+}
+
+/* Certificate Typography Exception: Preserves formal diploma serif & cursive fonts */
+.diploma-card,
+.diploma-card *,
+.certificate-preview,
+.certificate-preview *,
+[data-certificate="true"],
+[data-certificate="true"] *,
+.certificate-root,
+.certificate-root * {
+  font-family: 'Merriweather', 'EB Garamond', 'Times New Roman', serif !important;
+}
+
+/* Cursive signatures on certificates */
+.certificate-signature,
+.signature-font,
+.font-cursive,
+[data-certificate="true"] .font-cursive {
+  font-family: 'Alex Brush', 'Dancing Script', 'Great Vibes', cursive !important;
+}
+
+/* Keep monospace for UUID code display on certificates */
+.diploma-card .font-mono,
+[data-certificate="true"] .font-mono {
+  font-family: monospace, Courier, monospace !important;
 }
 
 /* Custom scrollbars & smooth transitions */
@@ -92,10 +128,58 @@
   }
 }
 
-.animate-card-entry {
-  animation: fadeInScale 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+.animate-card-enter {
+  animation: fadeInScale 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .animate-banner-entry {
   animation: slideDownFade 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Floating Parallax Animations for Academic Showcase */
+@keyframes floatSlow {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(2deg);
+  }
+}
+
+@keyframes floatReverse {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(10px) rotate(-2deg);
+  }
+}
+
+@keyframes floatGentle {
+  0%, 100% {
+    transform: translateY(0px) scale(1);
+  }
+  50% {
+    transform: translateY(-8px) scale(1.02);
+  }
+}
+
+.animate-float-slow {
+  animation: floatSlow 6s ease-in-out infinite;
+}
+
+.animate-float-reverse {
+  animation: floatReverse 7s ease-in-out infinite;
+}
+
+.animate-float-gentle {
+  animation: floatGentle 5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-float-slow,
+  .animate-float-reverse,
+  .animate-float-gentle {
+    animation: none !important;
+  }
 }

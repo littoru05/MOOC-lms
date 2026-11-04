@@ -178,5 +178,18 @@ Frontend sẽ chạy tại [http://localhost:5173](http://localhost:5173).
 
 ---
 
+
+---
+
+## ⚠️ Lưu ý quan trọng về Lưu trữ tệp (File Storage & Hosting)
+
+> [!WARNING]
+> **Cảnh báo lưu trữ trên môi trường Cloud / Hosting có ổ đĩa tạm (Ephemeral Disk):**
+> - Mặc định hệ thống sử dụng LocalFileStorageService để lưu trữ tệp tải lên (ảnh đại diện, video bài giảng, tài liệu PDF) vào thư mục cục bộ (uploads/ hoặc /app/uploads).
+> - Trên các dịch vụ Cloud / Hosting có hệ thống tệp tạm thời như **Render Free Tier**, **Heroku**, hoặc container không gắn Persistent Volume, **toàn bộ tệp tải lên sẽ bị mất mỗi khi máy chủ khởi động lại (restart) hoặc redeploy**.
+> - **Khuyến nghị:**
+>   - Khi triển khai môi trường Cloud tạm thời: Ưu tiên sử dụng liên kết ngoài trực tiếp (như YouTube, video CDN, Google Drive, v.v.) bằng cách dán URL vào ô liên kết bài giảng thay thế.
+>   - Khi cần lưu trữ tệp tải lên lâu dài trên Production: Hãy gắn Persistent Disk hoặc cấu hình tích hợp dịch vụ lưu trữ đám mây (AWS S3, Cloudinary, Firebase Storage).
+
 ## 📄 License
 Dự án được phát triển phục vụ mục đích học tập, nghiên cứu và bài tập lớn môn học.

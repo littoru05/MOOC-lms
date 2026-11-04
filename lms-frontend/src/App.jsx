@@ -11,8 +11,9 @@ function AuthListener() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const handleAuthExpired = () => {
-      navigate('/login');
+    const handleAuthExpired = (event) => {
+      const message = event.detail?.message || 'Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại.';
+      navigate('/login', { replace: true, state: { expired: true, message } });
     };
 
     window.addEventListener('auth:expired', handleAuthExpired);

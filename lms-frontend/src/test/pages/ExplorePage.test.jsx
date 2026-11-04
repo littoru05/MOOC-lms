@@ -100,4 +100,41 @@ describe('ExplorePage Component with React Query and MSW', () => {
     expect(within(catalog).queryByText('Khóa học thử nghiệm số 1')).not.toBeInTheDocument();
     expect(within(catalog).queryByText('Khóa học thử nghiệm số 13')).not.toBeInTheDocument();
   });
+
+  it('bấm chip danh mục ở banner lọc chính xác khóa học theo category', async () => {
+    renderExplorePage();
+
+    await waitFor(() => {
+      expect(
+        screen.getAllByText(/Lập trình Fullstack Web hiện đại với React và Spring Boot/i)[0]
+      ).toBeInTheDocument();
+    });
+
+    // Tìm nút danh mục "Lập trình Web" ở banner và bấm vào
+    const bannerSection = screen.getByRole('heading', { name: /Khám phá tri thức, làm chủ công nghệ tương lai/i }).closest('section');
+    expect(bannerSection).not.toBeNull();
+
+    const webButton = within(bannerSection).getByRole('button', { name: /Lập trình Web/i });
+    fireEvent.click(webButton);
+
+    // Chờ danh mục chuyển sang lọc Lập trình Web
+    const catalog = document.getElementById('course-catalog-section');
+    await waitFor(() => {
+      expect(within(catalog).getByText(/Lập trình Fullstack Web hiện đại với React và Spring Boot/i)).toBeInTheDocument();
+    });
+  });
+
+  it('tìm kiếm theo tên category trong ô input ở banner hiển thị đúng khóa học thuộc danh mục đó', async () => {
+    renderExplorePage();
+
+    const bannerSection = screen.getByRole('heading', { name: /Khám phá tri thức, làm chủ công nghệ tương lai/i }).closest('section');
+    const searchInput = within(bannerSection).getByPlaceholderText(/Tìm khóa học, danh mục/i);
+
+    fireEvent.change(searchInput, { target: { value: 'Lập trình Web' } });
+
+    const catalog = document.getElementById('course-catalog-section');
+    await waitFor(() => {
+      expect(within(catalog).getByText(/Lập trình Fullstack Web hiện đại với React và Spring Boot/i)).toBeInTheDocument();
+    });
+  });
 });

@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { courseApi } from '../../api/courseApi';
 import { learningApi } from '../../api/learningApi';
 import { quizApi } from '../../api/quizApi';
+import { useCourseSections } from '../../hooks/useCourses';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { useParams, useNavigate } from 'react-router-dom';
+import { getImageUrl } from '../../utils/imageUrl';
 import {
   CheckCircle,
   Circle,
@@ -32,6 +34,20 @@ export const CoursePlayerPage = ({ courseId: courseIdProp, onBack, onStartQuiz, 
   const { showToast } = useToast() || {};
   const [course, setCourse] = useState(null);
   const [sections, setSections] = useState([]);
+
+  // Fetch sections via shared useCourseSections React Query hook
+  const { data: fetchedSections } = useCourseSections(courseId);
+
+  useEffect(() => {
+    if (fetchedSections && Array.isArray(fetchedSections) && fetchedSections.length > 0) {
+      setSections(fetchedSections);
+      const flattened = fetchedSections.flatMap((s) => s.lessons || []);
+      if (flattened.length > 0 && !activeLesson) {
+        setActiveLesson(flattened[0]);
+      }
+    }
+  }, [fetchedSections]);
+
   const [enrollment, setEnrollment] = useState(null);
   const [completedLessonIds, setCompletedLessonIds] = useState(new Set());
   const [activeLesson, setActiveLesson] = useState(null);
@@ -255,25 +271,41 @@ export const CoursePlayerPage = ({ courseId: courseIdProp, onBack, onStartQuiz, 
                     autoPlay
                     className="w-full h-full object-cover"
                   >
-                    <source src={activeLesson.contentUrl || 'https://www.w3schools.com/html/mov_bbb.mp4'} type="video/mp4" />
+                    <source src={getImageUrl(activeLesson.contentUrl) || 'https://www.w3schools.com/html/mov_bbb.mp4'} type="video/mp4" />
                     Trình duyệt của bạn không hỗ trợ phát video HTML5.
                   </video>
                 ) : activeLesson.contentType === 'DOCUMENT' ? (
-                  <div className="w-full h-full bg-white flex flex-col items-center justify-center p-8 text-center text-[#1A1C1E]">
-                    <FileText className="w-16 h-16 text-[#16324F] mb-3 opacity-80" />
-                    <h4 className="text-base font-bold font-serif mb-2">Tài liệu học tập đính kèm</h4>
-                    <p className="text-xs text-[#5E5E5E] max-w-md mb-4 leading-relaxed">
-                      Bài học này cung cấp tài liệu dạng PDF/Văn bản phục vụ ôn tập kiến thức chuyên sâu.
-                    </p>
-                    <a
-                      href={activeLesson.contentUrl || '#'}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="px-4 py-2 bg-[#16324F] text-white text-xs font-medium rounded-lg flex items-center gap-1.5 hover:bg-[#001D37] transition-colors"
-                    >
-                      <ExternalLink className="w-3.5 h-3.5" /> Mở tài liệu toàn màn hình
-                    </a>
-                  </div>
+                  activeLesson.contentUrl ? (
+                    <div className="w-full h-full bg-slate-900 flex flex-col">
+                      <div className="bg-[#16324F] text-white px-4 py-2 text-xs flex items-center justify-between border-b border-[#001D37]">
+                        <span className="font-semibold flex items-center gap-2 truncate">
+                          <FileText className="w-4 h-4 text-blue-300 shrink-0" />
+                          {activeLesson.title}
+                        </span>
+                        <a
+                          href={getImageUrl(activeLesson.contentUrl)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 px-2.5 py-1 bg-white/10 hover:bg-white/20 rounded text-xs transition-colors shrink-0 cursor-pointer"
+                        >
+                          <ExternalLink className="w-3 h-3" /> Mở toàn màn hình
+                        </a>
+                      </div>
+                      <iframe
+                        src={getImageUrl(activeLesson.contentUrl)}
+                        title={activeLesson.title}
+                        className="w-full flex-1 border-0 bg-white"
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-full h-full bg-white flex flex-col items-center justify-center p-8 text-center text-[#1A1C1E]">
+                      <FileText className="w-16 h-16 text-[#16324F] mb-3 opacity-80" />
+                      <h4 className="text-base font-bold font-serif mb-2">Tài liệu học tập đính kèm</h4>
+                      <p className="text-xs text-[#5E5E5E] max-w-md mb-4 leading-relaxed">
+                        Bài học này cung cấp tài liệu dạng PDF/Văn bản phục vụ ôn tập kiến thức chuyên sâu.
+                      </p>
+                    </div>
+                  )
                 ) : (
                   <div className="w-full h-full bg-white p-8 text-[#1A1C1E] overflow-y-auto">
                     <h3 className="text-lg font-bold font-serif mb-3">{activeLesson.title}</h3>

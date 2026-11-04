@@ -66,10 +66,10 @@ export const UserMenuDropdown = ({
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     setIsOpen(false);
-    logout();
-    navigate('/');
+    await logout();
+    navigate('/login', { replace: true, state: { loggedOut: true } });
   };
 
   const roleLabel = isAdmin 
