@@ -4,9 +4,15 @@ import com.lms.lms_backend.entity.ContentType;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class LessonRequest {
     @NotNull(message = "Section ID không được để trống")
     private Long sectionId;

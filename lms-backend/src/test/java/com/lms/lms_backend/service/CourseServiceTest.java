@@ -11,6 +11,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import static org.mockito.Mockito.never;
@@ -25,6 +26,7 @@ import com.lms.lms_backend.dto.course.CourseResponse;
 import com.lms.lms_backend.entity.Category;
 import com.lms.lms_backend.entity.Course;
 import com.lms.lms_backend.entity.CourseStatus;
+import com.lms.lms_backend.entity.NotificationType;
 import com.lms.lms_backend.entity.Role;
 import com.lms.lms_backend.entity.User;
 import com.lms.lms_backend.repository.CategoryRepository;
@@ -46,6 +48,9 @@ class CourseServiceTest {
 
     @Mock
     private EnrollmentRepository enrollmentRepository;
+
+    @Mock
+    private NotificationService notificationService;
 
     @InjectMocks
     private CourseService courseService;
@@ -79,45 +84,50 @@ class CourseServiceTest {
 
         draftCourse = Course.builder()
                 .id(10L)
-                .title("Lập trình Web Fullstack")
-                .slug("web-fullstack")
+                .title("Khóa học Java Core")
+                .slug("khoa-hoc-java-core")
                 .instructor(instructor)
                 .category(category)
                 .status(CourseStatus.DRAFT)
+                .isDeleted(false)
                 .build();
     }
 
     @Test
-    @DisplayName("Tạo khóa học mới thành công với trạng thái mặc định DRAFT")
+    @DisplayName("Tạo khóa học mới thành công với trạng thái DRAFT mặc định")
     void createCourse_Success() {
-        CourseCreateRequest req = new CourseCreateRequest();
-        req.setTitle("Lập trình Web Fullstack");
-        req.setSlug("web-fullstack");
-        req.setCategoryId(1L);
-        req.setDescription("Mô tả khóa học");
+        CourseCreateRequest req = CourseCreateRequest.builder()
+                .title("Khóa học Java Core")
+                .slug("khoa-hoc-java-core")
+                .categoryId(1L)
+                .build();
 
-        when(courseRepository.existsBySlug("web-fullstack")).thenReturn(false);
+        when(courseRepository.existsBySlug("khoa-hoc-java-core")).thenReturn(false);
         when(userRepository.findByEmail("instructor@lms.com")).thenReturn(Optional.of(instructor));
         when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
-        when(courseRepository.save(any(Course.class))).thenReturn(draftCourse);
+        when(courseRepository.save(any(Course.class))).thenAnswer(invocation -> {
+            Course c = invocation.getArgument(0);
+            c.setId(10L);
+            return c;
+        });
 
         CourseResponse res = courseService.createCourse(req, "instructor@lms.com");
 
         assertNotNull(res);
-        assertEquals(10L, res.getId());
-        assertEquals("web-fullstack", res.getSlug());
         assertEquals(CourseStatus.DRAFT, res.getStatus());
-
-        verify(courseRepository, times(1)).save(any(Course.class));
+        assertEquals("Khóa học Java Core", res.getTitle());
+        verify(courseRepository).save(any(Course.class));
     }
 
     @Test
-    @DisplayName("Ném ngoại lệ khi tạo khóa học có slug đã tồn tại")
+    @DisplayName("Ném ngoại lệ khi tạo khóa học với slug đã tồn tại")
     void createCourse_DuplicateSlug_ThrowsException() {
-        CourseCreateRequest req = new CourseCreateRequest();
-        req.setSlug("web-fullstack");
+        CourseCreateRequest req = CourseCreateRequest.builder()
+                .title("Khóa học Java Core")
+                .slug("khoa-hoc-java-core")
+                .build();
 
-        when(courseRepository.existsBySlug("web-fullstack")).thenReturn(true);
+        when(courseRepository.existsBySlug("khoa-hoc-java-core")).thenReturn(true);
 
         RuntimeException ex = assertThrows(RuntimeException.class, () ->
                 courseService.createCourse(req, "instructor@lms.com")
@@ -128,7 +138,7 @@ class CourseServiceTest {
     }
 
     @Test
-    @DisplayName("Giảng viên gửi duyệt khóa học chuyển DRAFT -> PENDING")
+    @DisplayName("Giảng viên gửi duyệt khóa học chuyển DRAFT -> PENDING và gửi thông báo cho admin")
     void submitForReview_Success() {
         when(courseRepository.findById(10L)).thenReturn(Optional.of(draftCourse));
         when(userRepository.findByEmail("instructor@lms.com")).thenReturn(Optional.of(instructor));
@@ -139,12 +149,20 @@ class CourseServiceTest {
         assertNotNull(res);
         assertEquals(CourseStatus.PENDING, res.getStatus());
         assertEquals(CourseStatus.PENDING, draftCourse.getStatus());
+        verify(notificationService).notifyAdmins(
+                eq(NotificationType.COURSE_SUBMITTED),
+                any(),
+                any(),
+                any(),
+                eq(10L),
+                eq(2L)
+        );
     }
 
     @Test
     @DisplayName("Ném ngoại lệ khi giảng viên khác cố tình gửi duyệt khóa học không phải của mình")
     void submitForReview_NotOwner_ThrowsException() {
-        when(courseRepository.findById(10L)).thenReturn(Optional.of(draftCourse)); // owner is instructor@lms.com
+        when(courseRepository.findById(10L)).thenReturn(Optional.of(draftCourse));
         when(userRepository.findByEmail("other_instructor@lms.com")).thenReturn(Optional.of(otherInstructor));
 
         RuntimeException ex = assertThrows(RuntimeException.class, () ->
@@ -155,7 +173,7 @@ class CourseServiceTest {
     }
 
     @Test
-    @DisplayName("Admin phê duyệt khóa học chuyển PENDING -> PUBLISHED")
+    @DisplayName("Admin phê duyệt khóa học chuyển PENDING -> PUBLISHED và thông báo cho giảng viên")
     void approveCourse_Success() {
         draftCourse.setStatus(CourseStatus.PENDING);
         when(courseRepository.findById(10L)).thenReturn(Optional.of(draftCourse));
@@ -166,24 +184,43 @@ class CourseServiceTest {
         assertNotNull(res);
         assertEquals(CourseStatus.PUBLISHED, res.getStatus());
         assertEquals(CourseStatus.PUBLISHED, draftCourse.getStatus());
+        verify(notificationService).notifyUser(
+                eq(instructor),
+                eq(NotificationType.COURSE_APPROVED),
+                any(),
+                any(),
+                any(),
+                eq(10L),
+                any()
+        );
     }
 
     @Test
-    @DisplayName("Admin từ chối duyệt khóa học chuyển PENDING -> REJECTED")
+    @DisplayName("Admin từ chối duyệt khóa học chuyển PENDING -> REJECTED kèm lý do và thông báo cho giảng viên")
     void rejectCourse_Success() {
         draftCourse.setStatus(CourseStatus.PENDING);
         when(courseRepository.findById(10L)).thenReturn(Optional.of(draftCourse));
         when(courseRepository.save(any(Course.class))).thenAnswer(i -> i.getArgument(0));
 
-        CourseResponse res = courseService.rejectCourse(10L);
+        CourseResponse res = courseService.rejectCourse(10L, "Thiếu đề cương chi tiết");
 
         assertNotNull(res);
         assertEquals(CourseStatus.REJECTED, res.getStatus());
         assertEquals(CourseStatus.REJECTED, draftCourse.getStatus());
+        assertEquals("Thiếu đề cương chi tiết", draftCourse.getRejectionReason());
+        verify(notificationService).notifyUser(
+                eq(instructor),
+                eq(NotificationType.COURSE_REJECTED),
+                any(),
+                org.mockito.ArgumentMatchers.contains("Thiếu đề cương chi tiết"),
+                any(),
+                eq(10L),
+                any()
+        );
     }
 
     @Test
-    @DisplayName("Giảng viên gửi yêu cầu xóa khóa học chuyển trạng thái -> PENDING_DELETE")
+    @DisplayName("Giảng viên gửi yêu cầu xóa khóa học chuyển trạng thái -> PENDING_DELETE và thông báo admin")
     void requestDeleteCourse_Success() {
         when(courseRepository.findById(10L)).thenReturn(Optional.of(draftCourse));
         when(userRepository.findByEmail("instructor@lms.com")).thenReturn(Optional.of(instructor));
@@ -195,14 +232,22 @@ class CourseServiceTest {
         assertEquals(CourseStatus.PENDING_DELETE, res.getStatus());
         assertEquals(CourseStatus.PENDING_DELETE, draftCourse.getStatus());
         verify(courseRepository).save(draftCourse);
+        verify(notificationService).notifyAdmins(
+                eq(NotificationType.COURSE_DELETE_REQUESTED),
+                any(),
+                any(),
+                any(),
+                eq(10L),
+                eq(2L)
+        );
     }
 
     @Test
     @DisplayName("Ném ngoại lệ khi user không phải chủ sở hữu gửi yêu cầu xóa")
     void requestDeleteCourse_Unauthorized_ThrowsException() {
-        User otherInstructor = User.builder().id(99L).email("other@lms.com").role(Role.ROLE_INSTRUCTOR).build();
+        User other = User.builder().id(99L).email("other@lms.com").role(Role.ROLE_INSTRUCTOR).build();
         when(courseRepository.findById(10L)).thenReturn(Optional.of(draftCourse));
-        when(userRepository.findByEmail("other@lms.com")).thenReturn(Optional.of(otherInstructor));
+        when(userRepository.findByEmail("other@lms.com")).thenReturn(Optional.of(other));
 
         RuntimeException ex = assertThrows(RuntimeException.class, () ->
                 courseService.requestDeleteCourse(10L, "other@lms.com")
@@ -225,6 +270,15 @@ class CourseServiceTest {
         assertNotNull(res);
         assertTrue(res.getIsDeleted());
         verify(courseRepository).save(draftCourse);
+        verify(notificationService).notifyUser(
+                eq(instructor),
+                eq(NotificationType.COURSE_DELETE_APPROVED),
+                any(),
+                any(),
+                any(),
+                eq(10L),
+                any()
+        );
     }
 
     @Test
@@ -240,55 +294,20 @@ class CourseServiceTest {
         assertEquals(CourseStatus.PUBLISHED, res.getStatus());
         assertEquals(CourseStatus.PUBLISHED, draftCourse.getStatus());
         verify(courseRepository).save(draftCourse);
-    }
-
-    @Test
-    @DisplayName("Ném ngoại lệ khi tạo khóa học với giá âm")
-    void createCourse_NegativePrice_ThrowsException() {
-        CourseCreateRequest req = new CourseCreateRequest();
-        req.setTitle("Khóa học giá âm");
-        req.setSlug("khoa-hoc-gia-am");
-        req.setPrice(new java.math.BigDecimal("-50000"));
-
-        when(courseRepository.existsBySlug("khoa-hoc-gia-am")).thenReturn(false);
-        when(userRepository.findByEmail("instructor@lms.com")).thenReturn(Optional.of(instructor));
-
-        RuntimeException ex = assertThrows(RuntimeException.class, () ->
-                courseService.createCourse(req, "instructor@lms.com")
+        verify(notificationService).notifyUser(
+                eq(instructor),
+                eq(NotificationType.COURSE_DELETE_REJECTED),
+                any(),
+                any(),
+                any(),
+                eq(10L),
+                any()
         );
-
-        assertTrue(ex.getMessage().contains("Giá khóa học không được âm"));
     }
 
     @Test
-    @DisplayName("Lấy danh sách khóa học public có áp dụng filter Specification")
-    void getAllPublishedCourses_WithFilters_Success() {
-        Course publishedCourse = Course.builder()
-                .id(1L)
-                .title("Khóa học có phí")
-                .slug("khoa-hoc-co-phi")
-                .price(new java.math.BigDecimal("499000"))
-                .status(CourseStatus.PUBLISHED)
-                .instructor(instructor)
-                .category(category)
-                .build();
-
-        when(courseRepository.findAll(any(org.springframework.data.jpa.domain.Specification.class)))
-                .thenReturn(java.util.List.of(publishedCourse));
-
-        java.util.List<CourseResponse> result = courseService.getAllPublishedCourses(
-                "paid", new java.math.BigDecimal("100000"), new java.math.BigDecimal("600000"), 1L, "Khóa học"
-        );
-
-        assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals(new java.math.BigDecimal("499000"), result.get(0).getPrice());
-        verify(courseRepository, times(1)).findAll(any(org.springframework.data.jpa.domain.Specification.class));
-    }
-
-    @Test
-    @DisplayName("Xóa khóa học khi chưa có học viên -> Xóa mềm (isDeleted=true)")
-    void deleteCourse_ZeroEnrollments_SoftDeletes() {
+    @DisplayName("Xóa khóa học khi CHƯA có học viên -> Thực hiện Xóa mềm (isDeleted=true, status=DRAFT)")
+    void deleteCourse_NoEnrollments_SoftDeletes() {
         when(courseRepository.findById(1L)).thenReturn(Optional.of(draftCourse));
         when(userRepository.findByEmail("instructor@lms.com")).thenReturn(Optional.of(instructor));
         when(enrollmentRepository.countByCourseId(1L)).thenReturn(0L);

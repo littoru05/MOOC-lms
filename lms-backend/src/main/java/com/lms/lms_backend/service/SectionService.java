@@ -13,7 +13,9 @@ import com.lms.lms_backend.dto.lesson.LessonResponse;
 import com.lms.lms_backend.dto.section.SectionRequest;
 import com.lms.lms_backend.dto.section.SectionResponse;
 import com.lms.lms_backend.entity.Course;
+import com.lms.lms_backend.entity.CourseStatus;
 import com.lms.lms_backend.entity.Lesson;
+import com.lms.lms_backend.entity.NotificationType;
 import com.lms.lms_backend.entity.Section;
 import com.lms.lms_backend.repository.CourseRepository;
 import com.lms.lms_backend.repository.LessonRepository;
@@ -28,6 +30,7 @@ public class SectionService {
     private final SectionRepository sectionRepository;
     private final CourseRepository courseRepository;
     private final LessonRepository lessonRepository;
+    private final NotificationService notificationService;
 
     public List<SectionResponse> getSectionsByCourse(Long courseId) {
         List<Section> sections = sectionRepository.findByCourseIdOrderByOrderIndexAsc(courseId);
@@ -46,7 +49,7 @@ public class SectionService {
         return sections.stream()
                 .map(s -> SectionResponse.builder()
                         .id(s.getId())
-                        .courseId(s.getCourse().getId())
+                        .courseId(s.getCourse() != null ? s.getCourse().getId() : null)
                         .title(s.getTitle())
                         .orderIndex(s.getOrderIndex())
                         .lessons(lessonsBySectionId.getOrDefault(s.getId(), new ArrayList<>()))
@@ -71,6 +74,21 @@ public class SectionService {
                 .build();
 
         Section saved = sectionRepository.save(section);
+
+        if (course.getStatus() == CourseStatus.PUBLISHED && notificationService != null) {
+            String instructorName = (course.getInstructor() != null && course.getInstructor().getFullName() != null)
+                    ? course.getInstructor().getFullName()
+                    : "Giảng viên";
+            notificationService.notifyAdmins(
+                    NotificationType.LESSON_ADDED,
+                    "Nội dung khóa học được cập nhật",
+                    instructorName + " đã thêm chương mới vào khóa học \"" + course.getTitle() + "\"",
+                    "/courses/" + course.getSlug(),
+                    course.getId(),
+                    course.getInstructor() != null ? course.getInstructor().getId() : null
+            );
+        }
+
         return mapToResponse(saved);
     }
 
@@ -98,7 +116,7 @@ public class SectionService {
 
         return SectionResponse.builder()
                 .id(s.getId())
-                .courseId(s.getCourse().getId())
+                .courseId(s.getCourse() != null ? s.getCourse().getId() : null)
                 .title(s.getTitle())
                 .orderIndex(s.getOrderIndex())
                 .lessons(lessonResponses)

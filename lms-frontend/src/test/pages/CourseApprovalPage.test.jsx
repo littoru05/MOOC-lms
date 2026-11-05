@@ -1,7 +1,7 @@
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { http, HttpResponse } from 'msw';
 import { server } from '../mocks/server';
 import { AuthProvider } from '../../context/AuthContext';
@@ -10,8 +10,9 @@ import { CourseApprovalPage } from '../../pages/admin/CourseApprovalPage';
 import { createTestQueryClient } from '../test-utils';
 import { QueryClientProvider } from '@tanstack/react-query';
 
-const renderCourseApprovalPage = () => {
+const renderCourseApprovalPage = (initialRoute = '/admin/courses/approval') => {
   const queryClient = createTestQueryClient();
+  window.history.pushState({}, 'Test', initialRoute);
   return render(
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
@@ -112,5 +113,22 @@ describe('CourseApprovalPage - Thẩm định chi tiết khóa học chờ duy�
     // Xác nhận đáp án đúng được gắn nhãn
     expect(screen.getByText('StatefulWidget')).toBeInTheDocument();
     expect(screen.getByText('Đúng')).toBeInTheDocument();
+  });
+
+  it('tự động chọn khóa học khi có query parameter ?courseId=10', async () => {
+    renderCourseApprovalPage('/admin/courses/approval?courseId=10');
+
+    await waitFor(() => {
+      expect(screen.getAllByText('Lập trình Flutter & Dart Xây dựng App Mobile').length).toBeGreaterThan(0);
+      expect(screen.getByText(/ID: #10/)).toBeInTheDocument();
+    });
+  });
+
+  it('hiển thị toast thông báo thân thiện khi courseId không tồn tại hoặc đã được xử lý', async () => {
+    renderCourseApprovalPage('/admin/courses/approval?courseId=9999');
+
+    await waitFor(() => {
+      expect(screen.getByText('Khóa học này đã được xử lý')).toBeInTheDocument();
+    });
   });
 });

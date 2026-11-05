@@ -16,6 +16,7 @@ import com.lms.lms_backend.dto.course.CourseUpdateRequest;
 import com.lms.lms_backend.entity.Category;
 import com.lms.lms_backend.entity.Course;
 import com.lms.lms_backend.entity.CourseStatus;
+import com.lms.lms_backend.entity.NotificationType;
 import com.lms.lms_backend.entity.Role;
 import com.lms.lms_backend.entity.User;
 import com.lms.lms_backend.repository.CategoryRepository;
@@ -35,6 +36,7 @@ public class CourseService {
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
     private final EnrollmentRepository enrollmentRepository;
+    private final NotificationService notificationService;
 
     public List<CourseResponse> getAllPublishedCourses(
             String priceType,
@@ -174,7 +176,21 @@ public class CourseService {
         }
 
         course.setStatus(CourseStatus.PENDING);
-        return mapToResponse(courseRepository.save(course));
+        course.setRejectionReason(null);
+        Course saved = courseRepository.save(course);
+
+        if (notificationService != null) {
+            notificationService.notifyAdmins(
+                    NotificationType.COURSE_SUBMITTED,
+                    "Khóa học mới chờ duyệt",
+                    user.getFullName() + " đã gửi duyệt khóa học \"" + course.getTitle() + "\"",
+                    "/admin/courses/approval?courseId=" + course.getId(),
+                    course.getId(),
+                    user.getId()
+            );
+        }
+
+        return mapToResponse(saved);
     }
 
     @Transactional
@@ -190,7 +206,6 @@ public class CourseService {
         long enrolledCount = enrollmentRepository != null ? enrollmentRepository.countByCourseId(courseId) : 0L;
 
         if (enrolledCount > 0) {
-            // Trường hợp 2: ĐÃ có học viên ghi danh -> Chuyển sang ARCHIVED (Lưu trữ / Ngừng kinh doanh)
             course.setStatus(CourseStatus.ARCHIVED);
             courseRepository.save(course);
 
@@ -203,7 +218,6 @@ public class CourseService {
                     .message("Khóa học đã có học viên đăng ký nên đã được chuyển sang trạng thái Lưu trữ (Ngừng kinh doanh) thay vì xóa vĩnh viễn.")
                     .build();
         } else {
-            // Trường hợp 1: Chưa có ai mua/ghi danh -> Xóa mềm
             course.setIsDeleted(true);
             course.setDeletedAt(LocalDateTime.now());
             course.setStatus(CourseStatus.DRAFT);
@@ -251,7 +265,20 @@ public class CourseService {
         }
 
         course.setStatus(CourseStatus.PENDING_DELETE);
-        return mapToResponse(courseRepository.save(course));
+        Course saved = courseRepository.save(course);
+
+        if (notificationService != null) {
+            notificationService.notifyAdmins(
+                    NotificationType.COURSE_DELETE_REQUESTED,
+                    "Yêu cầu xóa khóa học",
+                    user.getFullName() + " đã yêu cầu xóa khóa học \"" + course.getTitle() + "\"",
+                    "/admin/courses/approval?courseId=" + course.getId(),
+                    course.getId(),
+                    user.getId()
+            );
+        }
+
+        return mapToResponse(saved);
     }
 
     @Transactional
@@ -260,30 +287,95 @@ public class CourseService {
         if (course.getStatus() == CourseStatus.PENDING_DELETE) {
             long enrolledCount = enrollmentRepository != null ? enrollmentRepository.countByCourseId(courseId) : 0L;
             if (enrolledCount > 0) {
-                // Đã có học viên -> Chuyển sang ARCHIVED thay vì xóa hẳn
                 course.setStatus(CourseStatus.ARCHIVED);
             } else {
-                // Chưa có học viên -> Đánh dấu xóa mềm
                 course.setIsDeleted(true);
                 course.setDeletedAt(LocalDateTime.now());
                 course.setStatus(CourseStatus.DRAFT);
             }
-            return mapToResponse(courseRepository.save(course));
+            Course saved = courseRepository.save(course);
+            if (notificationService != null && course.getInstructor() != null) {
+                notificationService.notifyUser(
+                        course.getInstructor(),
+                        NotificationType.COURSE_DELETE_APPROVED,
+                        "Yêu cầu xóa khóa học đã được duyệt",
+                        "Yêu cầu xóa khóa học \"" + course.getTitle() + "\" đã được chấp thuận.",
+                        "/instructor/courses/editor?courseId=" + course.getId(),
+                        course.getId(),
+                        null
+                );
+            }
+            return mapToResponse(saved);
         }
+
         course.setStatus(CourseStatus.PUBLISHED);
-        return mapToResponse(courseRepository.save(course));
+        course.setRejectionReason(null);
+        Course saved = courseRepository.save(course);
+
+        if (notificationService != null && course.getInstructor() != null) {
+            notificationService.notifyUser(
+                    course.getInstructor(),
+                    NotificationType.COURSE_APPROVED,
+                    "Khóa học đã được duyệt",
+                    "Khóa học \"" + course.getTitle() + "\" đã được duyệt và xuất bản.",
+                    "/instructor/courses/editor?courseId=" + course.getId(),
+                    course.getId(),
+                    null
+            );
+        }
+
+        return mapToResponse(saved);
+    }
+
+    public CourseResponse rejectCourse(Long courseId) {
+        return rejectCourse(courseId, null);
     }
 
     @Transactional
-    public CourseResponse rejectCourse(Long courseId) {
+    public CourseResponse rejectCourse(Long courseId, String reason) {
         Course course = getCourseEntityById(courseId);
+        String trimmedReason = (reason != null && !reason.trim().isEmpty()) ? reason.trim() : null;
+
         if (course.getStatus() == CourseStatus.PENDING_DELETE) {
-            // Từ chối xóa: giữ lại khóa học ở trạng thái PUBLISHED
             course.setStatus(CourseStatus.PUBLISHED);
-            return mapToResponse(courseRepository.save(course));
+            Course saved = courseRepository.save(course);
+            if (notificationService != null && course.getInstructor() != null) {
+                String msg = (trimmedReason != null)
+                        ? "Yêu cầu xóa khóa học \"" + course.getTitle() + "\" đã bị từ chối. Lý do: " + trimmedReason
+                        : "Yêu cầu xóa khóa học \"" + course.getTitle() + "\" đã bị từ chối.";
+                notificationService.notifyUser(
+                        course.getInstructor(),
+                        NotificationType.COURSE_DELETE_REJECTED,
+                        "Yêu cầu xóa khóa học bị từ chối",
+                        msg,
+                        "/instructor/courses/editor?courseId=" + course.getId(),
+                        course.getId(),
+                        null
+                );
+            }
+            return mapToResponse(saved);
         }
+
         course.setStatus(CourseStatus.REJECTED);
-        return mapToResponse(courseRepository.save(course));
+        course.setRejectionReason(trimmedReason);
+        Course saved = courseRepository.save(course);
+
+        if (notificationService != null && course.getInstructor() != null) {
+            String msg = (trimmedReason != null)
+                    ? "Khóa học \"" + course.getTitle() + "\" đã bị từ chối xét duyệt. Lý do: " + trimmedReason
+                    : "Khóa học \"" + course.getTitle() + "\" đã bị từ chối xét duyệt.";
+            notificationService.notifyUser(
+                    course.getInstructor(),
+                    NotificationType.COURSE_REJECTED,
+                    "Khóa học bị từ chối",
+                    msg,
+                    "/instructor/courses/editor?courseId=" + course.getId(),
+                    course.getId(),
+                    null
+            );
+        }
+
+        return mapToResponse(saved);
     }
 
     public CourseResponse mapToResponse(Course c) {
@@ -304,6 +396,7 @@ public class CourseService {
                 .status(c.getStatus())
                 .isDeleted(c.getIsDeleted())
                 .deletedAt(c.getDeletedAt())
+                .rejectionReason(c.getRejectionReason())
                 .enrolledCount(enrolledCount)
                 .categoryId(c.getCategory() != null ? c.getCategory().getId() : null)
                 .categoryName(c.getCategory() != null ? c.getCategory().getName() : null)

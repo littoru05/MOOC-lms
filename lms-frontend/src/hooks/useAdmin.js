@@ -1,8 +1,8 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { adminApi } from '../api/adminApi';
 
 /**
- * 1. Query lấy danh sách khóa học đang chờ kiểm duyệt (PENDING)
+ * 1. Query lấy danh sách các khóa học đang chờ Admin duyệt (PENDING)
  */
 export function usePendingCourses() {
   return useQuery({
@@ -11,6 +11,7 @@ export function usePendingCourses() {
       const res = await adminApi.getPendingCourses();
       return res.data || [];
     },
+    staleTime: 1000 * 60 * 2, // Cache 2 phút
   });
 }
 
@@ -28,6 +29,8 @@ export function useApproveCourse() {
       queryClient.invalidateQueries({ queryKey: ['admin', 'stats'] });
       queryClient.invalidateQueries({ queryKey: ['courses', 'published'] });
       queryClient.invalidateQueries({ queryKey: ['courses'] });
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      queryClient.invalidateQueries({ queryKey: ['notifications-unread-count'] });
     },
   });
 }
@@ -39,10 +42,17 @@ export function useRejectCourse() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (courseId) => adminApi.rejectCourse(courseId),
+    mutationFn: (param) => {
+      if (typeof param === 'object' && param !== null) {
+        return adminApi.rejectCourse(param.id, param.reason);
+      }
+      return adminApi.rejectCourse(param);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'pendingCourses'] });
       queryClient.invalidateQueries({ queryKey: ['admin', 'stats'] });
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      queryClient.invalidateQueries({ queryKey: ['notifications-unread-count'] });
     },
   });
 }
@@ -61,9 +71,9 @@ export function useUsers() {
 }
 
 /**
- * 5. Mutation bật/tắt trạng thái hoạt động của người dùng (isActive)
+ * 5. Mutation thay đổi trạng thái kích hoạt tài khoản (Lock/Unlock)
  */
-export function useToggleUserStatus() {
+export function useToggleUserActive() {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -76,15 +86,19 @@ export function useToggleUserStatus() {
 }
 
 /**
- * 6. Query lấy số liệu thống kê Dashboard hệ thống (Admin)
+ * 6. Query lấy số liệu thống kê Dashboard Admin
  */
-export function useAdminStats() {
+export function useDashboardStats() {
   return useQuery({
     queryKey: ['admin', 'stats'],
     queryFn: async () => {
       const res = await adminApi.getDashboardStats();
-      return res.data;
+      return res.data || {};
     },
-    staleTime: 30 * 1000,
+    staleTime: 1000 * 60, // Cache 1 phút
   });
 }
+
+// Aliases for compatibility
+export const useAdminStats = useDashboardStats;
+export const useToggleUserStatus = useToggleUserActive;

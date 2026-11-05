@@ -364,7 +364,21 @@ export const CourseEditorPage = ({ courseId: courseIdProp, onBack }) => {
       </div>
 
       {/* Approval Status Banner (UX Notification) */}
-      {courseDetail && (
+      {(courseDetail?.isDeleted || isErrorCourse) && (
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4.5 flex items-center gap-3 text-amber-900 shadow-2xs">
+          <AlertCircle className="w-5 h-5 text-amber-600 shrink-0" />
+          <div>
+            <p className="text-xs font-bold text-amber-900">
+              Khóa học không còn khả dụng
+            </p>
+            <p className="text-[11px] text-amber-800 mt-0.5 leading-relaxed">
+              Khóa học này đã bị xóa hoặc không còn tồn tại trên hệ thống.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {courseDetail && !courseDetail.isDeleted && !isErrorCourse && (
         <>
           {courseDetail.status === 'DRAFT' && (
             <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4.5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-amber-900 shadow-2xs">
@@ -399,6 +413,11 @@ export const CourseEditorPage = ({ courseId: courseIdProp, onBack }) => {
                   <p className="text-xs font-bold text-red-900">
                     Khóa học đã bị Ban Quản trị từ chối phê duyệt (REJECTED)
                   </p>
+                  {courseDetail.rejectionReason && (
+                    <p className="text-xs font-semibold text-red-950 mt-1">
+                      Lý do từ chối: {courseDetail.rejectionReason}
+                    </p>
+                  )}
                   <p className="text-[11px] text-red-800 mt-0.5 leading-relaxed">
                     Vui lòng rà soát lại bài giảng, video và nội dung đề cương trước khi gửi yêu cầu xét duyệt lại.
                   </p>
@@ -434,7 +453,7 @@ export const CourseEditorPage = ({ courseId: courseIdProp, onBack }) => {
             <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-3.5 flex items-center gap-2.5 text-emerald-900 shadow-2xs">
               <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
               <p className="text-xs font-medium text-emerald-900">
-                Khóa học đã được xuất bản chính thức và đang hiển thị công khai tới toàn bộ học viên.
+                Khóa học đã được duyệt, bạn có thể soạn bài giảng và cập nhật nội dung.
               </p>
             </div>
           )}

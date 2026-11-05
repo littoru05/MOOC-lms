@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation, Link, Outlet } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { UserMenuDropdown } from '../common/UserMenuDropdown';
+import { NotificationBell } from '../common/NotificationBell';
 import { 
   ShieldCheck, 
   Clock, 
@@ -16,7 +17,8 @@ import {
   Layers,
   Database,
   User,
-  TrendingUp
+  TrendingUp,
+  Bell
 } from 'lucide-react';
 
 export const AdminLayout = ({ currentTab: currentTabProp, onNavigate, children }) => {
@@ -28,120 +30,144 @@ export const AdminLayout = ({ currentTab: currentTabProp, onNavigate, children }
   const pathname = location.pathname;
 
   const isOverview = pathname === '/admin/dashboard' || pathname === '/admin/overview' || pathname === '/admin';
-  const isApproval = pathname === '/admin/courses/approval' || pathname === '/admin/course-approval';
-  const isUsers = pathname === '/admin/users' || pathname === '/admin/user-management';
-  const isRevenue = pathname === '/admin/revenue';
-  const isProfile = pathname === '/admin/profile';
+  const isApproval = pathname.includes('/admin/courses/approval');
+  const isUsers = pathname.includes('/admin/users');
+  const isRevenue = pathname.includes('/admin/revenue');
+  const isProfile = pathname.includes('/admin/profile');
+  const isNotifications = pathname.includes('/admin/notifications');
+
+  const menuItems = [
+    {
+      id: 'dashboard',
+      label: 'Tổng quan hệ thống',
+      icon: LayoutDashboard,
+      path: '/admin/dashboard',
+      active: isOverview,
+    },
+    {
+      id: 'course-approval',
+      label: 'Kiểm duyệt khóa học',
+      icon: Clock,
+      path: '/admin/courses/approval',
+      active: isApproval,
+    },
+    {
+      id: 'user-management',
+      label: 'Quản trị người dùng',
+      icon: Users,
+      path: '/admin/users',
+      active: isUsers,
+    },
+    {
+      id: 'revenue-analytics',
+      label: 'Doanh thu & Báo cáo',
+      icon: TrendingUp,
+      path: '/admin/revenue',
+      active: isRevenue,
+    },
+    {
+      id: 'notifications',
+      label: 'Trung tâm thông báo',
+      icon: Bell,
+      path: '/admin/notifications',
+      active: isNotifications,
+    },
+    {
+      id: 'admin-profile',
+      label: 'Hồ sơ quản trị viên',
+      icon: User,
+      path: '/admin/profile',
+      active: isProfile,
+    },
+  ];
+
+  const handleNavClick = (item) => {
+    if (onNavigate) {
+      onNavigate(item.id);
+    } else {
+      navigate(item.path);
+    }
+  };
 
   return (
-    <div className="min-h-screen flex bg-[#F4F3F6] text-[#1A1C1E]">
+    <div className="min-h-screen bg-[#FAF9FC] text-[#1A1C1E] flex flex-col font-sans">
       
-      {/* Fixed Left Sidebar with Dark / Deep Navy Theme (Matching Stitch Admin Design) */}
-      <aside className="w-64 h-screen fixed left-0 top-0 bg-[#001D37] text-white flex flex-col justify-between py-6 z-40 border-r border-[#16324F]">
-        <div>
-          
-          {/* Header Brand */}
-          <div className="px-6 mb-8">
-            <Link to="/admin/dashboard" className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[#16324F] border border-blue-400/30 text-white flex items-center justify-center font-bold text-lg font-serif shadow-sm">
-                <ShieldCheck className="w-6 h-6 text-blue-300" />
-              </div>
-              <div>
-                <h2 className="font-serif font-bold text-base text-white tracking-wide">EduMOOC Admin</h2>
-                <p className="text-[10px] text-blue-200 uppercase tracking-widest">System Control</p>
-              </div>
-            </Link>
+      {/* Sidebar Navigation */}
+      <aside className="w-64 bg-[#001D37] text-white flex flex-col fixed inset-y-0 left-0 z-40 border-r border-[#002B4E]">
+        
+        {/* Brand / Logo */}
+        <div className="h-16 px-6 flex items-center gap-3 border-b border-white/10">
+          <div className="w-9 h-9 bg-blue-500 rounded-lg flex items-center justify-center text-white shadow-sm font-serif font-black text-xl">
+            E
           </div>
-
-          {/* Nav Items */}
-          <nav className="space-y-1.5 px-3">
-            <div className="px-3 py-1 text-[10px] font-bold text-blue-300/60 uppercase tracking-wider">
-              Bảng quản trị
-            </div>
-
-            <Link
-              to="/admin/dashboard"
-              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
-                isOverview
-                  ? 'bg-[#16324F] text-white font-semibold border-l-4 border-blue-400 shadow-sm'
-                  : 'text-slate-300 hover:bg-white/10 hover:text-white'
-              }`}
-            >
-              <BarChart3 className="w-4 h-4 text-blue-400" />
-              <span>Tổng quan hệ thống</span>
-            </Link>
-
-            <Link
-              to="/admin/courses/approval"
-              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
-                isApproval
-                  ? 'bg-[#16324F] text-white font-semibold border-l-4 border-amber-400 shadow-sm'
-                  : 'text-slate-300 hover:bg-white/10 hover:text-white'
-              }`}
-            >
-              <Clock className="w-4 h-4 text-amber-400" />
-              <span>Kiểm duyệt khóa học</span>
-            </Link>
-
-            <Link
-              to="/admin/users"
-              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
-                isUsers
-                  ? 'bg-[#16324F] text-white font-semibold border-l-4 border-emerald-400 shadow-sm'
-                  : 'text-slate-300 hover:bg-white/10 hover:text-white'
-              }`}
-            >
-              <Users className="w-4 h-4 text-emerald-400" />
-              <span>Quản lý người dùng</span>
-            </Link>
-
-            <Link
-              to="/admin/revenue"
-              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
-                isRevenue
-                  ? 'bg-[#16324F] text-white font-semibold border-l-4 border-indigo-400 shadow-sm'
-                  : 'text-slate-300 hover:bg-white/10 hover:text-white'
-              }`}
-            >
-              <TrendingUp className="w-4 h-4 text-indigo-400" />
-              <span>Doanh thu & Báo cáo</span>
-            </Link>
-
-            <Link
-              to="/admin/profile"
-              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
-                isProfile
-                  ? 'bg-[#16324F] text-white font-semibold border-l-4 border-blue-400 shadow-sm'
-                  : 'text-slate-300 hover:bg-white/10 hover:text-white'
-              }`}
-            >
-              <User className="w-4 h-4 text-blue-300" />
-              <span>Hồ sơ cá nhân</span>
-            </Link>
-          </nav>
+          <div>
+            <span className="font-serif font-bold text-base tracking-tight text-white block">
+              EduMOOC
+            </span>
+            <span className="text-[10px] text-blue-300 font-medium uppercase tracking-wider block">
+              Admin Governance
+            </span>
+          </div>
         </div>
 
-        {/* Sidebar Bottom: Admin Profile & Logout */}
-        <div className="px-4 border-t border-white/10 pt-4 space-y-3">
-          <Link
-            to="/admin/profile"
-            className="w-full flex items-center gap-3 text-left p-1 rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
+        {/* Navigation Items */}
+        <nav className="flex-1 px-3 py-6 space-y-1.5 overflow-y-auto">
+          {menuItems.map((item) => {
+            const Icon = item.icon;
+            return (
+              <button
+                key={item.id}
+                onClick={() => handleNavClick(item)}
+                className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-xs font-medium transition-colors cursor-pointer text-left ${
+                  item.active
+                    ? 'bg-white/15 text-white font-semibold shadow-xs'
+                    : 'text-white/70 hover:bg-white/10 hover:text-white'
+                }`}
+              >
+                <Icon className={`w-4 h-4 ${item.active ? 'text-blue-400' : 'text-white/60'}`} />
+                <span>{item.label}</span>
+              </button>
+            );
+          })}
+        </nav>
+
+        {/* Role Quick Switch Menu (Floating Dropdown) */}
+        {showRoleMenu && (
+          <div className="mx-3 mb-2 p-2 bg-[#002B4E] border border-white/10 rounded-lg shadow-xl text-xs space-y-1 z-50">
+            <p className="text-[10px] uppercase font-bold text-blue-300 px-2 py-1">Chuyển vai trò thử nghiệm</p>
+            <button
+              onClick={() => { quickSwitchRole('STUDENT'); setShowRoleMenu(false); navigate('/'); }}
+              className="w-full text-left px-2.5 py-1.5 rounded hover:bg-white/10 text-white/80 flex items-center gap-2 cursor-pointer"
+            >
+              <GraduationCap className="w-3.5 h-3.5 text-blue-300" />
+              <span>Học viên (Student)</span>
+            </button>
+            <button
+              onClick={() => { quickSwitchRole('INSTRUCTOR'); setShowRoleMenu(false); navigate('/instructor/dashboard'); }}
+              className="w-full text-left px-2.5 py-1.5 rounded hover:bg-white/10 text-white/80 flex items-center gap-2 cursor-pointer"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              <span>Giảng viên (Instructor)</span>
+            </button>
+          </div>
+        )}
+
+        {/* Bottom Role Switch Trigger & Logout */}
+        <div className="p-3 border-t border-white/10 space-y-1">
+          <button
+            onClick={() => setShowRoleMenu(!showRoleMenu)}
+            className="w-full flex items-center justify-between px-3.5 py-2 rounded-lg text-xs font-medium text-white/70 hover:bg-white/10 hover:text-white transition-colors cursor-pointer"
           >
-            <div className="w-9 h-9 rounded-full bg-blue-900 border border-blue-400/40 flex items-center justify-center font-bold text-xs text-white">
-              AD
+            <div className="flex items-center gap-2">
+              <Shield className="w-3.5 h-3.5 text-blue-400" />
+              <span>Chuyển vai trò</span>
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-bold text-white truncate">{user?.fullName || 'Quản trị viên'}</p>
-              <p className="text-[10px] text-blue-300 truncate">Xem & Đổi hồ sơ →</p>
-            </div>
-          </Link>
+            <ChevronRight className={`w-3.5 h-3.5 transition-transform ${showRoleMenu ? 'rotate-90' : ''}`} />
+          </button>
 
           <button
-            onClick={async () => {
-              await logout();
-              navigate('/login', { replace: true, state: { loggedOut: true } });
-            }}
-            className="w-full py-1.5 px-3 bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/30 text-xs font-semibold rounded-md flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+            onClick={logout}
+            className="w-full flex items-center gap-2.5 px-3.5 py-2 rounded-lg text-xs font-medium text-red-300 hover:bg-red-500/20 hover:text-red-200 transition-colors cursor-pointer"
           >
             <LogOut className="w-3.5 h-3.5" />
             <span>Đăng xuất</span>
@@ -167,12 +193,15 @@ export const AdminLayout = ({ currentTab: currentTabProp, onNavigate, children }
                 ? 'Quản lý người dùng'
                 : isRevenue
                 ? 'Doanh thu & Báo cáo'
+                : isNotifications
+                ? 'Trung tâm thông báo'
                 : 'Hồ sơ cá nhân'}
             </span>
           </div>
 
           {/* Right Header: Role Badge & User Menu */}
           <div className="flex items-center gap-3">
+            <NotificationBell />
             <div className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-[#001D37] text-white rounded-md">
               <ShieldCheck className="w-3.5 h-3.5 text-blue-400" />
               <span>Portal: Quản trị viên</span>

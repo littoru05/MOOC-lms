@@ -30,6 +30,7 @@ public class CourseResponse {
     private java.math.BigDecimal price;
     private Boolean isDeleted;
     private LocalDateTime deletedAt;
+    private String rejectionReason;
     private Long enrolledCount;
     private LocalDateTime createdAt;
     private List<SectionResponse> sections;

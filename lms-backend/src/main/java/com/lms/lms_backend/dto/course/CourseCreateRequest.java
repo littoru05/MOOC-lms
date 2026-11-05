@@ -1,11 +1,18 @@
 package com.lms.lms_backend.dto.course;
 
 import java.math.BigDecimal;
+
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class CourseCreateRequest {
     @NotBlank(message = "Tiêu đề không được để trống")
     private String title;

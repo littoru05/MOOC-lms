@@ -1,0 +1,12 @@
+package com.lms.lms_backend.entity;
+
+public enum NotificationType {
+    COURSE_SUBMITTED,
+    COURSE_DELETE_REQUESTED,
+    LESSON_ADDED,
+    COURSE_APPROVED,
+    COURSE_REJECTED,
+    COURSE_DELETE_APPROVED,
+    COURSE_DELETE_REJECTED
+}
+

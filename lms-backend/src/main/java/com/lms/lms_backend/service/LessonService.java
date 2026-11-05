@@ -12,6 +12,7 @@ import com.lms.lms_backend.entity.ContentType;
 import com.lms.lms_backend.entity.Course;
 import com.lms.lms_backend.entity.CourseStatus;
 import com.lms.lms_backend.entity.Lesson;
+import com.lms.lms_backend.entity.NotificationType;
 import com.lms.lms_backend.entity.Role;
 import com.lms.lms_backend.entity.Section;
 import com.lms.lms_backend.entity.User;
@@ -28,6 +29,7 @@ public class LessonService {
     private final LessonRepository lessonRepository;
     private final SectionRepository sectionRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     public List<LessonResponse> getLessonsBySection(Long sectionId) {
         return lessonRepository.findBySectionIdOrderByOrderIndexAsc(sectionId).stream()
@@ -76,7 +78,24 @@ public class LessonService {
                 .section(section)
                 .build();
 
-        return mapToResponse(lessonRepository.save(lesson));
+        Lesson saved = lessonRepository.save(lesson);
+
+        Course course = section.getCourse();
+        if (course != null && course.getStatus() == CourseStatus.PUBLISHED && notificationService != null) {
+            String instructorName = (course.getInstructor() != null && course.getInstructor().getFullName() != null)
+                    ? course.getInstructor().getFullName()
+                    : "Giảng viên";
+            notificationService.notifyAdmins(
+                    NotificationType.LESSON_ADDED,
+                    "Nội dung khóa học được cập nhật",
+                    instructorName + " đã thêm bài giảng mới vào khóa học \"" + course.getTitle() + "\"",
+                    "/courses/" + course.getSlug(),
+                    course.getId(),
+                    course.getInstructor() != null ? course.getInstructor().getId() : null
+            );
+        }
+
+        return mapToResponse(saved);
     }
 
     @Transactional
@@ -105,7 +124,7 @@ public class LessonService {
     private LessonResponse mapToResponse(Lesson l) {
         return LessonResponse.builder()
                 .id(l.getId())
-                .sectionId(l.getSection().getId())
+                .sectionId(l.getSection() != null ? l.getSection().getId() : null)
                 .title(l.getTitle())
                 .contentType(l.getContentType())
                 .contentUrl(l.getContentUrl())

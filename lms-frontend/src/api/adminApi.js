@@ -4,7 +4,7 @@ export const adminApi = {
   // Course approvals
   getPendingCourses: () => client.get('/api/v1/admin/courses/pending'),
   approveCourse: (id) => client.patch(`/api/v1/admin/courses/${id}/approve`),
-  rejectCourse: (id) => client.patch(`/api/v1/admin/courses/${id}/reject`),
+  rejectCourse: (id, reason) => client.patch(`/api/v1/admin/courses/${id}/reject`, reason ? { reason } : {}),
 
   // User management
   getAllUsers: () => client.get('/api/v1/admin/users'),

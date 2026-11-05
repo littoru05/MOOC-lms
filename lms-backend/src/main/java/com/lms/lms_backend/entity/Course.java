@@ -74,6 +74,9 @@ public class Course {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
+    @Column(name = "rejection_reason", length = 500)
+    private String rejectionReason;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

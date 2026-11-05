@@ -7,12 +7,14 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.lms.lms_backend.dto.admin.AdminUserResponse;
 import com.lms.lms_backend.dto.admin.DashboardStatsResponse;
 import com.lms.lms_backend.dto.course.CourseResponse;
+import com.lms.lms_backend.dto.course.RejectCourseRequest;
 import com.lms.lms_backend.service.AdminService;
 
 import lombok.RequiredArgsConstructor;
@@ -39,8 +41,12 @@ public class AdminController {
 
     // 3. Từ chối khóa học (Pending -> Rejected)
     @PatchMapping("/courses/{id}/reject")
-    public ResponseEntity<CourseResponse> rejectCourse(@PathVariable Long id) {
-        return ResponseEntity.ok(adminService.rejectCourse(id));
+    public ResponseEntity<CourseResponse> rejectCourse(
+            @PathVariable Long id,
+            @RequestBody(required = false) RejectCourseRequest request
+    ) {
+        String reason = request != null ? request.getReason() : null;
+        return ResponseEntity.ok(adminService.rejectCourse(id, reason));
     }
 
     // 4. Lấy danh sách tất cả tài khoản người dùng

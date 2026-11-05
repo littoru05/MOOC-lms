@@ -94,6 +94,86 @@ export let mockPaymentSessionState = {
   expiresAt: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
 };
 
+export let mockNotifications = [
+  {
+    id: 1,
+    recipientId: 1,
+    type: 'COURSE_SUBMITTED',
+    title: 'Khóa học mới chờ phê duyệt',
+    message: 'TS. Nguyễn Văn A đã gửi duyệt khóa học "Lập trình React"',
+    link: '/admin/courses/approval?courseId=1',
+    courseId: 1,
+    actorId: 2,
+    isRead: false,
+    createdAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
+  },
+  {
+    id: 2,
+    recipientId: 1,
+    type: 'COURSE_DELETE_REQUESTED',
+    title: 'Yêu cầu xóa khóa học',
+    message: 'TS. Nguyễn Văn A yêu cầu xóa khóa học "Khóa học cũ"',
+    link: '/admin/courses/approval?courseId=2',
+    courseId: 2,
+    actorId: 2,
+    isRead: false,
+    createdAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
+  },
+  {
+    id: 3,
+    recipientId: 1,
+    type: 'LESSON_ADDED',
+    title: 'Khóa học có bài giảng mới',
+    message: 'TS. Nguyễn Văn A đã thêm nội dung mới cho khóa học "Lập trình React"',
+    link: '/courses/lap-trinh-fullstack-web-react-spring-boot',
+    courseId: 1,
+    actorId: 2,
+    isRead: true,
+    createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+  },
+];
+
+export const resetMockNotifications = () => {
+  mockNotifications = [
+    {
+      id: 1,
+      recipientId: 1,
+      type: 'COURSE_SUBMITTED',
+      title: 'Khóa học mới chờ phê duyệt',
+      message: 'TS. Nguyễn Văn A đã gửi duyệt khóa học "Lập trình React"',
+      link: '/admin/courses/approval?courseId=1',
+      courseId: 1,
+      actorId: 2,
+      isRead: false,
+      createdAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
+    },
+    {
+      id: 2,
+      recipientId: 1,
+      type: 'COURSE_DELETE_REQUESTED',
+      title: 'Yêu cầu xóa khóa học',
+      message: 'TS. Nguyễn Văn A yêu cầu xóa khóa học "Khóa học cũ"',
+      link: '/admin/courses/approval?courseId=2',
+      courseId: 2,
+      actorId: 2,
+      isRead: false,
+      createdAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
+    },
+    {
+      id: 3,
+      recipientId: 1,
+      type: 'LESSON_ADDED',
+      title: 'Khóa học có bài giảng mới',
+      message: 'TS. Nguyễn Văn A đã thêm nội dung mới cho khóa học "Lập trình React"',
+      link: '/courses/lap-trinh-fullstack-web-react-spring-boot',
+      courseId: 1,
+      actorId: 2,
+      isRead: true,
+      createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+    },
+  ];
+};
+
 export const handlers = [
   // 1. Categories
   http.get('*/api/v1/categories', () => {
@@ -875,5 +955,61 @@ export const handlers = [
       status: 'PENDING_DELETE',
       title: 'Khóa học chờ duyệt xóa',
     });
+  }),
+
+  // 20. Notifications Endpoints
+  http.get('*/api/v1/notifications', ({ request }) => {
+    const url = new URL(request.url);
+    const page = parseInt(url.searchParams.get('page') || '0', 10);
+    const size = parseInt(url.searchParams.get('size') || '10', 10);
+    const unreadOnly = url.searchParams.get('unreadOnly') === 'true';
+
+    let filtered = [...mockNotifications];
+    if (unreadOnly) {
+      filtered = filtered.filter((n) => !n.isRead);
+    }
+
+    const start = page * size;
+    const end = start + size;
+    const paginated = filtered.slice(start, end);
+    const unreadCount = mockNotifications.filter((n) => !n.isRead).length;
+
+    return HttpResponse.json({
+      content: paginated,
+      page,
+      size,
+      totalElements: filtered.length,
+      totalPages: Math.ceil(filtered.length / size) || 0,
+      unreadCount,
+    });
+  }),
+
+  http.get('*/api/v1/notifications/unread-count', () => {
+    const unreadCount = mockNotifications.filter((n) => !n.isRead).length;
+    return HttpResponse.json({
+      unreadCount,
+      count: unreadCount,
+    });
+  }),
+
+  http.patch('*/api/v1/notifications/:id/read', ({ params }) => {
+    const id = Number(params.id);
+    const notif = mockNotifications.find((n) => n.id === id);
+    if (notif) {
+      notif.isRead = true;
+      return HttpResponse.json(notif);
+    }
+    return new HttpResponse(null, { status: 404 });
+  }),
+
+  http.patch('*/api/v1/notifications/read-all', () => {
+    let count = 0;
+    mockNotifications.forEach((n) => {
+      if (!n.isRead) {
+        n.isRead = true;
+        count++;
+      }
+    });
+    return HttpResponse.json({ count });
   }),
 ];

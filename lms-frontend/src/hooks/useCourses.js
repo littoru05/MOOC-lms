@@ -70,6 +70,8 @@ export function useSubmitForReview() {
       queryClient.invalidateQueries({ queryKey: ['admin', 'pendingCourses'] });
       queryClient.invalidateQueries({ queryKey: ['admin', 'stats'] });
       queryClient.invalidateQueries({ queryKey: ['courses'] });
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      queryClient.invalidateQueries({ queryKey: ['notifications-unread-count'] });
     },
   });
 }
@@ -87,6 +89,8 @@ export function useRequestDeleteCourse() {
       queryClient.invalidateQueries({ queryKey: ['admin', 'pendingCourses'] });
       queryClient.invalidateQueries({ queryKey: ['admin', 'stats'] });
       queryClient.invalidateQueries({ queryKey: ['courses'] });
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      queryClient.invalidateQueries({ queryKey: ['notifications-unread-count'] });
     },
   });
 }

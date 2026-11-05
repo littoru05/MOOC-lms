@@ -48,7 +48,12 @@ public class AdminService {
 
     @Transactional
     public CourseResponse rejectCourse(Long courseId) {
-        return courseService.rejectCourse(courseId);
+        return courseService.rejectCourse(courseId, null);
+    }
+
+    @Transactional
+    public CourseResponse rejectCourse(Long courseId, String reason) {
+        return courseService.rejectCourse(courseId, reason);
     }
 
     // 2. Quản trị tài khoản người dùng (Khóa / Mở)
