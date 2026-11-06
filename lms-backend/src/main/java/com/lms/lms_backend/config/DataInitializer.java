@@ -283,7 +283,7 @@ public class DataInitializer implements CommandLineRunner {
         Enrollment studentEnrollment = Enrollment.builder()
                 .user(student)
                 .course(course1)
-                .progressPercent(BigDecimal.valueOf(28))
+                .progressPercent(new BigDecimal("28.57"))
                 .isCompleted(false)
                 .build();
         enrollmentRepository.save(studentEnrollment);

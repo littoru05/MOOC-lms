@@ -27,6 +27,15 @@ import lombok.RequiredArgsConstructor;
 @Transactional
 public class ProgressService {
 
+    public static BigDecimal calculateProgressPercent(long completedLessons, long totalLessons) {
+        if (totalLessons <= 0) {
+            return BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
+        }
+        return BigDecimal.valueOf(completedLessons)
+                .multiply(BigDecimal.valueOf(100))
+                .divide(BigDecimal.valueOf(totalLessons), 2, RoundingMode.HALF_UP);
+    }
+
     private final LessonProgressRepository lessonProgressRepository;
     private final LessonRepository lessonRepository;
     private final EnrollmentRepository enrollmentRepository;
@@ -64,11 +73,7 @@ public class ProgressService {
         long totalLessons = lessonRepository.countByCourseId(courseId);
         long completedLessons = lessonProgressRepository.countCompletedLessonsByEnrollmentId(enrollment.getId());
 
-        BigDecimal percentage = BigDecimal.ZERO;
-        if (totalLessons > 0) {
-            percentage = BigDecimal.valueOf((double) completedLessons / totalLessons * 100)
-                    .setScale(2, RoundingMode.HALF_UP);
-        }
+        BigDecimal percentage = calculateProgressPercent(completedLessons, totalLessons);
 
         enrollment.setProgressPercent(percentage);
         if (percentage.compareTo(BigDecimal.valueOf(100.00)) >= 0) {

@@ -1,6 +1,7 @@
 package com.lms.lms_backend.service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,15 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Transactional
 public class EnrollmentService {
+
+    public static BigDecimal calculateProgressPercent(long completedLessons, long totalLessons) {
+        if (totalLessons <= 0) {
+            return BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
+        }
+        return BigDecimal.valueOf(completedLessons)
+                .multiply(BigDecimal.valueOf(100))
+                .divide(BigDecimal.valueOf(totalLessons), 2, RoundingMode.HALF_UP);
+    }
 
     private final EnrollmentRepository enrollmentRepository;
     private final CourseRepository courseRepository;

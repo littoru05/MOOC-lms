@@ -208,4 +208,32 @@ class ProgressServiceTest {
         assertEquals(50L, result.get(0).getLessonId());
         assertTrue(result.get(0).getIsCompleted());
     }
+
+    @Test
+    @DisplayName("Tính tiến độ 2 trên 7 bài học làm tròn 2 chữ số trả về đúng 28.57%")
+    void calculateProgressPercent_TwoOutOfSeven_ReturnsTwentyEightPointFiftySeven() {
+        BigDecimal result = ProgressService.calculateProgressPercent(2, 7);
+        assertEquals(new BigDecimal("28.57"), result);
+    }
+
+    @Test
+    @DisplayName("Hoàn thành 2 trên 7 bài học thì cập nhật tiến độ enrollment thành 28.57%")
+    void completeLesson_TwoOutOfSeven_CalculatesCorrectPercentage() {
+        LessonCompleteRequest req = new LessonCompleteRequest();
+        req.setEnrollmentId(100L);
+        req.setLessonId(50L);
+
+        when(userRepository.findByEmail("student@lms.com")).thenReturn(Optional.of(student));
+        when(enrollmentRepository.findById(100L)).thenReturn(Optional.of(enrollment));
+        when(lessonRepository.findById(50L)).thenReturn(Optional.of(lesson1));
+        when(lessonProgressRepository.findByEnrollmentIdAndLessonId(100L, 50L)).thenReturn(Optional.empty());
+        when(lessonRepository.countByCourseId(10L)).thenReturn(7L);
+        when(lessonProgressRepository.countCompletedLessonsByEnrollmentId(100L)).thenReturn(2L);
+
+        LessonProgressResponse response = progressService.completeLesson("student@lms.com", req);
+
+        assertNotNull(response);
+        assertEquals(new BigDecimal("28.57"), response.getProgressPercent());
+        assertEquals(new BigDecimal("28.57"), enrollment.getProgressPercent());
+    }
 }
