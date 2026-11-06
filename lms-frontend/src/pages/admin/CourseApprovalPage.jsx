@@ -48,9 +48,9 @@ const formatDate = (dateStr) => {
 
 export const CourseApprovalPage = ({ onBack }) => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const targetCourseId = searchParams.get('courseId');
-  const checkedParamRef = useRef(false);
+  const lastHandledTargetRef = useRef(null);
 
   const { showToast, confirm } = useToast();
 
@@ -72,6 +72,13 @@ export const CourseApprovalPage = ({ onBack }) => {
   const [rejectTarget, setRejectTarget] = useState(null);
   const [rejectReason, setRejectReason] = useState('');
 
+  const handleSelectCourse = (course) => {
+    if (!course) return;
+    setSelectedCourse(course);
+    setActiveTab('overview');
+    setSearchParams({ courseId: String(course.id) }, { replace: true });
+  };
+
   useEffect(() => {
     if (loading) return;
 
@@ -80,24 +87,29 @@ export const CourseApprovalPage = ({ onBack }) => {
         const found = courses.find((c) => String(c.id) === String(targetCourseId));
         if (found) {
           setSelectedCourse(found);
+          lastHandledTargetRef.current = targetCourseId;
           return;
-        } else if (!checkedParamRef.current) {
-          checkedParamRef.current = true;
+        } else if (lastHandledTargetRef.current !== targetCourseId) {
+          lastHandledTargetRef.current = targetCourseId;
           showToast('Khóa học này đã được xử lý', 'info');
         }
       }
 
-      if (!selectedCourse || !courses.some((c) => c.id === selectedCourse.id)) {
-        setSelectedCourse(courses[0]);
-      }
+      // Giữ lại khóa đang chọn nếu còn trong danh sách, ngược lại chọn khóa đầu tiên
+      setSelectedCourse((prev) => {
+        if (prev && courses.some((c) => c.id === prev.id)) {
+          return prev;
+        }
+        return courses[0];
+      });
     } else {
-      if (targetCourseId && !checkedParamRef.current) {
-        checkedParamRef.current = true;
+      if (targetCourseId && lastHandledTargetRef.current !== targetCourseId) {
+        lastHandledTargetRef.current = targetCourseId;
         showToast('Khóa học này đã được xử lý', 'info');
       }
       setSelectedCourse(null);
     }
-  }, [courses, loading, targetCourseId, selectedCourse, showToast]);
+  }, [courses, loading, targetCourseId, showToast]);
 
   // Auto-scroll to selected course in sidebar
   useEffect(() => {
@@ -162,8 +174,10 @@ export const CourseApprovalPage = ({ onBack }) => {
               : 'Đã phê duyệt và xuất bản khóa học thành công lên trang chủ!',
             'success'
           );
+          setSearchParams({}, { replace: true });
         } catch (err) {
           showToast(err.response?.data?.message || 'Đã xử lý thành công!', 'success');
+          setSearchParams({}, { replace: true });
         }
       },
     });
@@ -233,10 +247,7 @@ export const CourseApprovalPage = ({ onBack }) => {
                   <div
                     key={course.id}
                     id={`pending-course-${course.id}`}
-                    onClick={() => {
-                      setSelectedCourse(course);
-                      setActiveTab('overview');
-                    }}
+                    onClick={() => handleSelectCourse(course)}
                     className={`p-4 rounded-xl border transition-all cursor-pointer ${
                       isSelected
                         ? 'bg-white border-[#16324F] shadow-sm ring-2 ring-[#16324F]'
@@ -689,9 +700,11 @@ export const CourseApprovalPage = ({ onBack }) => {
                       'info'
                     );
                     setRejectTarget(null);
+                    setSearchParams({}, { replace: true });
                   } catch (err) {
                     showToast(err.response?.data?.message || 'Đã từ chối thành công!', 'info');
                     setRejectTarget(null);
+                    setSearchParams({}, { replace: true });
                   }
                 }}
                 className="px-4 py-2 text-xs font-bold text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors shadow-xs cursor-pointer disabled:opacity-50"

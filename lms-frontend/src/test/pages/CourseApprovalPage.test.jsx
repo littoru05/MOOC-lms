@@ -131,4 +131,22 @@ describe('CourseApprovalPage - Thẩm định chi tiết khóa học chờ duy�
       expect(screen.getByText('Khóa học này đã được xử lý')).toBeInTheDocument();
     });
   });
+
+  it('cho phép chuyển đổi sang khóa học khác trong danh sách ngay cả khi URL có query parameter ?courseId', async () => {
+    renderCourseApprovalPage('/admin/courses/approval?courseId=10');
+
+    await waitFor(() => {
+      expect(screen.getByText(/ID: #10/)).toBeInTheDocument();
+    });
+
+    // Bấm vào khóa học thứ 2 (ID: 11) trong danh sách bên trái
+    const secondCourseItem = screen.getByText('Lập trình Backend với Node.js & Microservices');
+    fireEvent.click(secondCourseItem);
+
+    // Xác nhận đã chuyển sang xem chi tiết khóa học ID 11 thành công
+    await waitFor(() => {
+      expect(screen.getByText(/ID: #11/)).toBeInTheDocument();
+      expect(screen.getByText('Khóa học chuyên sâu về kiến trúc Microservices và RESTful API với Node.js.')).toBeInTheDocument();
+    });
+  });
 });

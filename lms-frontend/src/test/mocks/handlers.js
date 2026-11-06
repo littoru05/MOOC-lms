@@ -901,6 +901,21 @@ export const handlers = [
           },
         ],
       },
+      {
+        id: 11,
+        title: 'Lập trình Backend với Node.js & Microservices',
+        slug: 'lap-trinh-backend-nodejs-microservices',
+        description: 'Khóa học chuyên sâu về kiến trúc Microservices và RESTful API với Node.js.',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800',
+        status: 'PENDING',
+        categoryId: 1,
+        categoryName: 'Lập trình Web & Fullstack',
+        categorySlug: 'lap-trinh-web-fullstack',
+        instructorId: 3,
+        instructorName: 'ThS. Trần Thị B',
+        price: 399000,
+        sections: [],
+      },
     ]);
   }),
 
