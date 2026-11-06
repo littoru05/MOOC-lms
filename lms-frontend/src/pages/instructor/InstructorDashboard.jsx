@@ -16,6 +16,7 @@ import {
   Users,
   Archive,
   RotateCcw,
+  Filter,
 } from 'lucide-react';
 
 import { useToast } from '../../context/ToastContext';
@@ -35,18 +36,40 @@ export const InstructorDashboard = ({ onEditCourse, onCreateCourse, onBuildQuiz 
 
   // Client-side pagination state (5 items per page)
   const [currentPage, setCurrentPage] = useState(1);
+  const [statusFilter, setStatusFilter] = useState('ALL'); // 'ALL' | 'PUBLISHED' | 'PENDING' | 'ARCHIVED' | 'DRAFT'
   const PAGE_SIZE = 5;
 
-  // Sắp xếp mặc định khóa học giảm dần theo ID mới nhất
-  const sortedCourses = useMemo(() => {
-    return [...courses].sort((a, b) => (b.id || 0) - (a.id || 0));
-  }, [courses]);
+  // Đếm số lượng theo trạng thái
+  const publishedCount = courses.filter((c) => c.status === 'PUBLISHED').length;
+  const pendingCount = courses.filter((c) => c.status === 'PENDING' || c.status === 'PENDING_DELETE').length;
+  const archivedCount = courses.filter((c) => c.status === 'ARCHIVED').length;
+  const draftCount = courses.filter((c) => c.status === 'DRAFT' || !c.status).length;
+
+  // Lọc theo trạng thái và sắp xếp giảm dần theo ID mới nhất
+  const filteredCourses = useMemo(() => {
+    let list = [...courses];
+    if (statusFilter === 'PUBLISHED') {
+      list = list.filter((c) => c.status === 'PUBLISHED');
+    } else if (statusFilter === 'PENDING') {
+      list = list.filter((c) => c.status === 'PENDING' || c.status === 'PENDING_DELETE');
+    } else if (statusFilter === 'ARCHIVED') {
+      list = list.filter((c) => c.status === 'ARCHIVED');
+    } else if (statusFilter === 'DRAFT') {
+      list = list.filter((c) => c.status === 'DRAFT' || !c.status);
+    }
+    return list.sort((a, b) => (b.id || 0) - (a.id || 0));
+  }, [courses, statusFilter]);
 
   // Phân trang cục bộ
   const paginatedCourses = useMemo(() => {
     const startIndex = (currentPage - 1) * PAGE_SIZE;
-    return sortedCourses.slice(startIndex, startIndex + PAGE_SIZE);
-  }, [sortedCourses, currentPage]);
+    return filteredCourses.slice(startIndex, startIndex + PAGE_SIZE);
+  }, [filteredCourses, currentPage]);
+
+  const handleStatusCardClick = (targetFilter) => {
+    setStatusFilter((prev) => (prev === targetFilter ? 'ALL' : targetFilter));
+    setCurrentPage(1);
+  };
 
   const handleEdit = (cid) => {
     if (onEditCourse) onEditCourse(cid);
@@ -173,14 +196,8 @@ export const InstructorDashboard = ({ onEditCourse, onCreateCourse, onBuildQuiz 
     }
   };
 
-  const publishedCount = courses.filter(c => c.status === 'PUBLISHED').length;
-  const pendingCount = courses.filter(c => c.status === 'PENDING' || c.status === 'PENDING_DELETE').length;
-  const archivedCount = courses.filter(c => c.status === 'ARCHIVED').length;
-  const draftCount = courses.filter(c => c.status === 'DRAFT' || !c.status).length;
-
   return (
     <div className="min-h-screen bg-[#FAF9FC] py-8 px-8 space-y-8">
-
       {/* Top Clean Header */}
       <div className="bg-white border border-[#E4E4E0] rounded-2xl p-6 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-1">
@@ -205,35 +222,152 @@ export const InstructorDashboard = ({ onEditCourse, onCreateCourse, onBuildQuiz 
         </button>
       </div>
 
-      {/* 5 Stats Cards */}
+      {/* 5 Stats Cards (Clickable Filter) */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
-        <div className="bg-white border border-[#E4E4E0] rounded-2xl p-5 shadow-xs space-y-1">
-          <span className="text-[11px] text-[#5E5E5E] uppercase font-bold tracking-wider">Tổng khóa học</span>
+        {/* Card 1: Tổng khóa học */}
+        <button
+          type="button"
+          onClick={() => handleStatusCardClick('ALL')}
+          className={`border rounded-2xl p-5 shadow-xs space-y-1 transition-all cursor-pointer text-left select-none relative group hover:shadow-md active:scale-98 ${
+            statusFilter === 'ALL'
+              ? 'bg-[#001D37]/5 border-[#001D37] ring-2 ring-[#001D37]'
+              : 'bg-white border-[#E4E4E0] hover:border-[#001D37]/40'
+          }`}
+          title="Bấm để xem tất cả khóa học"
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] text-[#5E5E5E] uppercase font-bold tracking-wider">Tổng khóa học</span>
+            {statusFilter === 'ALL' && (
+              <span className="text-[10px] font-bold text-[#001D37] bg-white px-2 py-0.5 rounded-full border border-[#001D37]/20">
+                Đang xem
+              </span>
+            )}
+          </div>
           <p className="text-2xl font-extrabold text-[#001D37] font-serif">{courses.length}</p>
-        </div>
-        <div className="bg-white border border-[#E4E4E0] rounded-2xl p-5 shadow-xs space-y-1">
-          <span className="text-[11px] text-emerald-600 uppercase font-bold tracking-wider">Đã xuất bản</span>
+        </button>
+
+        {/* Card 2: Đã xuất bản */}
+        <button
+          type="button"
+          onClick={() => handleStatusCardClick('PUBLISHED')}
+          className={`border rounded-2xl p-5 shadow-xs space-y-1 transition-all cursor-pointer text-left select-none relative group hover:shadow-md active:scale-98 ${
+            statusFilter === 'PUBLISHED'
+              ? 'bg-emerald-50/70 border-emerald-500 ring-2 ring-emerald-500'
+              : 'bg-white border-[#E4E4E0] hover:border-emerald-500/40'
+          }`}
+          title="Bấm để lọc các khóa học đã xuất bản"
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] text-emerald-600 uppercase font-bold tracking-wider">Đã xuất bản</span>
+            {statusFilter === 'PUBLISHED' && (
+              <span className="text-[10px] font-bold text-emerald-700 bg-white px-2 py-0.5 rounded-full border border-emerald-200">
+                Đang xem
+              </span>
+            )}
+          </div>
           <p className="text-2xl font-extrabold text-emerald-600 font-serif">{publishedCount}</p>
-        </div>
-        <div className="bg-white border border-[#E4E4E0] rounded-2xl p-5 shadow-xs space-y-1">
-          <span className="text-[11px] text-amber-600 uppercase font-bold tracking-wider">Chờ xét duyệt</span>
+        </button>
+
+        {/* Card 3: Chờ xét duyệt */}
+        <button
+          type="button"
+          onClick={() => handleStatusCardClick('PENDING')}
+          className={`border rounded-2xl p-5 shadow-xs space-y-1 transition-all cursor-pointer text-left select-none relative group hover:shadow-md active:scale-98 ${
+            statusFilter === 'PENDING'
+              ? 'bg-amber-50/70 border-amber-500 ring-2 ring-amber-500'
+              : 'bg-white border-[#E4E4E0] hover:border-amber-500/40'
+          }`}
+          title="Bấm để lọc các khóa học chờ xét duyệt"
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] text-amber-600 uppercase font-bold tracking-wider">Chờ xét duyệt</span>
+            {statusFilter === 'PENDING' && (
+              <span className="text-[10px] font-bold text-amber-700 bg-white px-2 py-0.5 rounded-full border border-amber-200">
+                Đang xem
+              </span>
+            )}
+          </div>
           <p className="text-2xl font-extrabold text-amber-600 font-serif">{pendingCount}</p>
-        </div>
-        <div className="bg-white border border-[#E4E4E0] rounded-2xl p-5 shadow-xs space-y-1">
-          <span className="text-[11px] text-slate-600 uppercase font-bold tracking-wider">Đã lưu trữ</span>
+        </button>
+
+        {/* Card 4: Đã lưu trữ */}
+        <button
+          type="button"
+          onClick={() => handleStatusCardClick('ARCHIVED')}
+          className={`border rounded-2xl p-5 shadow-xs space-y-1 transition-all cursor-pointer text-left select-none relative group hover:shadow-md active:scale-98 ${
+            statusFilter === 'ARCHIVED'
+              ? 'bg-slate-100 border-slate-500 ring-2 ring-slate-500'
+              : 'bg-white border-[#E4E4E0] hover:border-slate-400'
+          }`}
+          title="Bấm để lọc các khóa học đã lưu trữ"
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] text-slate-600 uppercase font-bold tracking-wider">Đã lưu trữ</span>
+            {statusFilter === 'ARCHIVED' && (
+              <span className="text-[10px] font-bold text-slate-700 bg-white px-2 py-0.5 rounded-full border border-slate-300">
+                Đang xem
+              </span>
+            )}
+          </div>
           <p className="text-2xl font-extrabold text-slate-700 font-serif">{archivedCount}</p>
-        </div>
-        <div className="bg-white border border-[#E4E4E0] rounded-2xl p-5 shadow-xs space-y-1">
-          <span className="text-[11px] text-[#5E5E5E] uppercase font-bold tracking-wider">Bản nháp</span>
+        </button>
+
+        {/* Card 5: Bản nháp */}
+        <button
+          type="button"
+          onClick={() => handleStatusCardClick('DRAFT')}
+          className={`border rounded-2xl p-5 shadow-xs space-y-1 transition-all cursor-pointer text-left select-none relative group hover:shadow-md active:scale-98 ${
+            statusFilter === 'DRAFT'
+              ? 'bg-gray-100 border-gray-600 ring-2 ring-gray-600'
+              : 'bg-white border-[#E4E4E0] hover:border-gray-400'
+          }`}
+          title="Bấm để lọc các khóa học bản nháp"
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] text-[#5E5E5E] uppercase font-bold tracking-wider">Bản nháp</span>
+            {statusFilter === 'DRAFT' && (
+              <span className="text-[10px] font-bold text-gray-700 bg-white px-2 py-0.5 rounded-full border border-gray-300">
+                Đang xem
+              </span>
+            )}
+          </div>
           <p className="text-2xl font-extrabold text-[#5E5E5E] font-serif">{draftCount}</p>
-        </div>
+        </button>
       </div>
+
       {/* Courses Table / List */}
       <div className="bg-white border border-[#E4E4E0] rounded-2xl overflow-hidden shadow-sm">
-        <div className="px-6 py-4 border-b border-[#E4E4E0] flex items-center justify-between bg-[#FAF9FC]">
-          <h3 className="font-serif font-extrabold text-[#001D37] text-base">
-            Danh sách khóa học của bạn ({courses.length})
-          </h3>
+        <div className="px-6 py-4 border-b border-[#E4E4E0] flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#FAF9FC]">
+          <div className="flex items-center gap-3 flex-wrap">
+            <h3 className="font-serif font-extrabold text-[#001D37] text-base">
+              Danh sách khóa học của bạn ({filteredCourses.length})
+            </h3>
+            {statusFilter !== 'ALL' && (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-white border border-[#E4E4E0] text-[#16324F] shadow-2xs">
+                <span>
+                  Đang lọc:{' '}
+                  {statusFilter === 'PUBLISHED'
+                    ? 'Đã xuất bản'
+                    : statusFilter === 'PENDING'
+                    ? 'Chờ xét duyệt'
+                    : statusFilter === 'ARCHIVED'
+                    ? 'Đã lưu trữ'
+                    : 'Bản nháp'}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStatusFilter('ALL');
+                    setCurrentPage(1);
+                  }}
+                  className="text-[#5E5E5E] hover:text-red-600 cursor-pointer font-bold ml-1 text-sm leading-none"
+                  title="Bỏ lọc, xem tất cả"
+                >
+                  ×
+                </button>
+              </span>
+            )}
+          </div>
           <span className="text-xs text-[#5E5E5E]">Quản lý nội dung và gửi duyệt</span>
         </div>
 
@@ -250,11 +384,29 @@ export const InstructorDashboard = ({ onEditCourse, onCreateCourse, onBuildQuiz 
               <Plus className="w-4 h-4" /> Bắt đầu tạo khóa học đầu tiên
             </button>
           </div>
+        ) : filteredCourses.length === 0 ? (
+          <div className="text-center py-16 space-y-3">
+            <Filter className="w-10 h-10 text-[#5E5E5E] mx-auto mb-2 opacity-50" />
+            <p className="text-sm font-bold text-[#1A1C1E]">
+              Không có khóa học nào thuộc trạng thái này
+            </p>
+            <p className="text-xs text-[#5E5E5E]">
+              Thử chọn ô chỉ số khác hoặc quay lại xem tất cả khóa học của bạn.
+            </p>
+            <button
+              onClick={() => {
+                setStatusFilter('ALL');
+                setCurrentPage(1);
+              }}
+              className="mt-3 px-4 py-2 bg-[#16324F] hover:bg-[#001D37] text-white text-xs font-bold rounded-xl inline-flex items-center gap-1.5 shadow-xs cursor-pointer"
+            >
+              <RotateCcw className="w-3.5 h-3.5" /> Xem tất cả ({courses.length}) khóa học
+            </button>
+          </div>
         ) : (
           <div className="divide-y divide-[#E4E4E0] transition-opacity duration-200">
             {paginatedCourses.map((c) => (
               <div key={c.id} className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:bg-[#FAF9FC] transition-colors">
-
                 {/* Left info */}
                 <div className="flex items-start gap-4">
                   <img
@@ -299,19 +451,21 @@ export const InstructorDashboard = ({ onEditCourse, onCreateCourse, onBuildQuiz 
                     <HelpCircle className="w-3.5 h-3.5 text-amber-600" /> Soạn đề Quiz
                   </button>
 
-                  {(c.status === 'DRAFT' || c.status === 'REJECTED') && (
+                  {/* Nút gửi duyệt: hiển thị khi DRAFT hoặc REJECTED */}
+                  {(c.status === 'DRAFT' || c.status === 'REJECTED' || !c.status) && (
                     <button
                       onClick={() => handleSubmitReview(c.id)}
-                      className="px-4 py-2 bg-[#16324F] hover:bg-[#001D37] text-white text-xs font-bold rounded-xl flex items-center gap-1.5 transition-all shadow-xs cursor-pointer active:scale-95"
-                      title="Gửi lên Admin để phê duyệt xuất bản"
+                      className="px-3.5 py-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 transition-all shadow-2xs cursor-pointer active:scale-95"
+                      title="Gửi khóa học để Admin phê duyệt xuất bản"
                     >
-                      <Send className="w-3.5 h-3.5" /> {c.status === 'REJECTED' ? 'Gửi duyệt lại' : 'Gửi duyệt'}
+                      <Send className="w-3.5 h-3.5" /> Gửi duyệt
                     </button>
                   )}
 
+                  {/* Nút Xóa / Lưu trữ / Khôi phục */}
                   {c.status === 'ARCHIVED' ? (
                     <div className="flex items-center gap-2">
-                      <span className="px-3 py-2 bg-slate-100 border border-slate-300 text-slate-600 text-xs font-semibold rounded-xl inline-flex items-center gap-1.5" title="Khóa học đã ngừng kinh doanh và lưu trữ">
+                      <span className="px-3 py-2 bg-slate-100 border border-slate-300 text-slate-700 text-xs font-semibold rounded-xl inline-flex items-center gap-1.5">
                         <Archive className="w-3.5 h-3.5 text-slate-500" /> Đã lưu trữ
                       </span>
                       <button
@@ -330,23 +484,26 @@ export const InstructorDashboard = ({ onEditCourse, onCreateCourse, onBuildQuiz 
                     <button
                       onClick={() => handleDeleteCourse(c)}
                       className="px-3 py-2 bg-white border border-[#E4E4E0] hover:border-red-400 hover:bg-red-50 text-[#BA1A1A] text-xs font-bold rounded-xl flex items-center gap-1.5 transition-all shadow-2xs cursor-pointer active:scale-95"
-                      title={c.enrolledCount > 0 ? "Lưu trữ khóa học (Ngừng kinh doanh)" : "Xóa vĩnh viễn khóa học"}
+                      title={c.enrolledCount > 0 ? 'Lưu trữ khóa học (Ngừng kinh doanh)' : 'Xóa vĩnh viễn khóa học'}
                     >
                       <Trash2 className="w-3.5 h-3.5" /> Xóa
                     </button>
                   )}
                 </div>
-
               </div>
             ))}
 
             {/* Thanh phân trang client-side */}
-            <Pagination
-              currentPage={currentPage}
-              totalItems={sortedCourses.length}
-              pageSize={PAGE_SIZE}
-              onPageChange={(p) => setCurrentPage(p)}
-            />
+            {filteredCourses.length > PAGE_SIZE && (
+              <div className="p-4 border-t border-[#E4E4E0] flex justify-center">
+                <Pagination
+                  currentPage={currentPage}
+                  totalItems={filteredCourses.length}
+                  pageSize={PAGE_SIZE}
+                  onPageChange={(p) => setCurrentPage(p)}
+                />
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -380,7 +537,8 @@ export const InstructorDashboard = ({ onEditCourse, onCreateCourse, onBuildQuiz 
           </p>
         </div>
       </div>
-
     </div>
   );
 };
+
+export default InstructorDashboard;

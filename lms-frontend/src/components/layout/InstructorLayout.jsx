@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate, useLocation, Link, Outlet } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { getImageUrl } from '../../utils/imageUrl';
@@ -14,18 +14,15 @@ import {
   ChevronRight, 
   Sparkles,
   LayoutDashboard,
-  GraduationCap,
-  ShieldCheck,
   User,
   TrendingUp,
-  Bell
+  History
 } from 'lucide-react';
 
 export const InstructorLayout = ({ currentTab: currentTabProp, onNavigate, onCreateCourse, children }) => {
-  const { user, logout, quickSwitchRole } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [showRoleMenu, setShowRoleMenu] = useState(false);
 
   const pathname = location.pathname;
 
@@ -37,6 +34,7 @@ export const InstructorLayout = ({ currentTab: currentTabProp, onNavigate, onCre
   const isRevenue = pathname.includes('/revenue');
   const isProfile = pathname.includes('/profile');
   const isNotifications = pathname.includes('/instructor/notifications');
+  const isHistory = pathname.includes('/instructor/history');
 
   return (
     <div className="min-h-screen bg-[#FAF9FC] text-[#1A1C1E] flex flex-col font-sans">
@@ -136,15 +134,15 @@ export const InstructorLayout = ({ currentTab: currentTabProp, onNavigate, onCre
           </Link>
 
           <Link
-            to="/instructor/notifications"
+            to="/instructor/history"
             className={`flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-xs font-medium transition-colors ${
-              isNotifications
+              isHistory
                 ? 'bg-white/15 text-white font-semibold shadow-xs'
                 : 'text-white/70 hover:bg-white/10 hover:text-white'
             }`}
           >
-            <Bell className={`w-4 h-4 ${isNotifications ? 'text-amber-400' : 'text-white/60'}`} />
-            <span>Thông báo</span>
+            <History className={`w-4 h-4 ${isHistory ? 'text-amber-400' : 'text-white/60'}`} />
+            <span>Lịch sử khóa học</span>
           </Link>
 
           <Link
@@ -160,40 +158,8 @@ export const InstructorLayout = ({ currentTab: currentTabProp, onNavigate, onCre
           </Link>
         </nav>
 
-        {/* Role Quick Switch Menu (Floating Dropdown) */}
-        {showRoleMenu && (
-          <div className="mx-3 mb-2 p-2 bg-[#002B4E] border border-white/10 rounded-lg shadow-xl text-xs space-y-1 z-50">
-            <p className="text-[10px] uppercase font-bold text-amber-300 px-2 py-1">Chuyển vai trò thử nghiệm</p>
-            <button
-              onClick={() => { quickSwitchRole('STUDENT'); setShowRoleMenu(false); navigate('/'); }}
-              className="w-full text-left px-2.5 py-1.5 rounded hover:bg-white/10 text-white/80 flex items-center gap-2 cursor-pointer"
-            >
-              <GraduationCap className="w-3.5 h-3.5 text-blue-300" />
-              <span>Học viên (Student)</span>
-            </button>
-            <button
-              onClick={() => { quickSwitchRole('ADMIN'); setShowRoleMenu(false); navigate('/admin/dashboard'); }}
-              className="w-full text-left px-2.5 py-1.5 rounded hover:bg-white/10 text-white/80 flex items-center gap-2 cursor-pointer"
-            >
-              <ShieldCheck className="w-3.5 h-3.5 text-blue-400" />
-              <span>Quản trị viên (Admin)</span>
-            </button>
-          </div>
-        )}
-
-        {/* Bottom Role Switch Trigger & Logout */}
-        <div className="p-3 border-t border-white/10 space-y-1">
-          <button
-            onClick={() => setShowRoleMenu(!showRoleMenu)}
-            className="w-full flex items-center justify-between px-3.5 py-2 rounded-lg text-xs font-medium text-white/70 hover:bg-white/10 hover:text-white transition-colors cursor-pointer"
-          >
-            <div className="flex items-center gap-2">
-              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-              <span>Chuyển vai trò</span>
-            </div>
-            <ChevronRight className={`w-3.5 h-3.5 transition-transform ${showRoleMenu ? 'rotate-90' : ''}`} />
-          </button>
-
+        {/* Bottom Actions: Logout */}
+        <div className="p-3 border-t border-white/10">
           <button
             onClick={logout}
             className="w-full flex items-center gap-2.5 px-3.5 py-2 rounded-lg text-xs font-medium text-red-300 hover:bg-red-500/20 hover:text-red-200 transition-colors cursor-pointer"

@@ -38,13 +38,16 @@ import { QuizBuilderPage } from '../pages/instructor/QuizBuilderPage';
 import { StudentProgressPage } from '../pages/instructor/StudentProgressPage';
 import { InstructorProfilePage } from '../pages/instructor/InstructorProfilePage';
 import { InstructorRevenuePage } from '../pages/instructor/InstructorRevenuePage';
+import { InstructorHistoryPage } from '../pages/instructor/InstructorHistoryPage';
 
 // Admin Pages
 import { AdminOverviewPage } from '../pages/admin/AdminOverviewPage';
 import { CourseApprovalPage } from '../pages/admin/CourseApprovalPage';
 import { UserManagementPage } from '../pages/admin/UserManagementPage';
+import { AdminUserDetailPage } from '../pages/admin/AdminUserDetailPage';
 import { AdminProfilePage } from '../pages/admin/AdminProfilePage';
 import { AdminRevenuePage } from '../pages/admin/AdminRevenuePage';
+import { AdminCertificatesPage } from '../pages/admin/AdminCertificatesPage';
 
 // Common Pages
 import { NotificationsPage } from '../pages/common/NotificationsPage';
@@ -76,6 +79,38 @@ export const AppRoutes = () => {
           element={
             <ProtectedRoute>
               <CoursePlayerPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/learn/:courseId"
+          element={
+            <ProtectedRoute>
+              <CoursePlayerPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/quiz/:quizId"
+          element={
+            <ProtectedRoute>
+              <QuizIntroPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/quiz/:quizId/take"
+          element={
+            <ProtectedRoute>
+              <QuizTakingPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/quiz/:quizId/result"
+          element={
+            <ProtectedRoute>
+              <QuizResultPage />
             </ProtectedRoute>
           }
         />
@@ -171,6 +206,7 @@ export const AppRoutes = () => {
         <Route path="/instructor/students" element={<StudentProgressPage />} />
         <Route path="/instructor/revenue" element={<InstructorRevenuePage />} />
         <Route path="/instructor/notifications" element={<NotificationsPage portal="instructor" />} />
+        <Route path="/instructor/history" element={<InstructorHistoryPage />} />
         <Route path="/instructor/profile" element={<InstructorProfilePage />} />
       </Route>
 
@@ -188,7 +224,9 @@ export const AppRoutes = () => {
         <Route path="/admin/dashboard" element={<AdminOverviewPage />} />
         <Route path="/admin/courses/approval" element={<CourseApprovalPage />} />
         <Route path="/admin/users" element={<UserManagementPage />} />
+        <Route path="/admin/users/:id" element={<AdminUserDetailPage />} />
         <Route path="/admin/revenue" element={<AdminRevenuePage />} />
+        <Route path="/admin/certificates" element={<AdminCertificatesPage />} />
         <Route path="/admin/notifications" element={<NotificationsPage portal="admin" />} />
         <Route path="/admin/profile" element={<AdminProfilePage />} />
       </Route>

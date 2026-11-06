@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { usePendingCourses, useApproveCourse, useRejectCourse } from '../../hooks/useAdmin';
 import { useCourseSections, useCourseQuizzes } from '../../hooks/useCourses';
@@ -24,7 +25,8 @@ import {
   HelpCircle,
   ExternalLink,
   Calendar,
-  GraduationCap
+  GraduationCap,
+  X
 } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { getImageUrl } from '../../utils/imageUrl';
@@ -65,6 +67,10 @@ export const CourseApprovalPage = ({ onBack }) => {
   const courses = apiPendingCourses;
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'curriculum' | 'quiz'
+
+  // Modal từ chối duyệt (in-page modal thay thế browser alert/prompt)
+  const [rejectTarget, setRejectTarget] = useState(null);
+  const [rejectReason, setRejectReason] = useState('');
 
   useEffect(() => {
     if (loading) return;
@@ -164,32 +170,8 @@ export const CourseApprovalPage = ({ onBack }) => {
   };
 
   const handleReject = (course) => {
-    const isDeleteRequest = course.status === 'PENDING_DELETE';
-    const reasonPrompt = (!isDeleteRequest && typeof window !== 'undefined' && window.prompt)
-      ? window.prompt('Nhập lý do từ chối (tùy chọn):', '')
-      : null;
-
-    confirm({
-      title: isDeleteRequest ? 'Từ chối yêu cầu xóa khóa học' : 'Từ chối khóa học',
-      message: isDeleteRequest
-        ? `Bạn có chắc muốn từ chối yêu cầu xóa và tiếp tục giữ lại khóa học "${course.title}" trên hệ thống ở trạng thái hoạt động?`
-        : `Bạn có chắc muốn từ chối yêu cầu xuất bản của khóa học này để giảng viên bổ sung thêm nội dung?${reasonPrompt ? ` (Lý do: ${reasonPrompt})` : ''}`,
-      confirmText: isDeleteRequest ? 'Từ chối xóa & Giữ lại' : 'Xác nhận từ chối',
-      isDanger: !isDeleteRequest,
-      onConfirm: async () => {
-        try {
-          await rejectMutation.mutateAsync({ id: course.id, reason: reasonPrompt || undefined });
-          showToast(
-            isDeleteRequest
-              ? 'Đã từ chối yêu cầu xóa và giữ lại khóa học trên hệ thống.'
-              : 'Đã từ chối khóa học và gửi thông báo phản hồi cho giảng viên.',
-            'info'
-          );
-        } catch (err) {
-          showToast(err.response?.data?.message || 'Đã từ chối thành công!', 'info');
-        }
-      },
-    });
+    setRejectTarget(course);
+    setRejectReason('');
   };
 
   return (
@@ -626,6 +608,100 @@ export const CourseApprovalPage = ({ onBack }) => {
           )}
 
         </div>
+      )}
+
+      {/* Modal từ chối duyệt / từ chối xóa khóa học (In-page React modal thay thế alert/prompt) */}
+      {rejectTarget && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-fade-in">
+          <div className="bg-white border border-[#E4E4E0] rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center shrink-0">
+                  <XCircle className="w-5 h-5 text-red-600" />
+                </div>
+                <div>
+                  <h3 className="font-serif font-bold text-base text-[#001D37]">
+                    {rejectTarget.status === 'PENDING_DELETE'
+                      ? 'Từ chối yêu cầu xóa khóa học'
+                      : 'Từ chối xuất bản khóa học'}
+                  </h3>
+                  <p className="text-[11px] text-[#5E5E5E]">
+                    {rejectTarget.status === 'PENDING_DELETE'
+                      ? 'Khóa học sẽ tiếp tục được giữ lại trên hệ thống'
+                      : 'Giảng viên sẽ nhận được lý do phản hồi để chỉnh sửa'}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setRejectTarget(null)}
+                className="text-[#5E5E5E] hover:text-[#1A1C1E] p-1 rounded-md cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="bg-[#FAF9FC] p-3 rounded-xl border border-[#E4E4E0] text-xs space-y-1">
+              <p className="font-bold text-[#001D37] line-clamp-1">{rejectTarget.title}</p>
+              <p className="text-[11px] text-[#5E5E5E]">
+                Giảng viên:{' '}
+                <span className="font-medium text-[#1A1C1E]">
+                  {rejectTarget.instructor?.fullName || 'N/A'}
+                </span>
+              </p>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="block text-xs font-bold text-[#001D37]">
+                Lý do từ chối <span className="text-[#5E5E5E] font-normal">(tùy chọn, thông báo đến giảng viên):</span>
+              </label>
+              <textarea
+                value={rejectReason}
+                onChange={(e) => setRejectReason(e.target.value)}
+                placeholder="Nhập lý do từ chối (ví dụ: Cần cập nhật thêm tài liệu thực hành, âm thanh video bài 2 chưa rõ...)"
+                rows={3}
+                className="w-full px-3 py-2 text-xs border border-[#E4E4E0] rounded-xl focus:outline-none focus:border-red-500 bg-white resize-none"
+              />
+            </div>
+
+            <div className="flex justify-end gap-2.5 pt-2 border-t border-[#E4E4E0]">
+              <button
+                type="button"
+                onClick={() => setRejectTarget(null)}
+                className="px-4 py-2 text-xs font-semibold text-[#5E5E5E] hover:bg-[#FAF9FC] rounded-lg border border-[#E4E4E0] transition-colors cursor-pointer"
+              >
+                Hủy bỏ
+              </button>
+              <button
+                type="button"
+                disabled={actionLoading}
+                onClick={async () => {
+                  const isDeleteReq = rejectTarget.status === 'PENDING_DELETE';
+                  try {
+                    await rejectMutation.mutateAsync({
+                      id: rejectTarget.id,
+                      reason: rejectReason.trim() || undefined,
+                    });
+                    showToast(
+                      isDeleteReq
+                        ? 'Đã từ chối yêu cầu xóa và giữ lại khóa học trên hệ thống.'
+                        : 'Đã từ chối khóa học và gửi thông báo phản hồi cho giảng viên.',
+                      'info'
+                    );
+                    setRejectTarget(null);
+                  } catch (err) {
+                    showToast(err.response?.data?.message || 'Đã từ chối thành công!', 'info');
+                    setRejectTarget(null);
+                  }
+                }}
+                className="px-4 py-2 text-xs font-bold text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors shadow-xs cursor-pointer disabled:opacity-50"
+              >
+                {actionLoading ? 'Đang xử lý...' : 'Xác nhận từ chối'}
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
       )}
 
     </div>

@@ -9,7 +9,8 @@ import {
   Trash2, 
   BookOpen, 
   AlertCircle,
-  ChevronRight
+  ChevronRight,
+  Award
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { 
@@ -27,6 +28,7 @@ export const NotificationBell = () => {
   const { user } = useAuth();
 
   const isAdmin = user?.role === 'ROLE_ADMIN' || user?.role === 'ADMIN';
+  const isStudent = user?.role === 'ROLE_STUDENT' || user?.role === 'STUDENT';
   const allNotificationsPath = isAdmin ? '/admin/notifications' : '/instructor/notifications';
 
   const { data: unreadCount = 0 } = useUnreadNotificationCount(!!user);
@@ -53,15 +55,35 @@ export const NotificationBell = () => {
     return notif?.isRead === true || notif?.read === true;
   };
 
+  // Học viên chỉ xem các thông báo liên quan đến chứng chỉ bị thu hồi
+  const displayedNotifications = isStudent
+    ? recentNotifications.filter((n) => n.type === 'CERTIFICATE_REVOKED')
+    : recentNotifications;
+
+  const studentUnreadCount = recentNotifications.filter(
+    (n) => n.type === 'CERTIFICATE_REVOKED' && !isNotificationRead(n)
+  ).length;
+
+  const effectiveUnreadCount = isStudent ? studentUnreadCount : unreadCount;
+
   const handleNotificationClick = async (notif) => {
     if (!isNotificationRead(notif)) {
       markAsReadMutation.mutate(notif.id);
     }
     setIsOpen(false);
 
+    if (notif.type === 'CERTIFICATE_REVOKED') {
+      navigate('/my-certificates');
+      return;
+    }
+
     if (isAdmin) {
       if (notif.type === 'COURSE_SUBMITTED' || notif.type === 'COURSE_DELETE_REQUESTED') {
         navigate(`/admin/courses/approval?courseId=${notif.courseId}`);
+        return;
+      }
+      if (notif.type === 'CERTIFICATE_ISSUED') {
+        navigate(notif.link || '/admin/certificates');
         return;
       }
       if (notif.type === 'LESSON_ADDED') {
@@ -102,12 +124,16 @@ export const NotificationBell = () => {
       case 'COURSE_REJECTED':
       case 'COURSE_DELETE_REJECTED':
         return <XCircle className="w-4 h-4 text-red-600" />;
+      case 'CERTIFICATE_ISSUED':
+        return <Award className="w-4 h-4 text-purple-600" />;
+      case 'CERTIFICATE_REVOKED':
+        return <Award className="w-4 h-4 text-red-600" />;
       default:
         return <AlertCircle className="w-4 h-4 text-blue-600" />;
     }
   };
 
-  const displayCount = unreadCount > 99 ? '99+' : unreadCount;
+  const displayCount = effectiveUnreadCount > 99 ? '99+' : effectiveUnreadCount;
 
   return (
     <div className="relative inline-block" ref={dropdownRef}>
@@ -120,7 +146,7 @@ export const NotificationBell = () => {
       >
         <div className="relative flex items-center justify-center">
           <Bell className="w-5 h-5 text-current" />
-          {unreadCount > 0 && (
+          {effectiveUnreadCount > 0 && (
             <span 
               data-testid="notification-badge"
               className="absolute -top-1.5 -right-2 flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-bold text-white bg-red-600 rounded-full border-2 border-white leading-none shadow-xs pointer-events-none"
@@ -141,13 +167,13 @@ export const NotificationBell = () => {
           <div className="px-4 py-3 bg-[#FAF9FC] border-b border-[#E4E4E0] flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="font-serif font-bold text-sm text-[#001D37]">Thông báo</span>
-              {unreadCount > 0 && (
+              {effectiveUnreadCount > 0 && (
                 <span className="px-2 py-0.5 text-[10px] font-semibold bg-red-100 text-red-700 rounded-full">
-                  {unreadCount} mới
+                  {effectiveUnreadCount} mới
                 </span>
               )}
             </div>
-            {unreadCount > 0 && (
+            {effectiveUnreadCount > 0 && (
               <button
                 type="button"
                 onClick={handleMarkAllRead}
@@ -166,14 +192,18 @@ export const NotificationBell = () => {
               <div className="py-8 text-center text-xs text-[#5E5E5E]">
                 Đang tải thông báo...
               </div>
-            ) : recentNotifications.length === 0 ? (
+            ) : displayedNotifications.length === 0 ? (
               <div className="py-8 text-center text-xs text-[#5E5E5E] space-y-1">
                 <Bell className="w-8 h-8 text-gray-300 mx-auto mb-2" />
                 <p className="font-medium text-[#1A1C1E]">Chưa có thông báo nào</p>
-                <p className="text-[11px] text-gray-400">Các cập nhật quan trọng sẽ xuất hiện tại đây.</p>
+                <p className="text-[11px] text-gray-400">
+                  {isStudent
+                    ? 'Thông báo thu hồi chứng chỉ sẽ xuất hiện tại đây.'
+                    : 'Các cập nhật quan trọng sẽ xuất hiện tại đây.'}
+                </p>
               </div>
             ) : (
-              recentNotifications.map((notif) => {
+              displayedNotifications.map((notif) => {
                 const isUnread = !isNotificationRead(notif);
                 return (
                   <div
@@ -208,20 +238,22 @@ export const NotificationBell = () => {
             )}
           </div>
 
-          {/* Footer */}
-          <div className="p-2.5 bg-[#FAF9FC] border-t border-[#E4E4E0] text-center">
-            <button
-              type="button"
-              onClick={() => {
-                setIsOpen(false);
-                navigate(allNotificationsPath);
-              }}
-              className="w-full py-1 text-xs font-semibold text-[#16324F] hover:text-blue-700 flex items-center justify-center gap-1 cursor-pointer"
-            >
-              <span>Xem tất cả</span>
-              <ChevronRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
+          {/* Footer (Ẩn nút "Xem tất cả" đối với học viên) */}
+          {!isStudent && (
+            <div className="p-2.5 bg-[#FAF9FC] border-t border-[#E4E4E0] text-center">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsOpen(false);
+                  navigate(allNotificationsPath);
+                }}
+                className="w-full py-1 text-xs font-semibold text-[#16324F] hover:text-blue-700 flex items-center justify-center gap-1 cursor-pointer"
+              >
+                <span>Xem tất cả</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

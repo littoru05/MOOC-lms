@@ -16,7 +16,8 @@ import {
   Award, 
   Star, 
   TrendingUp,
-  RefreshCw
+  RefreshCw,
+  ChevronRight
 } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { getImageUrl } from '../../utils/imageUrl';
@@ -240,7 +241,12 @@ export const UserManagementPage = ({ onBack }) => {
                 </tr>
               ) : (
                 paginatedUsers.map((u) => (
-                  <tr key={u.id} className="hover:bg-[#FAF9FC] transition-colors">
+                  <tr 
+                    key={u.id} 
+                    onClick={() => navigate(`/admin/users/${u.id}`)}
+                    className="hover:bg-[#FAF9FC] transition-colors cursor-pointer group"
+                    title="Bấm để xem chi tiết tài khoản"
+                  >
                     {/* Name & Email */}
                     <td className="py-3.5 px-6 flex items-center gap-3">
                       <img
@@ -249,7 +255,7 @@ export const UserManagementPage = ({ onBack }) => {
                         className="w-8 h-8 rounded-full object-cover border border-[#E4E4E0] shrink-0"
                       />
                       <div>
-                        <p className="font-semibold text-[#1A1C1E]">
+                        <p className="font-semibold text-[#1A1C1E] group-hover:text-blue-600 transition-colors">
                           #{u.id} • {u.fullName}
                         </p>
                         <p className="text-[11px] text-[#5E5E5E]">{u.email}</p>
@@ -280,28 +286,40 @@ export const UserManagementPage = ({ onBack }) => {
                     </td>
 
                     {/* Actions */}
-                    <td className="py-3.5 px-6 text-right">
-                      {u.role !== 'ROLE_ADMIN' && u.role !== 'ADMIN' && (
+                    <td className="py-3.5 px-6 text-right" onClick={(e) => e.stopPropagation()}>
+                      <div className="inline-flex items-center gap-2">
+                        {u.role !== 'ROLE_ADMIN' && u.role !== 'ADMIN' && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleToggleActive(u.id, u.isActive !== false);
+                            }}
+                            disabled={togglingId === u.id}
+                            className={`px-2.5 py-1 text-[11px] font-semibold rounded-md transition-colors inline-flex items-center gap-1 cursor-pointer ${
+                              u.isActive !== false
+                                ? 'border border-[#BA1A1A]/30 text-[#BA1A1A] hover:bg-[#BA1A1A]/10'
+                                : 'border border-[#22C55E]/30 text-[#22C55E] hover:bg-[#22C55E]/10'
+                            }`}
+                          >
+                            {u.isActive !== false ? (
+                              <>
+                                <Lock className="w-3 h-3" /> Khóa tài khoản
+                              </>
+                            ) : (
+                              <>
+                                <Unlock className="w-3 h-3" /> Mở khóa
+                              </>
+                            )}
+                          </button>
+                        )}
                         <button
-                          onClick={() => handleToggleActive(u.id, u.isActive !== false)}
-                          disabled={togglingId === u.id}
-                          className={`px-2.5 py-1 text-[11px] font-semibold rounded-md transition-colors inline-flex items-center gap-1 cursor-pointer ${
-                            u.isActive !== false
-                              ? 'border border-[#BA1A1A]/30 text-[#BA1A1A] hover:bg-[#BA1A1A]/10'
-                              : 'border border-[#22C55E]/30 text-[#22C55E] hover:bg-[#22C55E]/10'
-                          }`}
+                          onClick={() => navigate(`/admin/users/${u.id}`)}
+                          className="p-1 text-gray-400 hover:text-blue-600 rounded-md transition-colors"
+                          title="Xem chi tiết"
                         >
-                          {u.isActive !== false ? (
-                            <>
-                              <Lock className="w-3 h-3" /> Khóa tài khoản
-                            </>
-                          ) : (
-                            <>
-                              <Unlock className="w-3 h-3" /> Mở khóa
-                            </>
-                          )}
+                          <ChevronRight className="w-4 h-4" />
                         </button>
-                      )}
+                      </div>
                     </td>
 
                   </tr>

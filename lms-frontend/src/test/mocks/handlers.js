@@ -1,4 +1,4 @@
-import { http, HttpResponse } from 'msw';
+﻿import { http, HttpResponse } from 'msw';
 
 export const mockCourses = [
   {
@@ -174,10 +174,261 @@ export const resetMockNotifications = () => {
   ];
 };
 
+
+export let mockInstructorHistory = [
+  {
+    id: 1,
+    actorId: 2,
+    actorName: 'TS. Nguyễn Văn A',
+    actorRole: 'ROLE_INSTRUCTOR',
+    isCurrentActor: true,
+    action: 'COURSE_CREATED',
+    actionLabel: 'Tạo khóa học',
+    entityType: 'COURSE',
+    entityId: 1,
+    entityLabel: 'Lập trình Fullstack Web hiện đại với React và Spring Boot',
+    details: 'Khởi tạo khóa học mới',
+    courseOwnerId: 2,
+    courseOwnerName: 'TS. Nguyễn Văn A',
+    createdAt: '2026-11-01T08:00:00',
+    canRestore: false,
+  },
+  {
+    id: 2,
+    actorId: 2,
+    actorName: 'TS. Nguyễn Văn A',
+    actorRole: 'ROLE_INSTRUCTOR',
+    isCurrentActor: true,
+    action: 'COURSE_UPDATED',
+    actionLabel: 'Chỉnh sửa khóa học',
+    entityType: 'COURSE',
+    entityId: 1,
+    entityLabel: 'Lập trình Fullstack Web hiện đại với React và Spring Boot',
+    details: 'Giá: Miễn phí → 599.000 ₫',
+    courseOwnerId: 2,
+    courseOwnerName: 'TS. Nguyễn Văn A',
+    createdAt: '2026-11-02T10:30:00',
+    canRestore: false,
+  },
+  {
+    id: 3,
+    actorId: 1,
+    actorName: 'Quản trị viên',
+    actorRole: 'ROLE_ADMIN',
+    isCurrentActor: false,
+    action: 'COURSE_APPROVED',
+    actionLabel: 'Duyệt khóa học',
+    entityType: 'COURSE',
+    entityId: 1,
+    entityLabel: 'Lập trình Fullstack Web hiện đại với React và Spring Boot',
+    details: 'Phê duyệt xuất bản khóa học',
+    courseOwnerId: 2,
+    courseOwnerName: 'TS. Nguyễn Văn A',
+    createdAt: '2026-11-03T14:00:00',
+    canRestore: false,
+  },
+  {
+    id: 4,
+    actorId: 2,
+    actorName: 'TS. Nguyễn Văn A',
+    actorRole: 'ROLE_INSTRUCTOR',
+    isCurrentActor: true,
+    action: 'COURSE_DELETED',
+    actionLabel: 'Khóa học đã xóa',
+    entityType: 'COURSE',
+    entityId: 2,
+    entityLabel: 'Kiến trúc Vi dịch vụ và Cloud Native',
+    details: 'Lưu trữ khóa học do đã có học viên đăng ký',
+    courseOwnerId: 2,
+    courseOwnerName: 'TS. Nguyễn Văn A',
+    createdAt: '2026-11-04T16:00:00',
+    canRestore: true,
+  },
+];
+
+export const resetMockInstructorHistory = () => {
+  mockInstructorHistory = [
+    {
+      id: 1,
+      actorId: 2,
+      actorName: 'TS. Nguyễn Văn A',
+      actorRole: 'ROLE_INSTRUCTOR',
+      isCurrentActor: true,
+      action: 'COURSE_CREATED',
+      actionLabel: 'Tạo khóa học',
+      entityType: 'COURSE',
+      entityId: 1,
+      entityLabel: 'Lập trình Fullstack Web hiện đại với React và Spring Boot',
+      details: 'Khởi tạo khóa học mới',
+      courseOwnerId: 2,
+      courseOwnerName: 'TS. Nguyễn Văn A',
+      createdAt: '2026-11-01T08:00:00',
+      canRestore: false,
+    },
+    {
+      id: 2,
+      actorId: 2,
+      actorName: 'TS. Nguyễn Văn A',
+      actorRole: 'ROLE_INSTRUCTOR',
+      isCurrentActor: true,
+      action: 'COURSE_UPDATED',
+      actionLabel: 'Chỉnh sửa khóa học',
+      entityType: 'COURSE',
+      entityId: 1,
+      entityLabel: 'Lập trình Fullstack Web hiện đại với React và Spring Boot',
+      details: 'Giá: Miễn phí → 599.000 ₫',
+      courseOwnerId: 2,
+      courseOwnerName: 'TS. Nguyễn Văn A',
+      createdAt: '2026-11-02T10:30:00',
+      canRestore: false,
+    },
+    {
+      id: 3,
+      actorId: 1,
+      actorName: 'Quản trị viên',
+      actorRole: 'ROLE_ADMIN',
+      isCurrentActor: false,
+      action: 'COURSE_APPROVED',
+      actionLabel: 'Duyệt khóa học',
+      entityType: 'COURSE',
+      entityId: 1,
+      entityLabel: 'Lập trình Fullstack Web hiện đại với React và Spring Boot',
+      details: 'Phê duyệt xuất bản khóa học',
+      courseOwnerId: 2,
+      courseOwnerName: 'TS. Nguyễn Văn A',
+      createdAt: '2026-11-03T14:00:00',
+      canRestore: false,
+    },
+    {
+      id: 4,
+      actorId: 2,
+      actorName: 'TS. Nguyễn Văn A',
+      actorRole: 'ROLE_INSTRUCTOR',
+      isCurrentActor: true,
+      action: 'COURSE_DELETED',
+      actionLabel: 'Khóa học đã xóa',
+      entityType: 'COURSE',
+      entityId: 2,
+      entityLabel: 'Kiến trúc Vi dịch vụ và Cloud Native',
+      details: 'Lưu trữ khóa học do đã có học viên đăng ký',
+      courseOwnerId: 2,
+      courseOwnerName: 'TS. Nguyễn Văn A',
+      createdAt: '2026-11-04T16:00:00',
+      canRestore: true,
+    },
+  ];
+};
+
+export let mockAdminCertificates = [
+  {
+    id: 1,
+    certificateCode: 'CERT-A1B2C3D4-10001',
+    studentId: 3,
+    studentName: 'Học viên Nguyễn Văn B',
+    studentEmail: 'student.b@example.com',
+    courseId: 1,
+    courseTitle: 'Lập trình Fullstack Web hiện đại với React và Spring Boot',
+    instructorName: 'TS. Nguyễn Văn A',
+    finalScore: 95,
+    totalDurationMinutes: 120,
+    issuedAt: '2026-11-04T10:00:00',
+    status: 'VALID',
+    revokedAt: null,
+    revokedByName: null,
+    revokeReason: null,
+    pdfUrl: '/api/v1/certificates/download/CERT-A1B2C3D4-10001',
+  },
+  {
+    id: 2,
+    certificateCode: 'CERT-E5F6G7H8-10002',
+    studentId: 4,
+    studentName: 'Học viên Trần Thị C',
+    studentEmail: 'student.c@example.com',
+    courseId: 2,
+    courseTitle: 'Kiến trúc Vi dịch vụ và Cloud Native',
+    instructorName: 'TS. Nguyễn Văn A',
+    finalScore: 82,
+    totalDurationMinutes: 180,
+    issuedAt: '2026-11-03T14:30:00',
+    status: 'REVOKED',
+    revokedAt: '2026-11-04T09:00:00',
+    revokedByName: 'Quản trị viên Hệ thống',
+    revokeReason: 'Gian lận thi trắc nghiệm',
+    pdfUrl: '/api/v1/certificates/download/CERT-E5F6G7H8-10002',
+  },
+];
+
+export const resetMockAdminCertificates = () => {
+  mockAdminCertificates = [
+    {
+      id: 1,
+      certificateCode: 'CERT-A1B2C3D4-10001',
+      studentId: 3,
+      studentName: 'Học viên Nguyễn Văn B',
+      studentEmail: 'student.b@example.com',
+      courseId: 1,
+      courseTitle: 'Lập trình Fullstack Web hiện đại với React và Spring Boot',
+      instructorName: 'TS. Nguyễn Văn A',
+      finalScore: 95,
+      totalDurationMinutes: 120,
+      issuedAt: '2026-11-04T10:00:00',
+      status: 'VALID',
+      revokedAt: null,
+      revokedByName: null,
+      revokeReason: null,
+      pdfUrl: '/api/v1/certificates/download/CERT-A1B2C3D4-10001',
+    },
+    {
+      id: 2,
+      certificateCode: 'CERT-E5F6G7H8-10002',
+      studentId: 4,
+      studentName: 'Học viên Trần Thị C',
+      studentEmail: 'student.c@example.com',
+      courseId: 2,
+      courseTitle: 'Kiến trúc Vi dịch vụ và Cloud Native',
+      instructorName: 'TS. Nguyễn Văn A',
+      finalScore: 82,
+      totalDurationMinutes: 180,
+      issuedAt: '2026-11-03T14:30:00',
+      status: 'REVOKED',
+      revokedAt: '2026-11-04T09:00:00',
+      revokedByName: 'Quản trị viên Hệ thống',
+      revokeReason: 'Gian lận thi trắc nghiệm',
+      pdfUrl: '/api/v1/certificates/download/CERT-E5F6G7H8-10002',
+    },
+  ];
+};
+
 export const handlers = [
   // 1. Categories
   http.get('*/api/v1/categories', () => {
     return HttpResponse.json(mockCategories);
+  }),
+
+  // 1b. Create Course (with custom category support)
+  http.post('*/api/v1/courses', async ({ request }) => {
+    const body = await request.json();
+    let catId = body.categoryId;
+    let catName = 'Lập trình Web';
+    if (body.customCategoryName) {
+      catId = mockCategories.length + 1;
+      catName = body.customCategoryName;
+      mockCategories.push({ id: catId, name: catName, slug: `cat-${catId}` });
+    }
+    const newCourse = {
+      id: Date.now(),
+      title: body.title,
+      slug: body.slug,
+      description: body.description,
+      thumbnailUrl: body.thumbnailUrl,
+      price: body.price || 0,
+      status: 'DRAFT',
+      categoryId: catId,
+      categoryName: catName,
+      instructorName: 'TS. Nguyễn Văn A',
+      sections: [],
+    };
+    return HttpResponse.json(newCourse);
   }),
 
   // 2. Public courses
@@ -1011,5 +1262,215 @@ export const handlers = [
       }
     });
     return HttpResponse.json({ count });
+  }),
+
+  // Instructor History
+  http.get('*/api/v1/instructor/history', ({ request }) => {
+    const url = new URL(request.url);
+    const page = parseInt(url.searchParams.get('page') || '0', 10);
+    const size = parseInt(url.searchParams.get('size') || '10', 10);
+    const action = url.searchParams.get('action');
+    const courseId = url.searchParams.get('courseId');
+    const from = url.searchParams.get('from');
+    const to = url.searchParams.get('to');
+
+    let filtered = [...mockInstructorHistory];
+    if (action) {
+      filtered = filtered.filter((h) => h.action === action);
+    }
+    if (courseId) {
+      filtered = filtered.filter((h) => String(h.entityId) === String(courseId));
+    }
+    if (from) {
+      filtered = filtered.filter((h) => h.createdAt >= from);
+    }
+    if (to) {
+      filtered = filtered.filter((h) => h.createdAt <= to + 'T23:59:59');
+    }
+
+    const start = page * size;
+    const end = start + size;
+    const paginated = filtered.slice(start, end);
+
+    return HttpResponse.json({
+      content: paginated,
+      page,
+      size,
+      totalElements: filtered.length,
+      totalPages: Math.ceil(filtered.length / size) || 1,
+    });
+  }),
+
+  // Admin Certificates: Summary
+  http.get('*/api/v1/admin/certificates/summary', () => {
+    const total = mockAdminCertificates.length;
+    const valid = mockAdminCertificates.filter((c) => c.status === 'VALID').length;
+    const revoked = mockAdminCertificates.filter((c) => c.status === 'REVOKED').length;
+    return HttpResponse.json({ total, valid, revoked });
+  }),
+
+  // Admin Certificates: Paginated List
+  http.get('*/api/v1/admin/certificates', ({ request }) => {
+    const url = new URL(request.url);
+    const page = parseInt(url.searchParams.get('page') || '0', 10);
+    const size = parseInt(url.searchParams.get('size') || '10', 10);
+    const q = (url.searchParams.get('q') || '').toLowerCase().trim();
+    const status = url.searchParams.get('status');
+    const from = url.searchParams.get('from');
+    const to = url.searchParams.get('to');
+
+    let filtered = [...mockAdminCertificates];
+    if (status) {
+      filtered = filtered.filter((c) => c.status === status);
+    }
+    if (from) {
+      filtered = filtered.filter((c) => c.issuedAt >= from);
+    }
+    if (to) {
+      filtered = filtered.filter((c) => c.issuedAt <= to + 'T23:59:59');
+    }
+    if (q) {
+      filtered = filtered.filter((c) =>
+        c.certificateCode.toLowerCase().includes(q) ||
+        c.studentName.toLowerCase().includes(q) ||
+        c.studentEmail.toLowerCase().includes(q) ||
+        c.courseTitle.toLowerCase().includes(q)
+      );
+    }
+
+    const start = page * size;
+    const end = start + size;
+    const paginated = filtered.slice(start, end);
+
+    return HttpResponse.json({
+      content: paginated,
+      page,
+      size,
+      totalElements: filtered.length,
+      totalPages: Math.ceil(filtered.length / size) || 1,
+      last: end >= filtered.length,
+    });
+  }),
+
+  // Admin Certificates: Revoke
+  http.post('*/api/v1/admin/certificates/:id/revoke', async ({ params, request }) => {
+    const id = Number(params.id);
+    const cert = mockAdminCertificates.find((c) => c.id === id);
+    if (!cert) return new HttpResponse(null, { status: 404 });
+
+    const body = await request.json();
+    cert.status = 'REVOKED';
+    cert.revokedAt = new Date().toISOString();
+    cert.revokedByName = 'Quản trị viên Hệ thống';
+    cert.revokeReason = body.reason || 'Lý do thu hồi';
+
+    return HttpResponse.json(cert);
+  }),
+
+  // Admin Certificates: Reinstate
+  http.post('*/api/v1/admin/certificates/:id/reinstate', ({ params }) => {
+    const id = Number(params.id);
+    const cert = mockAdminCertificates.find((c) => c.id === id);
+    if (!cert) return new HttpResponse(null, { status: 404 });
+
+    cert.status = 'VALID';
+    cert.revokedAt = null;
+    cert.revokedByName = null;
+    cert.revokeReason = null;
+
+    return HttpResponse.json(cert);
+  }),
+
+  // Admin User Detail, Reveal & Reset Password
+  http.get('*/api/v1/admin/users/:id/detail', ({ params }) => {
+    return HttpResponse.json({
+      id: Number(params.id),
+      username: 'student_mock',
+      fullName: 'Trần Văn Học Viên',
+      avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+      role: 'ROLE_STUDENT',
+      isActive: true,
+      createdAt: '2026-03-01T08:00:00',
+      title: 'Học viên CNTT',
+      bio: 'Đam mê lập trình web và AI',
+      teachingField: null,
+      email: 't***@g***.com',
+      phone: '09******78',
+      dateOfBirth: '**/**/****',
+      gender: '***',
+      stats: {
+        enrolledCoursesCount: 3,
+        completedCoursesCount: 1,
+        certificatesCount: 1,
+        ordersCount: 2,
+        totalSpent: 499000,
+      },
+      recentEnrollments: [
+        {
+          enrollmentId: 101,
+          courseId: 1,
+          courseTitle: 'Lập trình NestJS Chuyên Sâu',
+          enrolledAt: '2026-03-02T10:00:00',
+          progressPercent: 100,
+          isCompleted: true,
+        },
+      ],
+      recentOrders: [
+        {
+          orderId: 201,
+          orderCode: 'ORD-2026-001',
+          totalAmount: 499000,
+          status: 'COMPLETED',
+          createdAt: '2026-03-02T09:30:00',
+        },
+      ],
+      recentCertificates: [
+        {
+          certificateId: 301,
+          certificateCode: 'CERT-2026-NESTJS-88',
+          courseTitle: 'Lập trình NestJS Chuyên Sâu',
+          issuedAt: '2026-03-10T14:00:00',
+          status: 'VALID',
+          finalScore: 95,
+        },
+      ],
+      recentCourses: [],
+    });
+  }),
+
+  http.post('*/api/v1/admin/users/:id/reveal', async ({ request }) => {
+    const body = await request.json().catch(() => ({}));
+    if (body.adminPassword === 'WrongPass') {
+      return HttpResponse.json(
+        { message: 'Mật khẩu quản trị viên không chính xác. Vui lòng thử lại.' },
+        { status: 403 }
+      );
+    }
+    if (body.adminPassword === 'RateLimit') {
+      return HttpResponse.json(
+        { message: 'Bạn đã nhập sai quá 5 lần. Vui lòng thử lại sau 10 phút.' },
+        { status: 429 }
+      );
+    }
+    return HttpResponse.json({
+      email: 'tranvanhocvien@gmail.com',
+      phone: '0912345678',
+      dateOfBirth: '2000-05-15',
+      gender: 'Nam',
+    });
+  }),
+
+  http.post('*/api/v1/admin/users/:id/reset-password', async ({ request }) => {
+    const body = await request.json().catch(() => ({}));
+    if (body.adminPassword === 'WrongPass') {
+      return HttpResponse.json(
+        { message: 'Mật khẩu quản trị viên không chính xác. Vui lòng thử lại.' },
+        { status: 403 }
+      );
+    }
+    return HttpResponse.json({
+      tempPassword: 'K8#mP9!q',
+      message: 'Đã đặt lại mật khẩu tạm thời thành công.',
+    });
   }),
 ];

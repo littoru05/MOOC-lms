@@ -1,20 +1,29 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { certificateApi } from '../../api/certificateApi';
 import { learningApi } from '../../api/learningApi';
 import { useAuth } from '../../context/AuthContext';
-import { Award, Search, CheckCircle, Download, ExternalLink, Printer, ShieldCheck, AlertCircle, Copy, Check } from 'lucide-react';
+import { Award, Search, CheckCircle, Download, ExternalLink, Printer, ShieldCheck, AlertCircle, Copy, Check, XCircle } from 'lucide-react';
 
 export const MyCertificatesPage = ({ initialCode: initialCodeProp }) => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const initialCode = initialCodeProp || searchParams.get('code') || '';
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const [searchCode, setSearchCode] = useState(initialCode || '');
   const [verifiedCert, setVerifiedCert] = useState(null);
   const [myCertificates, setMyCertificates] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [copied, setCopied] = useState(false);
+
+  // Nếu người dùng là Quản trị viên, chuyển hướng về phân hệ Quản lý chứng chỉ của Admin (không ở lại trang Học viên)
+  useEffect(() => {
+    if (isAdmin || user?.role === 'ROLE_ADMIN' || user?.role === 'ADMIN') {
+      const code = searchParams.get('code') || initialCode;
+      navigate(code ? `/admin/certificates?q=${encodeURIComponent(code)}` : '/admin/certificates', { replace: true });
+    }
+  }, [isAdmin, user, searchParams, initialCode, navigate]);
 
   // Auto-verify if initialCode passed
   useEffect(() => {
@@ -57,7 +66,7 @@ export const MyCertificatesPage = ({ initialCode: initialCodeProp }) => {
       setVerifiedCert(null);
       setError(
         err.response?.data?.message ||
-        'Không tìm thấy chứng chỉ số với mã xác thực này hoặc mã băm không hợp lệ!'
+        'Chứng chỉ không tồn tại hoặc không còn hiệu lực!'
       );
     } finally {
       setLoading(false);
@@ -73,6 +82,8 @@ export const MyCertificatesPage = ({ initialCode: initialCodeProp }) => {
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
+
+  const isRevoked = verifiedCert?.status === 'REVOKED' || verifiedCert?.isValid === false;
 
   return (
     <div className="min-h-screen bg-[#FAF9FC] py-12 px-6">
@@ -120,11 +131,11 @@ export const MyCertificatesPage = ({ initialCode: initialCodeProp }) => {
 
         {/* Verified Certificate Display (Scholarly Diploma Card) */}
         {verifiedCert && (
-          <div data-certificate="true" className="diploma-card bg-white border-4 border-double border-[#16324F] rounded-2xl p-8 md:p-12 shadow-md relative print:border-black print:m-0 space-y-8">
+          <div data-certificate="true" className={`diploma-card bg-white border-4 border-double ${isRevoked ? 'border-red-400' : 'border-[#16324F]'} rounded-2xl p-8 md:p-12 shadow-md relative print:border-black print:m-0 space-y-8`}>
             
             {/* Diploma Brand Header */}
             <div className="text-center border-b border-[#E4E4E0] pb-6">
-              <div className="w-14 h-14 bg-[#002D72] text-white rounded-2xl mx-auto flex items-center justify-center font-bold text-2xl font-serif mb-3 shadow-sm">
+              <div className={`w-14 h-14 ${isRevoked ? 'bg-red-800' : 'bg-[#002D72]'} text-white rounded-2xl mx-auto flex items-center justify-center font-bold text-2xl font-serif mb-3 shadow-sm`}>
                 E
               </div>
               <h2 className="text-base font-bold text-[#002D72] tracking-widest uppercase font-serif">
@@ -134,11 +145,17 @@ export const MyCertificatesPage = ({ initialCode: initialCodeProp }) => {
                 HỆ THỐNG ĐÀO TẠO TRỰC TUYẾN QUỐC TẾ • INTERNATIONAL ONLINE LEARNING SYSTEM
               </p>
               
-              <div className="flex items-center justify-center gap-2 mt-4">
-                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                  <CheckCircle className="w-3.5 h-3.5" /> Chứng chỉ số hợp lệ & đã xác thực
-                </span>
-                {verifiedCert.finalScore && verifiedCert.finalScore >= 90 && (
+              <div className="flex flex-wrap items-center justify-center gap-2 mt-4">
+                {isRevoked ? (
+                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800 border border-red-300">
+                    <XCircle className="w-3.5 h-3.5 text-red-600" /> Đã bị thu hồi {verifiedCert.revokeReason ? `(${verifiedCert.revokeReason})` : ''}
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    <CheckCircle className="w-3.5 h-3.5" /> Chứng chỉ số hợp lệ & đã xác thực
+                  </span>
+                )}
+                {!isRevoked && verifiedCert.finalScore && verifiedCert.finalScore >= 90 && (
                   <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-[#002D72] text-[#D4AF37] border border-[#D4AF37]">
                     ★ WITH DISTINCTION ({verifiedCert.finalScore}%)
                   </span>
@@ -213,55 +230,78 @@ export const MyCertificatesPage = ({ initialCode: initialCodeProp }) => {
 
             {/* Actions Toolbar */}
             <div className="pt-4 border-t border-[#E4E4E0] flex flex-col sm:flex-row items-center justify-center gap-4 print:hidden">
-              <a
-                href={certificateApi.getDownloadUrl(verifiedCert.certificateCode)}
-                download={`certificate-${verifiedCert.certificateCode}.pdf`}
-                className="w-full sm:w-auto px-6 py-3 bg-[#002D72] hover:bg-[#001D37] text-white text-sm font-semibold rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm hover:shadow-md cursor-pointer"
-              >
-                <Download className="w-4 h-4" /> Tải file PDF chính thức (Chuẩn Coursera)
-              </a>
+              {isRevoked ? (
+                <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0 text-red-600" />
+                  <span>Chứng chỉ này không còn hiệu lực do đã bị thu hồi. Không thể tải về tệp PDF.</span>
+                </div>
+              ) : (
+                <>
+                  <a
+                    href={certificateApi.getDownloadUrl(verifiedCert.certificateCode)}
+                    download={`certificate-${verifiedCert.certificateCode}.pdf`}
+                    className="w-full sm:w-auto px-6 py-3 bg-[#002D72] hover:bg-[#001D37] text-white text-sm font-semibold rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm hover:shadow-md cursor-pointer"
+                  >
+                    <Download className="w-4 h-4" /> Tải file PDF chính thức (Chuẩn Coursera)
+                  </a>
 
-              <button
-                onClick={handlePrint}
-                className="w-full sm:w-auto px-5 py-3 bg-white border border-[#E4E4E0] hover:bg-[#FAF9FC] text-[#1A1C1E] text-sm font-semibold rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer"
-              >
-                <Printer className="w-4 h-4" /> In chứng chỉ
-              </button>
+                  <button
+                    onClick={handlePrint}
+                    className="w-full sm:w-auto px-5 py-3 bg-white border border-[#E4E4E0] hover:bg-[#FAF9FC] text-[#1A1C1E] text-sm font-semibold rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                  >
+                    <Printer className="w-4 h-4" /> In chứng chỉ
+                  </button>
+                </>
+              )}
             </div>
 
             {/* Note banner */}
-            <p className="text-[11px] text-center text-[#718096] print:hidden">
-              * Tệp PDF tải về định dạng A4 Landscape có đầy đủ dải ruy băng danh dự, con dấu dập nổi, mã QR Code bảo mật và chữ ký viết tay quốc tế.
-            </p>
+            {!isRevoked && (
+              <p className="text-[11px] text-center text-[#718096] print:hidden">
+                * Tệp PDF tải về định dạng A4 Landscape có đầy đủ dải ruy băng danh dự, con dấu dập nổi, mã QR Code bảo mật và chữ ký viết tay quốc tế.
+              </p>
+            )}
 
           </div>
         )}
 
-        {/* My Certificates List (If logged in) */}
-        {user && myCertificates.length > 0 && (
+        {/* My Certificates List (If logged in as student) */}
+        {user && !isAdmin && myCertificates.length > 0 && (
           <div className="bg-white border border-[#E4E4E0] rounded-xl p-6 shadow-xs">
             <h3 className="text-base font-bold font-serif text-[#001D37] mb-4">
               Danh sách Chứng chỉ số của bạn ({myCertificates.length})
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {myCertificates.map((cert) => (
-                <div
-                  key={cert.id}
-                  onClick={() => setVerifiedCert(cert)}
-                  className="p-4 border border-[#E4E4E0] rounded-lg hover:border-[#16324F] cursor-pointer transition-colors flex items-center justify-between group"
-                >
-                  <div>
-                    <h4 className="text-xs font-bold font-serif text-[#001D37] group-hover:text-[#16324F]">
-                      {cert.courseTitle}
-                    </h4>
-                    <p className="text-[11px] font-mono text-[#6B6B6B] mt-1">{cert.certificateCode}</p>
-                    <span className="text-[10px] text-[#5E5E5E]">
-                      {new Date(cert.issuedAt).toLocaleDateString('vi-VN')}
-                    </span>
+              {myCertificates.map((cert) => {
+                const certRevoked = cert.status === 'REVOKED' || cert.isValid === false;
+                return (
+                  <div
+                    key={cert.id}
+                    onClick={() => setVerifiedCert(cert)}
+                    className={`p-4 border rounded-lg hover:border-[#16324F] cursor-pointer transition-colors flex items-center justify-between group ${
+                      certRevoked ? 'border-red-200 bg-red-50/20' : 'border-[#E4E4E0]'
+                    }`}
+                  >
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h4 className="text-xs font-bold font-serif text-[#001D37] group-hover:text-[#16324F]">
+                          {cert.courseTitle}
+                        </h4>
+                        {certRevoked && (
+                          <span className="px-2 py-0.5 text-[10px] font-bold bg-red-100 text-red-700 border border-red-200 rounded-full">
+                            Đã bị thu hồi
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[11px] font-mono text-[#6B6B6B] mt-1">{cert.certificateCode}</p>
+                      <span className="text-[10px] text-[#5E5E5E]">
+                        {new Date(cert.issuedAt).toLocaleDateString('vi-VN')}
+                      </span>
+                    </div>
+                    <ExternalLink className="w-4 h-4 text-[#6B6B6B] group-hover:text-[#16324F] transition-colors" />
                   </div>
-                  <ExternalLink className="w-4 h-4 text-[#6B6B6B] group-hover:text-[#16324F] transition-colors" />
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}

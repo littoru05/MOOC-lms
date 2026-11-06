@@ -2,6 +2,8 @@ package com.lms.lms_backend.dto.certificate;
 
 import java.time.LocalDateTime;
 
+import com.lms.lms_backend.entity.CertificateStatus;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,4 +25,11 @@ public class CertificateResponse {
     private String pdfUrl;
     private Integer finalScore;
     private Integer totalDurationMinutes;
+
+    @Builder.Default
+    private CertificateStatus status = CertificateStatus.VALID;
+    private LocalDateTime revokedAt;
+    private String revokedByName;
+    private String revokeReason;
+    private boolean isValid;
 }

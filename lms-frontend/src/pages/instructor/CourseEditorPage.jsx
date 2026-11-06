@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { courseApi } from '../../api/courseApi';
 import { 
   useCourseDetail, 
@@ -38,6 +39,7 @@ import {
 export const CourseEditorPage = ({ courseId: courseIdProp, onBack }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { showToast, confirm } = useToast();
 
   const { data: teachingCourses = [], isLoading: loadingTeaching } = useTeachingCourses();
@@ -89,6 +91,7 @@ export const CourseEditorPage = ({ courseId: courseIdProp, onBack }) => {
   const [fullDescription, setFullDescription] = useState('');
   const [thumbnailUrl, setThumbnailUrl] = useState('');
   const [categoryId, setCategoryId] = useState('');
+  const [customCategoryName, setCustomCategoryName] = useState('');
   const [level, setLevel] = useState('Trung cấp');
   const [language, setLanguage] = useState('Tiếng Việt');
   const [price, setPrice] = useState('');
@@ -143,6 +146,10 @@ export const CourseEditorPage = ({ courseId: courseIdProp, onBack }) => {
 
   const handleSaveCourse = async (e) => {
     e?.preventDefault();
+    if (categoryId === 'OTHER' && !customCategoryName.trim()) {
+      showToast('Vui lòng nhập tên cho danh mục mới!', 'warning');
+      return;
+    }
     setSaving(true);
     try {
       if (courseId) {
@@ -153,7 +160,8 @@ export const CourseEditorPage = ({ courseId: courseIdProp, onBack }) => {
             slug,
             description: shortDescription || fullDescription,
             thumbnailUrl,
-            categoryId: Number(categoryId) || 1,
+            categoryId: categoryId === 'OTHER' ? null : (Number(categoryId) || 1),
+            customCategoryName: categoryId === 'OTHER' ? customCategoryName.trim() : undefined,
             price: price !== '' ? Number(price) : 0,
           },
         });
@@ -167,6 +175,7 @@ export const CourseEditorPage = ({ courseId: courseIdProp, onBack }) => {
           price: price !== '' ? Number(price) : 0,
         });
       }
+      await queryClient.invalidateQueries({ queryKey: ['categories'] });
       showToast('Đã lưu thông tin khóa học thành công!', 'success');
       if (!courseId) onBack();
     } catch (err) {
@@ -544,7 +553,20 @@ export const CourseEditorPage = ({ courseId: courseIdProp, onBack }) => {
                       {cat.name}
                     </option>
                   ))}
+                  <option value="OTHER">-- Khác (Nhập danh mục mới) --</option>
                 </select>
+                {categoryId === 'OTHER' && (
+                  <div className="mt-2">
+                    <input
+                      type="text"
+                      value={customCategoryName}
+                      onChange={(e) => setCustomCategoryName(e.target.value)}
+                      placeholder="Nhập tên danh mục mới (ví dụ: Ngoại ngữ, Tiếng Nhật)..."
+                      className="w-full px-3 py-2 text-xs border border-[#16324F] rounded-lg focus:outline-none bg-blue-50/30"
+                      required
+                    />
+                  </div>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-3">

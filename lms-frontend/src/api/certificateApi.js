@@ -12,5 +12,10 @@ export const certificateApi = {
     const base = (import.meta.env.VITE_API_URL || API_BASE_URL || 'http://localhost:8080').replace(/\/+$/, '');
     return `${base}/api/v1/certificates/download/${encodeURIComponent(code || '')}`;
   },
-};
 
+  // Quản trị viên (ROLE_ADMIN)
+  getAdminCertificates: (params) => client.get('/api/v1/admin/certificates', { params }),
+  getAdminCertificateSummary: () => client.get('/api/v1/admin/certificates/summary'),
+  revokeCertificate: (id, reason) => client.post(`/api/v1/admin/certificates/${id}/revoke`, { reason }),
+  reinstateCertificate: (id) => client.post(`/api/v1/admin/certificates/${id}/reinstate`),
+};

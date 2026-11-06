@@ -102,3 +102,39 @@ export function useDashboardStats() {
 // Aliases for compatibility
 export const useAdminStats = useDashboardStats;
 export const useToggleUserStatus = useToggleUserActive;
+
+/**
+ * 7. Query lấy chi tiết tài khoản người dùng (Admin)
+ */
+export function useAdminUserDetail(userId) {
+  return useQuery({
+    queryKey: ['admin', 'users', String(userId)],
+    queryFn: async () => {
+      const res = await adminApi.getUserDetail(userId);
+      return res.data;
+    },
+    enabled: Boolean(userId),
+  });
+}
+
+/**
+ * 8. Mutation xem thông tin nhạy cảm (yêu cầu mật khẩu Admin)
+ */
+export function useRevealSensitiveInfo() {
+  return useMutation({
+    mutationFn: ({ userId, adminPassword }) => adminApi.revealSensitiveInfo(userId, adminPassword).then(r => r.data),
+  });
+}
+
+/**
+ * 9. Mutation đặt lại mật khẩu tạm thời cho người dùng (yêu cầu mật khẩu Admin)
+ */
+export function useResetUserPassword() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ userId, adminPassword }) => adminApi.resetUserPassword(userId, adminPassword).then(r => r.data),
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users', String(variables.userId)] });
+    },
+  });
+}

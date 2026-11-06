@@ -195,6 +195,17 @@ export const UserMenuDropdown = ({
               </button>
               <button
                 type="button"
+                onClick={() => handleNavigate('/admin/certificates')}
+                className="w-full text-left px-4 py-2 text-xs hover:bg-emerald-50/70 flex items-center justify-between text-emerald-900 font-semibold transition-colors cursor-pointer group"
+              >
+                <div className="flex items-center gap-2.5">
+                  <Award className="w-4 h-4 text-emerald-700 group-hover:scale-110 transition-transform" />
+                  <span>Quản lý chứng chỉ</span>
+                </div>
+                <ChevronRight className="w-3.5 h-3.5 text-emerald-400 group-hover:translate-x-0.5 transition-transform" />
+              </button>
+              <button
+                type="button"
                 onClick={() => handleNavigate('/admin/revenue')}
                 className="w-full text-left px-4 py-2 text-xs hover:bg-indigo-50/70 flex items-center justify-between text-indigo-900 font-semibold transition-colors cursor-pointer group"
               >

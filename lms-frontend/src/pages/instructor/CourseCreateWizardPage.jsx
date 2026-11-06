@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { courseApi } from '../../api/courseApi';
+import { useCategories } from '../../hooks/useCourses';
 import { useToast } from '../../context/ToastContext';
 import { ImageUploadInput } from '../../components/common/ImageUploadInput';
 import { getImageUrl } from '../../utils/imageUrl';
@@ -38,7 +39,15 @@ export const CourseCreateWizardPage = ({ onBack, onCourseCreated }) => {
 
   const [title, setTitle] = useState('');
   const [slug, setSlug] = useState('');
-  const [categoryId, setCategoryId] = useState('1');
+  const { data: categories = [] } = useCategories();
+  const [categoryId, setCategoryId] = useState('');
+  const [customCategoryName, setCustomCategoryName] = useState('');
+
+  useEffect(() => {
+    if (categories.length > 0 && !categoryId) {
+      setCategoryId(String(categories[0].id));
+    }
+  }, [categories, categoryId]);
   const [level, setLevel] = useState('Trung cấp');
   const [language, setLanguage] = useState('Tiếng Việt');
   const [thumbnailUrl, setThumbnailUrl] = useState('https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800');
@@ -108,13 +117,18 @@ export const CourseCreateWizardPage = ({ onBack, onCourseCreated }) => {
       showToast('Vui lòng nhập mô tả ngắn cho khóa học!', 'warning');
       return;
     }
+    if (categoryId === 'OTHER' && !customCategoryName.trim()) {
+      showToast('Vui lòng nhập tên cho danh mục mới!', 'warning');
+      return;
+    }
 
     setSaving(true);
     try {
       const payload = {
         title: title.trim(),
         slug: slug.trim() || `course-${Date.now()}`,
-        categoryId: Number(categoryId),
+        categoryId: categoryId === 'OTHER' ? null : (Number(categoryId) || 1),
+        customCategoryName: categoryId === 'OTHER' ? customCategoryName.trim() : undefined,
         description: shortDescription.trim(),
         thumbnailUrl: thumbnailUrl.trim(),
         price: price ? Number(price) : 0,
@@ -126,6 +140,7 @@ export const CourseCreateWizardPage = ({ onBack, onCourseCreated }) => {
       }
 
       await queryClient.invalidateQueries({ queryKey: ['courses'] });
+      await queryClient.invalidateQueries({ queryKey: ['categories'] });
 
       showToast(
         'Khóa học đã được tạo ở dạng Bản nháp. Sau khi soạn xong bài giảng, hãy bấm "Gửi duyệt" để Admin xét duyệt trước khi hiển thị công khai cho học viên.',
@@ -216,16 +231,36 @@ export const CourseCreateWizardPage = ({ onBack, onCourseCreated }) => {
                 <select
                   value={categoryId}
                   onChange={(e) => setCategoryId(e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-xs border border-[#E4E4E0] rounded-xl bg-white focus:outline-none focus:border-[#16324F]"
+                  className="w-full px-3.5 py-2.5 text-xs border border-[#E4E4E0] rounded-xl bg-white focus:outline-none focus:border-[#16324F] cursor-pointer"
                 >
-                  <option value="1">Lập trình Web & Fullstack</option>
-                  <option value="2">Trí tuệ nhân tạo & Data Science</option>
-                  <option value="3">Lập trình Di động (React Native)</option>
-                  <option value="4">Thiết kế UI/UX & Figma</option>
-                  <option value="5">An toàn Thông tin & Web Security</option>
+                  {categories.map((cat) => (
+                    <option key={cat.id} value={String(cat.id)}>
+                      {cat.name}
+                    </option>
+                  ))}
+                  <option value="OTHER">-- Khác (Nhập danh mục mới) --</option>
                 </select>
               </div>
 
+              {/* Nhập tên danh mục mới khi chọn Khác */}
+              {categoryId === 'OTHER' && (
+                <div className="space-y-1 sm:col-span-2">
+                  <label className="block text-xs font-semibold text-[#1A1C1E]">
+                    Tên danh mục mới <span className="text-[#BA1A1A]">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={customCategoryName}
+                    onChange={(e) => setCustomCategoryName(e.target.value)}
+                    placeholder="Ví dụ: Ngoại ngữ, Tiếng Nhật, Marketing, v.v..."
+                    className="w-full px-3.5 py-2.5 text-xs border border-[#16324F] rounded-xl focus:outline-none bg-blue-50/30 font-medium"
+                    required
+                  />
+                  <p className="text-[11px] text-[#5E5E5E]">
+                    Danh mục này sẽ tự động hiển thị trong thanh danh mục của học viên và các bộ lọc hệ thống.
+                  </p>
+                </div>
+              )}
               {/* Cấp độ */}
               <div className="space-y-1">
                 <label className="block text-xs font-semibold text-[#1A1C1E]">

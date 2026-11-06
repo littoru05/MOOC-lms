@@ -34,6 +34,7 @@ import com.lms.lms_backend.entity.NotificationType;
 import com.lms.lms_backend.entity.Role;
 import com.lms.lms_backend.entity.User;
 import com.lms.lms_backend.exception.ResourceNotFoundException;
+import com.lms.lms_backend.repository.AuditLogRepository;
 import com.lms.lms_backend.repository.CategoryRepository;
 import com.lms.lms_backend.repository.CourseRepository;
 import com.lms.lms_backend.repository.LessonRepository;
@@ -67,6 +68,9 @@ public class NotificationIntegrationTest {
 
     @Autowired
     private NotificationRepository notificationRepository;
+
+    @Autowired
+    private AuditLogRepository auditLogRepository;
 
     @Autowired
     private CourseService courseService;
@@ -151,6 +155,7 @@ public class NotificationIntegrationTest {
     @AfterEach
     void tearDown() {
         notificationRepository.deleteAll();
+        auditLogRepository.deleteAll();
         lessonRepository.deleteAll();
         sectionRepository.deleteAll();
         courseRepository.deleteAll();

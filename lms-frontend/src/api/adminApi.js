@@ -9,6 +9,9 @@ export const adminApi = {
   // User management
   getAllUsers: () => client.get('/api/v1/admin/users'),
   toggleUserActive: (id) => client.patch(`/api/v1/admin/users/${id}/toggle-active`),
+  getUserDetail: (id) => client.get(`/api/v1/admin/users/${id}/detail`),
+  revealSensitiveInfo: (id, adminPassword) => client.post(`/api/v1/admin/users/${id}/reveal`, { adminPassword }),
+  resetUserPassword: (id, adminPassword) => client.post(`/api/v1/admin/users/${id}/reset-password`, { adminPassword }),
 
   // Dashboard Stats
   getDashboardStats: () => client.get('/api/v1/admin/stats'),

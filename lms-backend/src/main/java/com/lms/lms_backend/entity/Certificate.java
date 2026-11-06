@@ -8,11 +8,14 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -54,4 +57,19 @@ public class Certificate {
 
     @Column(name = "total_duration_minutes")
     private Integer totalDurationMinutes;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false, length = 20)
+    @Builder.Default
+    private CertificateStatus status = CertificateStatus.VALID;
+
+    @Column(name = "revoked_at")
+    private LocalDateTime revokedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "revoked_by")
+    private User revokedBy;
+
+    @Column(name = "revoke_reason", length = 500)
+    private String revokeReason;
 }

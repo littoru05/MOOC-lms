@@ -140,4 +140,56 @@ describe('NotificationBell Component', () => {
     const blueDots = document.querySelectorAll('.bg-blue-600.rounded-full');
     expect(blueDots.length).toBe(0);
   });
+
+  it('học viên chỉ thấy thông báo thu hồi chứng chỉ và không hiển thị nút Xem tất cả', async () => {
+    vi.spyOn(AuthContextModule, 'useAuth').mockReturnValue({
+      user: { id: 3, fullName: 'Học Viên A', email: 'student@lms.com', role: 'ROLE_STUDENT' },
+      isAuthenticated: true,
+      isAdmin: false,
+      isInstructor: false,
+    });
+
+    server.use(
+      http.get('*/api/v1/notifications', () => {
+        return HttpResponse.json({
+          content: [
+            {
+              id: 101,
+              type: 'CERTIFICATE_REVOKED',
+              title: 'Chứng chỉ đã bị thu hồi',
+              message: 'Chứng chỉ khóa học Lập trình Web đã bị thu hồi do vi phạm.',
+              isRead: false,
+              createdAt: new Date().toISOString(),
+            },
+            {
+              id: 102,
+              type: 'COURSE_APPROVED',
+              title: 'Khóa học được duyệt',
+              message: 'Khóa học đã được duyệt.',
+              isRead: false,
+              createdAt: new Date().toISOString(),
+            },
+          ],
+          page: 0,
+          size: 8,
+          totalElements: 2,
+          unreadCount: 2,
+        });
+      })
+    );
+
+    const user = userEvent.setup();
+    renderWithAllProviders(<NotificationBell />);
+
+    const bellBtn = screen.getByLabelText(/thông báo/i);
+    await user.click(bellBtn);
+
+    // Học viên thấy thông báo thu hồi chứng chỉ
+    expect(await screen.findByText('Chứng chỉ đã bị thu hồi')).toBeInTheDocument();
+    // Khóa học được duyệt (của giảng viên) bị lọc bỏ
+    expect(screen.queryByText('Khóa học được duyệt')).not.toBeInTheDocument();
+
+    // Nút "Xem tất cả" BỊ ẨN đối với học viên
+    expect(screen.queryByText('Xem tất cả')).not.toBeInTheDocument();
+  });
 });

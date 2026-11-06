@@ -79,11 +79,15 @@ export const AdminOverviewPage = ({ onNavigateSubTab }) => {
           </div>
         </div>
 
-        {/* Metric Cards Grid */}
+        {/* Metric Cards Grid (Clickable) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           
           {/* Total Users */}
-          <div className="bg-white border border-[#E4E4E0] rounded-xl p-6 shadow-xs space-y-3">
+          <div 
+            onClick={() => onNavigateSubTab ? onNavigateSubTab('user-management') : navigate('/admin/users')}
+            className="bg-white border border-[#E4E4E0] hover:border-[#16324F]/40 rounded-xl p-6 shadow-xs hover:shadow-md transition-all cursor-pointer space-y-3"
+            title="Bấm để xem Quản trị người dùng"
+          >
             <div className="flex items-center justify-between text-[#5E5E5E]">
               <span className="text-xs font-semibold uppercase tracking-wider">Tổng người dùng</span>
               <Users className="w-5 h-5 text-[#16324F]" />
@@ -97,7 +101,11 @@ export const AdminOverviewPage = ({ onNavigateSubTab }) => {
           </div>
 
           {/* Total Courses */}
-          <div className="bg-white border border-[#E4E4E0] rounded-xl p-6 shadow-xs space-y-3">
+          <div 
+            onClick={() => onNavigateSubTab ? onNavigateSubTab('course-approval') : navigate('/admin/courses/approval')}
+            className="bg-white border border-[#E4E4E0] hover:border-[#16324F]/40 rounded-xl p-6 shadow-xs hover:shadow-md transition-all cursor-pointer space-y-3"
+            title="Bấm để kiểm duyệt và xem danh sách khóa học"
+          >
             <div className="flex items-center justify-between text-[#5E5E5E]">
               <span className="text-xs font-semibold uppercase tracking-wider">Khóa học</span>
               <BookOpen className="w-5 h-5 text-[#16324F]" />
@@ -111,7 +119,11 @@ export const AdminOverviewPage = ({ onNavigateSubTab }) => {
           </div>
 
           {/* Total Enrollments */}
-          <div className="bg-white border border-[#E4E4E0] rounded-xl p-6 shadow-xs space-y-3">
+          <div 
+            onClick={() => navigate('/admin/revenue')}
+            className="bg-white border border-[#E4E4E0] hover:border-[#16324F]/40 rounded-xl p-6 shadow-xs hover:shadow-md transition-all cursor-pointer space-y-3"
+            title="Bấm để xem Báo cáo doanh thu & Lượt ghi danh"
+          >
             <div className="flex items-center justify-between text-[#5E5E5E]">
               <span className="text-xs font-semibold uppercase tracking-wider">Lượt ghi danh học</span>
               <GraduationCap className="w-5 h-5 text-[#16324F]" />
@@ -125,7 +137,11 @@ export const AdminOverviewPage = ({ onNavigateSubTab }) => {
           </div>
 
           {/* Completion Rate */}
-          <div className="bg-white border border-[#E4E4E0] rounded-xl p-6 shadow-xs space-y-3">
+          <div 
+            onClick={() => navigate('/admin/revenue')}
+            className="bg-white border border-[#E4E4E0] hover:border-[#16324F]/40 rounded-xl p-6 shadow-xs hover:shadow-md transition-all cursor-pointer space-y-3"
+            title="Bấm để xem Báo cáo hoàn thành & Doanh thu"
+          >
             <div className="flex items-center justify-between text-[#5E5E5E]">
               <span className="text-xs font-semibold uppercase tracking-wider">Tỷ lệ tốt nghiệp</span>
               <TrendingUp className="w-5 h-5 text-[#22C55E]" />
@@ -223,3 +239,5 @@ export const AdminOverviewPage = ({ onNavigateSubTab }) => {
     </div>
   );
 };
+
+export default AdminOverviewPage;

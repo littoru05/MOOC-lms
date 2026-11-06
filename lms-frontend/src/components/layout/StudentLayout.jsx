@@ -50,7 +50,7 @@ export const StudentLayout = ({ currentTab: currentTabProp, onNavigate, onOpenAu
     } else if (tab === 'student-my-learning' || tab === 'my-learning') {
       navigate('/my-learning');
     } else if (tab === 'student-certificates' || tab === 'certificates') {
-      navigate('/certificates');
+      navigate(isAdmin ? '/admin/certificates' : '/certificates');
     } else if (tab === 'student-profile' || tab === 'profile') {
       navigate('/profile');
     } else if (tab === 'instructor-dashboard') {
@@ -63,7 +63,7 @@ export const StudentLayout = ({ currentTab: currentTabProp, onNavigate, onOpenAu
   };
 
   const isMyLearningActive = pathname.startsWith('/my-learning') || pathname.startsWith('/learn');
-  const isCertificatesActive = pathname.startsWith('/certificates');
+  const isCertificatesActive = isAdmin ? pathname.includes('/admin/certificates') : pathname.startsWith('/certificates');
 
   return (
     <div className="min-h-screen flex flex-col bg-[#FAF9FC] text-[#1A1C1E]">
@@ -117,16 +117,15 @@ export const StudentLayout = ({ currentTab: currentTabProp, onNavigate, onOpenAu
               )}
 
               <Link
-                to="/certificates"
+                to={isAdmin ? '/admin/certificates' : '/certificates'}
                 className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
                   isCertificatesActive
                     ? 'text-[#16324F] bg-[#F4F3F6] font-bold shadow-2xs'
                     : 'text-[#1A1C1E] hover:text-[#16324F] hover:bg-[#FAF9FC]'
                 }`}
               >
-                Chứng chỉ & Xác thực
+                {isAdmin ? 'Quản lý chứng chỉ' : 'Chứng chỉ & Xác thực'}
               </Link>
-
 
             </nav>
           </div>
@@ -138,53 +137,64 @@ export const StudentLayout = ({ currentTab: currentTabProp, onNavigate, onOpenAu
             <button
               onClick={() => setMobileDrawerOpen(!mobileDrawerOpen)}
               className="p-2 md:hidden text-[#1A1C1E] hover:bg-[#FAF9FC] rounded-lg cursor-pointer"
-              title="Menu"
+              aria-label="Menu"
             >
-              {mobileDrawerOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              <Menu className="w-5 h-5 text-[#16324F]" />
             </button>
-            
-            {/* Role Badge Indicator (Chỉ hiển thị vai trò hiện tại, không cho chuyển sang portal khác) */}
+
+            {/* Portal Badge */}
             {user && (
-              <div className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-[#EFEDF0] border border-[#E4E4E0] text-[#16324F] rounded-lg shadow-2xs">
-                <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-                <span>
-                  {currentRole === 'ROLE_ADMIN'
-                    ? 'Portal: Admin'
-                    : currentRole === 'ROLE_INSTRUCTOR'
-                    ? 'Portal: Giảng viên'
-                    : 'Portal: Học viên'}
-                </span>
+              <div className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-[#16324F] text-white rounded-md">
+                <GraduationCap className="w-3.5 h-3.5 text-blue-300" />
+                <span>Portal: Học viên</span>
               </div>
             )}
 
-            {/* User Account / Login */}
+            {/* User Profile or Login CTA */}
             {user ? (
               <UserMenuDropdown />
             ) : (
               <div className="flex items-center gap-2">
-                <button
-                  onClick={() => onOpenAuthModal ? onOpenAuthModal('login') : navigate('/login')}
-                  className="px-3.5 py-1.5 text-xs font-semibold text-[#16324F] hover:bg-[#FAF9FC] rounded-lg transition-colors border border-[#E4E4E0] cursor-pointer"
+                <Link
+                  to="/login"
+                  className="px-3.5 py-1.5 text-xs font-semibold text-[#16324F] hover:bg-[#F4F3F6] rounded-md transition-colors"
                 >
                   Đăng nhập
-                </button>
-                <button
-                  onClick={() => onOpenAuthModal ? onOpenAuthModal('register') : navigate('/register')}
-                  className="px-3.5 py-1.5 bg-[#16324F] hover:bg-[#001D37] text-white text-xs font-semibold rounded-lg transition-colors shadow-xs cursor-pointer"
+                </Link>
+                <Link
+                  to="/login?mode=register"
+                  className="px-3.5 py-1.5 bg-[#16324F] hover:bg-[#001D37] text-white text-xs font-semibold rounded-md transition-colors shadow-2xs"
                 >
                   Đăng ký
-                </button>
+                </Link>
               </div>
             )}
-
           </div>
         </div>
+      </header>
 
-        {/* Mobile Dropdown Drawer */}
-        {mobileDrawerOpen && (
-          <div className="md:hidden border-t border-[#E4E4E0] bg-white px-6 py-4 space-y-4 shadow-lg animate-in slide-in-from-top duration-200">
-            {/* Quick Links */}
-            <div className="flex flex-col space-y-2 border-b border-[#E4E4E0] pb-3">
+      {/* Mobile Drawer (Responsive Overlay) */}
+      {mobileDrawerOpen && (
+        <div className="fixed inset-0 z-50 flex md:hidden">
+          {/* Backdrop */}
+          <div 
+            className="fixed inset-0 bg-black/40 backdrop-blur-2xs animate-in fade-in duration-200"
+            onClick={() => setMobileDrawerOpen(false)}
+          />
+          {/* Drawer content */}
+          <div className="relative w-4/5 max-w-xs bg-white h-full shadow-2xl flex flex-col z-10 animate-in slide-in-from-left duration-200">
+            <div className="p-4 border-b border-[#E4E4E0] flex items-center justify-between">
+              <span className="font-serif font-bold text-lg text-[#001D37]">EduMOOC</span>
+              <button 
+                onClick={() => setMobileDrawerOpen(false)}
+                className="p-1 rounded-md text-[#5E5E5E] hover:bg-[#FAF9FC]"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            {/* Mobile Nav Links */}
+            <div className="p-4 space-y-3 overflow-y-auto flex-1">
               {user && (
                 <button
                   onClick={() => {
@@ -198,12 +208,12 @@ export const StudentLayout = ({ currentTab: currentTabProp, onNavigate, onOpenAu
               )}
               <button
                 onClick={() => {
-                  navigate('/certificates');
+                  navigate(isAdmin ? '/admin/certificates' : '/certificates');
                   setMobileDrawerOpen(false);
                 }}
                 className="text-left text-xs font-semibold text-[#16324F] py-1.5 flex items-center gap-2"
               >
-                <Award className="w-4 h-4" /> Chứng chỉ & Xác thực
+                <Award className="w-4 h-4" /> {isAdmin ? 'Quản lý chứng chỉ' : 'Chứng chỉ & Xác thực'}
               </button>
             </div>
 
@@ -220,15 +230,15 @@ export const StudentLayout = ({ currentTab: currentTabProp, onNavigate, onOpenAu
               }}
             />
           </div>
-        )}
-      </header>
+        </div>
+      )}
 
-      {/* Main Student Content with Unified Page Transition */}
-      <div key={pathname} className="flex-1 animate-page-transition">
+      {/* Main Outlet View with Page Transition */}
+      <main key={pathname} className="flex-1 animate-page-transition">
         {children || <Outlet />}
-      </div>
+      </main>
 
-      {/* Student Footer */}
+      {/* Global Academic Scholarly Footer */}
       <Footer />
 
     </div>

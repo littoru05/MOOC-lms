@@ -52,6 +52,9 @@ class CourseServiceTest {
     @Mock
     private NotificationService notificationService;
 
+    @Mock
+    private AuditLogService auditLogService;
+
     @InjectMocks
     private CourseService courseService;
 
@@ -116,6 +119,39 @@ class CourseServiceTest {
         assertNotNull(res);
         assertEquals(CourseStatus.DRAFT, res.getStatus());
         assertEquals("Khóa học Java Core", res.getTitle());
+        verify(courseRepository).save(any(Course.class));
+    }
+
+    @Test
+    @DisplayName("Tạo khóa học mới với danh mục tùy chỉnh Khác thành công")
+    void createCourse_CustomCategory_Success() {
+        CourseCreateRequest req = CourseCreateRequest.builder()
+                .title("Khóa học Tiếng Nhật N5")
+                .slug("tieng-nhat-n5")
+                .customCategoryName("Ngoại ngữ - Tiếng Nhật")
+                .build();
+
+        when(courseRepository.existsBySlug("tieng-nhat-n5")).thenReturn(false);
+        when(userRepository.findByEmail("instructor@lms.com")).thenReturn(Optional.of(instructor));
+        when(categoryRepository.findByNameIgnoreCase("Ngoại ngữ - Tiếng Nhật")).thenReturn(Optional.empty());
+        when(categoryRepository.existsBySlug(any(String.class))).thenReturn(false);
+        when(categoryRepository.save(any(Category.class))).thenAnswer(inv -> {
+            Category cat = inv.getArgument(0);
+            cat.setId(99L);
+            return cat;
+        });
+        when(courseRepository.save(any(Course.class))).thenAnswer(invocation -> {
+            Course c = invocation.getArgument(0);
+            c.setId(20L);
+            return c;
+        });
+
+        CourseResponse res = courseService.createCourse(req, "instructor@lms.com");
+
+        assertNotNull(res);
+        assertEquals("Khóa học Tiếng Nhật N5", res.getTitle());
+        assertEquals("Ngoại ngữ - Tiếng Nhật", res.getCategoryName());
+        verify(categoryRepository).save(any(Category.class));
         verify(courseRepository).save(any(Course.class));
     }
 

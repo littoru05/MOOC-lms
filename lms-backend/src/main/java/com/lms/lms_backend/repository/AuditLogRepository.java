@@ -1,0 +1,18 @@
+package com.lms.lms_backend.repository;
+
+import java.util.List;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.stereotype.Repository;
+
+import com.lms.lms_backend.entity.AuditLog;
+
+@Repository
+public interface AuditLogRepository extends JpaRepository<AuditLog, Long>, JpaSpecificationExecutor<AuditLog> {
+
+    List<AuditLog> findByCourseOwnerIdOrderByCreatedAtDesc(Long courseOwnerId);
+
+    List<AuditLog> findByEntityIdAndEntityTypeOrderByCreatedAtDesc(Long entityId, String entityType);
+}
+

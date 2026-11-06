@@ -10,5 +10,6 @@ import com.lms.lms_backend.entity.Category;
 @Repository
 public interface CategoryRepository extends JpaRepository<Category, Long> {
     Optional<Category> findBySlug(String slug);
+    Optional<Category> findByNameIgnoreCase(String name);
     boolean existsBySlug(String slug);
 }

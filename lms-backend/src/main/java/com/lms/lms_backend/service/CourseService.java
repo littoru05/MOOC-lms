@@ -13,6 +13,7 @@ import com.lms.lms_backend.dto.course.CourseCreateRequest;
 import com.lms.lms_backend.dto.course.CourseDeleteResponse;
 import com.lms.lms_backend.dto.course.CourseResponse;
 import com.lms.lms_backend.dto.course.CourseUpdateRequest;
+import com.lms.lms_backend.entity.AuditAction;
 import com.lms.lms_backend.entity.Category;
 import com.lms.lms_backend.entity.Course;
 import com.lms.lms_backend.entity.CourseStatus;
@@ -37,6 +38,8 @@ public class CourseService {
     private final UserRepository userRepository;
     private final EnrollmentRepository enrollmentRepository;
     private final NotificationService notificationService;
+    private final AuditLogService auditLogService;
+
 
     public List<CourseResponse> getAllPublishedCourses(
             String priceType,
@@ -107,11 +110,7 @@ public class CourseService {
         User instructor = userRepository.findByEmail(instructorEmail)
                 .orElseThrow(() -> new RuntimeException("Giảng viên không tồn tại với email: " + instructorEmail));
 
-        Category category = null;
-        if (req.getCategoryId() != null) {
-            category = categoryRepository.findById(req.getCategoryId())
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy danh mục với ID: " + req.getCategoryId()));
-        }
+        Category category = resolveCategory(req.getCategoryId(), req.getCustomCategoryName());
 
         java.math.BigDecimal price = req.getPrice() != null ? req.getPrice() : java.math.BigDecimal.ZERO;
         if (price.compareTo(java.math.BigDecimal.ZERO) < 0) {
@@ -130,6 +129,17 @@ public class CourseService {
                 .build();
 
         Course saved = courseRepository.save(course);
+        if (auditLogService != null) {
+            auditLogService.log(
+                    instructor,
+                    AuditAction.COURSE_CREATED,
+                    "COURSE",
+                    saved.getId(),
+                    saved.getTitle(),
+                    "Tạo mới khóa học (Bản nháp)",
+                    instructor
+            );
+        }
         return mapToResponse(saved);
     }
 
@@ -145,24 +155,55 @@ public class CourseService {
         }
 
         Category category = null;
-        if (req.getCategoryId() != null) {
-            category = categoryRepository.findById(req.getCategoryId())
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy danh mục với ID: " + req.getCategoryId()));
+        if ((req.getCustomCategoryName() != null && !req.getCustomCategoryName().trim().isEmpty())
+                || req.getCategoryId() != null) {
+            category = resolveCategory(req.getCategoryId(), req.getCustomCategoryName());
+        } else {
+            category = course.getCategory();
+        }
+
+        java.util.List<String> changedFields = new java.util.ArrayList<>();
+        if (req.getTitle() != null && !req.getTitle().equals(course.getTitle())) {
+            changedFields.add("Tiêu đề");
+            course.setTitle(req.getTitle());
+        }
+        if (req.getDescription() != null && !req.getDescription().equals(course.getDescription())) {
+            changedFields.add("Mô tả");
+            course.setDescription(req.getDescription());
+        }
+        if (req.getThumbnailUrl() != null && !req.getThumbnailUrl().equals(course.getThumbnailUrl())) {
+            changedFields.add("Ảnh thu nhỏ");
+            course.setThumbnailUrl(req.getThumbnailUrl());
+        }
+        if (category != null && (course.getCategory() == null || !category.getId().equals(course.getCategory().getId()))) {
+            changedFields.add("Danh mục");
+            course.setCategory(category);
         }
 
         if (req.getPrice() != null) {
             if (req.getPrice().compareTo(java.math.BigDecimal.ZERO) < 0) {
                 throw new RuntimeException("Giá khóa học không được âm!");
             }
-            course.setPrice(req.getPrice());
+            if (course.getPrice() == null || req.getPrice().compareTo(course.getPrice()) != 0) {
+                changedFields.add("Giá");
+                course.setPrice(req.getPrice());
+            }
         }
 
-        course.setTitle(req.getTitle());
-        course.setDescription(req.getDescription());
-        course.setThumbnailUrl(req.getThumbnailUrl());
-        course.setCategory(category);
-
-        return mapToResponse(courseRepository.save(course));
+        Course saved = courseRepository.save(course);
+        if (auditLogService != null) {
+            String details = changedFields.isEmpty() ? "Cập nhật thông tin khóa học" : "Cập nhật trường: " + String.join(", ", changedFields);
+            auditLogService.log(
+                    user,
+                    AuditAction.COURSE_UPDATED,
+                    "COURSE",
+                    saved.getId(),
+                    saved.getTitle(),
+                    details,
+                    saved.getInstructor()
+            );
+        }
+        return mapToResponse(saved);
     }
 
     @Transactional
@@ -178,6 +219,18 @@ public class CourseService {
         course.setStatus(CourseStatus.PENDING);
         course.setRejectionReason(null);
         Course saved = courseRepository.save(course);
+
+        if (auditLogService != null) {
+            auditLogService.log(
+                    user,
+                    AuditAction.COURSE_SUBMITTED,
+                    "COURSE",
+                    course.getId(),
+                    course.getTitle(),
+                    "Gửi duyệt khóa học",
+                    course.getInstructor()
+            );
+        }
 
         if (notificationService != null) {
             notificationService.notifyAdmins(
@@ -209,6 +262,18 @@ public class CourseService {
             course.setStatus(CourseStatus.ARCHIVED);
             courseRepository.save(course);
 
+            if (auditLogService != null) {
+                auditLogService.log(
+                        user,
+                        AuditAction.COURSE_DELETED,
+                        "COURSE",
+                        course.getId(),
+                        course.getTitle(),
+                        "Lưu trữ khóa học do đã có học viên đăng ký",
+                        course.getInstructor()
+                );
+            }
+
             return CourseDeleteResponse.builder()
                     .courseId(courseId)
                     .status(CourseStatus.ARCHIVED)
@@ -222,6 +287,18 @@ public class CourseService {
             course.setDeletedAt(LocalDateTime.now());
             course.setStatus(CourseStatus.DRAFT);
             courseRepository.save(course);
+
+            if (auditLogService != null) {
+                auditLogService.log(
+                        user,
+                        AuditAction.COURSE_DELETED,
+                        "COURSE",
+                        course.getId(),
+                        course.getTitle(),
+                        "Xóa khóa học",
+                        course.getInstructor()
+                );
+            }
 
             return CourseDeleteResponse.builder()
                     .courseId(courseId)
@@ -251,7 +328,21 @@ public class CourseService {
         course.setStatus(CourseStatus.PUBLISHED);
         course.setIsDeleted(false);
         course.setDeletedAt(null);
-        return mapToResponse(courseRepository.save(course));
+        Course saved = courseRepository.save(course);
+
+        if (auditLogService != null) {
+            auditLogService.log(
+                    user,
+                    AuditAction.COURSE_RESTORED,
+                    "COURSE",
+                    saved.getId(),
+                    saved.getTitle(),
+                    "Khôi phục khóa học",
+                    saved.getInstructor()
+            );
+        }
+
+        return mapToResponse(saved);
     }
 
     @Transactional
@@ -266,6 +357,18 @@ public class CourseService {
 
         course.setStatus(CourseStatus.PENDING_DELETE);
         Course saved = courseRepository.save(course);
+
+        if (auditLogService != null) {
+            auditLogService.log(
+                    user,
+                    AuditAction.COURSE_DELETE_REQUESTED,
+                    "COURSE",
+                    course.getId(),
+                    course.getTitle(),
+                    "Yêu cầu xóa khóa học",
+                    course.getInstructor()
+            );
+        }
 
         if (notificationService != null) {
             notificationService.notifyAdmins(
@@ -378,6 +481,48 @@ public class CourseService {
         return mapToResponse(saved);
     }
 
+    @Transactional
+    public CourseResponse approveCourse(Long courseId, String actorEmail) {
+        CourseResponse res = approveCourse(courseId);
+        if (auditLogService != null && actorEmail != null) {
+            User admin = userRepository.findByEmail(actorEmail).orElse(null);
+            Course c = courseRepository.findById(courseId).orElse(null);
+            if (admin != null && c != null) {
+                auditLogService.log(
+                        admin,
+                        AuditAction.COURSE_APPROVED,
+                        "COURSE",
+                        c.getId(),
+                        c.getTitle(),
+                        "Quản trị viên duyệt xuất bản khóa học",
+                        c.getInstructor()
+                );
+            }
+        }
+        return res;
+    }
+
+    @Transactional
+    public CourseResponse rejectCourse(Long courseId, String reason, String actorEmail) {
+        CourseResponse res = rejectCourse(courseId, reason);
+        if (auditLogService != null && actorEmail != null) {
+            User admin = userRepository.findByEmail(actorEmail).orElse(null);
+            Course c = courseRepository.findById(courseId).orElse(null);
+            if (admin != null && c != null) {
+                auditLogService.log(
+                        admin,
+                        AuditAction.COURSE_REJECTED,
+                        "COURSE",
+                        c.getId(),
+                        c.getTitle(),
+                        reason != null ? "Từ chối khóa học: " + reason : "Từ chối khóa học",
+                        c.getInstructor()
+                );
+            }
+        }
+        return res;
+    }
+
     public CourseResponse mapToResponse(Course c) {
         if (c == null) {
             return null;
@@ -405,5 +550,31 @@ public class CourseService {
                 .instructorName(c.getInstructor() != null ? c.getInstructor().getFullName() : null)
                 .createdAt(c.getCreatedAt())
                 .build();
+    }
+
+    private Category resolveCategory(Long categoryId, String customCategoryName) {
+        if (customCategoryName != null && !customCategoryName.trim().isEmpty()) {
+            String catName = customCategoryName.trim();
+            return categoryRepository.findByNameIgnoreCase(catName)
+                    .orElseGet(() -> {
+                        String slug = com.lms.lms_backend.util.SlugUtils.toSlug(catName);
+                        if (slug.isBlank()) {
+                            slug = "danh-muc-" + System.currentTimeMillis();
+                        } else if (categoryRepository.existsBySlug(slug)) {
+                            slug = slug + "-" + (System.currentTimeMillis() % 10000);
+                        }
+                        Category newCat = Category.builder()
+                                .name(catName)
+                                .slug(slug)
+                                .description("Danh mục " + catName)
+                                .build();
+                        return categoryRepository.save(newCat);
+                    });
+        }
+        if (categoryId != null) {
+            return categoryRepository.findById(categoryId)
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy danh mục với ID: " + categoryId));
+        }
+        return null;
     }
 }

@@ -9,7 +9,8 @@ import {
   Trash2, 
   BookOpen, 
   AlertCircle,
-  Filter
+  Filter,
+  Award
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { 
@@ -64,6 +65,10 @@ export const NotificationsPage = ({ portal = 'instructor' }) => {
         navigate(`/admin/courses/approval?courseId=${notif.courseId}`);
         return;
       }
+      if (notif.type === 'CERTIFICATE_ISSUED') {
+        navigate(notif.link || '/admin/certificates');
+        return;
+      }
       if (notif.type === 'LESSON_ADDED') {
         if (notif.link) {
           navigate(notif.link);
@@ -97,6 +102,8 @@ export const NotificationsPage = ({ portal = 'instructor' }) => {
       case 'COURSE_REJECTED':
       case 'COURSE_DELETE_REJECTED':
         return <XCircle className="w-5 h-5 text-red-600" />;
+      case 'CERTIFICATE_ISSUED':
+        return <Award className="w-5 h-5 text-purple-600" />;
       default:
         return <AlertCircle className="w-5 h-5 text-blue-600" />;
     }
@@ -235,4 +242,3 @@ export const NotificationsPage = ({ portal = 'instructor' }) => {
 };
 
 export default NotificationsPage;
-

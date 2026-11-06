@@ -19,10 +19,15 @@ public interface CourseRepository extends JpaRepository<Course, Long>, JpaSpecif
     List<Course> findByStatusInAndIsDeletedFalse(List<CourseStatus> statuses);
     List<Course> findByInstructorId(Long instructorId);
     List<Course> findByInstructorIdAndIsDeletedFalse(Long instructorId);
+    List<Course> findByInstructorIdOrderByCreatedAtDesc(Long instructorId);
     boolean existsBySlug(String slug);
     long countByStatus(CourseStatus status);
     long countByStatusAndIsDeletedFalse(CourseStatus status);
     long countByStatusIn(List<CourseStatus> statuses);
     long countByStatusInAndIsDeletedFalse(List<CourseStatus> statuses);
     long countByIsDeletedFalse();
+    long countByInstructorId(Long instructorId);
+    long countByInstructorIdAndIsDeletedFalse(Long instructorId);
+    long countByInstructorIdAndStatus(Long instructorId, CourseStatus status);
+    long countByInstructorIdAndStatusAndIsDeletedFalse(Long instructorId, CourseStatus status);
 }

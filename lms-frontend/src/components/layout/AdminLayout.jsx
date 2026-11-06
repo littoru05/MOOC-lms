@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate, useLocation, Link, Outlet } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { UserMenuDropdown } from '../common/UserMenuDropdown';
@@ -10,22 +10,18 @@ import {
   BarChart3, 
   LogOut, 
   ChevronRight, 
-  Sparkles,
-  GraduationCap,
   LayoutDashboard,
-  Shield,
   Layers,
   Database,
   User,
   TrendingUp,
-  Bell
+  Award
 } from 'lucide-react';
 
 export const AdminLayout = ({ currentTab: currentTabProp, onNavigate, children }) => {
-  const { user, logout, quickSwitchRole } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [showRoleMenu, setShowRoleMenu] = useState(false);
 
   const pathname = location.pathname;
 
@@ -33,6 +29,7 @@ export const AdminLayout = ({ currentTab: currentTabProp, onNavigate, children }
   const isApproval = pathname.includes('/admin/courses/approval');
   const isUsers = pathname.includes('/admin/users');
   const isRevenue = pathname.includes('/admin/revenue');
+  const isCertificates = pathname.includes('/admin/certificates');
   const isProfile = pathname.includes('/admin/profile');
   const isNotifications = pathname.includes('/admin/notifications');
 
@@ -66,11 +63,11 @@ export const AdminLayout = ({ currentTab: currentTabProp, onNavigate, children }
       active: isRevenue,
     },
     {
-      id: 'notifications',
-      label: 'Trung tâm thông báo',
-      icon: Bell,
-      path: '/admin/notifications',
-      active: isNotifications,
+      id: 'certificates',
+      label: 'Quản lý chứng chỉ',
+      icon: Award,
+      path: '/admin/certificates',
+      active: isCertificates,
     },
     {
       id: 'admin-profile',
@@ -131,40 +128,8 @@ export const AdminLayout = ({ currentTab: currentTabProp, onNavigate, children }
           })}
         </nav>
 
-        {/* Role Quick Switch Menu (Floating Dropdown) */}
-        {showRoleMenu && (
-          <div className="mx-3 mb-2 p-2 bg-[#002B4E] border border-white/10 rounded-lg shadow-xl text-xs space-y-1 z-50">
-            <p className="text-[10px] uppercase font-bold text-blue-300 px-2 py-1">Chuyển vai trò thử nghiệm</p>
-            <button
-              onClick={() => { quickSwitchRole('STUDENT'); setShowRoleMenu(false); navigate('/'); }}
-              className="w-full text-left px-2.5 py-1.5 rounded hover:bg-white/10 text-white/80 flex items-center gap-2 cursor-pointer"
-            >
-              <GraduationCap className="w-3.5 h-3.5 text-blue-300" />
-              <span>Học viên (Student)</span>
-            </button>
-            <button
-              onClick={() => { quickSwitchRole('INSTRUCTOR'); setShowRoleMenu(false); navigate('/instructor/dashboard'); }}
-              className="w-full text-left px-2.5 py-1.5 rounded hover:bg-white/10 text-white/80 flex items-center gap-2 cursor-pointer"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-              <span>Giảng viên (Instructor)</span>
-            </button>
-          </div>
-        )}
-
-        {/* Bottom Role Switch Trigger & Logout */}
-        <div className="p-3 border-t border-white/10 space-y-1">
-          <button
-            onClick={() => setShowRoleMenu(!showRoleMenu)}
-            className="w-full flex items-center justify-between px-3.5 py-2 rounded-lg text-xs font-medium text-white/70 hover:bg-white/10 hover:text-white transition-colors cursor-pointer"
-          >
-            <div className="flex items-center gap-2">
-              <Shield className="w-3.5 h-3.5 text-blue-400" />
-              <span>Chuyển vai trò</span>
-            </div>
-            <ChevronRight className={`w-3.5 h-3.5 transition-transform ${showRoleMenu ? 'rotate-90' : ''}`} />
-          </button>
-
+        {/* Bottom Actions: Logout */}
+        <div className="p-3 border-t border-white/10">
           <button
             onClick={logout}
             className="w-full flex items-center gap-2.5 px-3.5 py-2 rounded-lg text-xs font-medium text-red-300 hover:bg-red-500/20 hover:text-red-200 transition-colors cursor-pointer"
@@ -193,6 +158,8 @@ export const AdminLayout = ({ currentTab: currentTabProp, onNavigate, children }
                 ? 'Quản lý người dùng'
                 : isRevenue
                 ? 'Doanh thu & Báo cáo'
+                : isCertificates
+                ? 'Quản lý chứng chỉ'
                 : isNotifications
                 ? 'Trung tâm thông báo'
                 : 'Hồ sơ cá nhân'}

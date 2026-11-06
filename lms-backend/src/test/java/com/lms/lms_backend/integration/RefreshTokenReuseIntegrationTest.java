@@ -17,6 +17,7 @@ import org.springframework.test.context.ActiveProfiles;
 import com.lms.lms_backend.entity.RefreshToken;
 import com.lms.lms_backend.entity.Role;
 import com.lms.lms_backend.entity.User;
+import com.lms.lms_backend.repository.AuditLogRepository;
 import com.lms.lms_backend.repository.RefreshTokenRepository;
 import com.lms.lms_backend.repository.UserRepository;
 import com.lms.lms_backend.service.AuthService;
@@ -32,6 +33,9 @@ public class RefreshTokenReuseIntegrationTest {
     private RefreshTokenRepository refreshTokenRepository;
 
     @Autowired
+    private AuditLogRepository auditLogRepository;
+
+    @Autowired
     private UserRepository userRepository;
 
     private User testUser;
@@ -39,6 +43,7 @@ public class RefreshTokenReuseIntegrationTest {
     @BeforeEach
     void setUp() {
         refreshTokenRepository.deleteAll();
+        auditLogRepository.deleteAll();
         userRepository.deleteAll();
 
         testUser = User.builder()

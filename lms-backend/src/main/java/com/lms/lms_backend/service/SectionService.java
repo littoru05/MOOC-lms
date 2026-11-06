@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.lms.lms_backend.dto.lesson.LessonResponse;
 import com.lms.lms_backend.dto.section.SectionRequest;
 import com.lms.lms_backend.dto.section.SectionResponse;
+import com.lms.lms_backend.entity.AuditAction;
 import com.lms.lms_backend.entity.Course;
 import com.lms.lms_backend.entity.CourseStatus;
 import com.lms.lms_backend.entity.Lesson;
@@ -31,6 +32,7 @@ public class SectionService {
     private final CourseRepository courseRepository;
     private final LessonRepository lessonRepository;
     private final NotificationService notificationService;
+    private final AuditLogService auditLogService;
 
     public List<SectionResponse> getSectionsByCourse(Long courseId) {
         List<Section> sections = sectionRepository.findByCourseIdOrderByOrderIndexAsc(courseId);
@@ -89,6 +91,18 @@ public class SectionService {
             );
         }
 
+        if (auditLogService != null) {
+            auditLogService.log(
+                    course.getInstructor(),
+                    AuditAction.SECTION_CREATED,
+                    "COURSE",
+                    course.getId(),
+                    course.getTitle(),
+                    "Thêm chương học: " + saved.getTitle(),
+                    course.getInstructor()
+            );
+        }
+
         return mapToResponse(saved);
     }
 
@@ -100,13 +114,42 @@ public class SectionService {
             section.setOrderIndex(req.getOrderIndex());
         }
         Section saved = sectionRepository.save(section);
+
+        if (auditLogService != null && section.getCourse() != null) {
+            Course course = section.getCourse();
+            auditLogService.log(
+                    course.getInstructor(),
+                    AuditAction.SECTION_UPDATED,
+                    "COURSE",
+                    course.getId(),
+                    course.getTitle(),
+                    "Chỉnh sửa chương học: " + saved.getTitle(),
+                    course.getInstructor()
+            );
+        }
+
         return mapToResponse(saved);
     }
 
     @Transactional
     public void deleteSection(Long id) {
         Section section = getSectionEntityById(id);
+        Course course = section.getCourse();
+        String title = section.getTitle();
+
         sectionRepository.delete(section);
+
+        if (auditLogService != null && course != null) {
+            auditLogService.log(
+                    course.getInstructor(),
+                    AuditAction.SECTION_DELETED,
+                    "COURSE",
+                    course.getId(),
+                    course.getTitle(),
+                    "Xóa chương học: " + title,
+                    course.getInstructor()
+            );
+        }
     }
 
     private SectionResponse mapToResponse(Section s) {

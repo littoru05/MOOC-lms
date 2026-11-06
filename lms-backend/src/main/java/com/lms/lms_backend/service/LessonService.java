@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.lms.lms_backend.dto.lesson.LessonRequest;
 import com.lms.lms_backend.dto.lesson.LessonResponse;
+import com.lms.lms_backend.entity.AuditAction;
 import com.lms.lms_backend.entity.ContentType;
 import com.lms.lms_backend.entity.Course;
 import com.lms.lms_backend.entity.CourseStatus;
@@ -30,6 +31,7 @@ public class LessonService {
     private final SectionRepository sectionRepository;
     private final UserRepository userRepository;
     private final NotificationService notificationService;
+    private final AuditLogService auditLogService;
 
     public List<LessonResponse> getLessonsBySection(Long sectionId) {
         return lessonRepository.findBySectionIdOrderByOrderIndexAsc(sectionId).stream()
@@ -95,6 +97,18 @@ public class LessonService {
             );
         }
 
+        if (auditLogService != null && course != null) {
+            auditLogService.log(
+                    course.getInstructor(),
+                    AuditAction.LESSON_CREATED,
+                    "COURSE",
+                    course.getId(),
+                    course.getTitle(),
+                    "Thêm bài giảng: " + saved.getTitle(),
+                    course.getInstructor()
+            );
+        }
+
         return mapToResponse(saved);
     }
 
@@ -112,13 +126,43 @@ public class LessonService {
         if (req.getOrderIndex() != null) {
             lesson.setOrderIndex(req.getOrderIndex());
         }
-        return mapToResponse(lessonRepository.save(lesson));
+        Lesson saved = lessonRepository.save(lesson);
+
+        if (auditLogService != null && lesson.getSection() != null && lesson.getSection().getCourse() != null) {
+            Course c = lesson.getSection().getCourse();
+            auditLogService.log(
+                    c.getInstructor(),
+                    AuditAction.LESSON_UPDATED,
+                    "COURSE",
+                    c.getId(),
+                    c.getTitle(),
+                    "Chỉnh sửa bài giảng: " + saved.getTitle(),
+                    c.getInstructor()
+            );
+        }
+
+        return mapToResponse(saved);
     }
 
     @Transactional
     public void deleteLesson(Long id) {
         Lesson lesson = getLessonEntityById(id);
+        Course c = lesson.getSection() != null ? lesson.getSection().getCourse() : null;
+        String title = lesson.getTitle();
+
         lessonRepository.delete(lesson);
+
+        if (auditLogService != null && c != null) {
+            auditLogService.log(
+                    c.getInstructor(),
+                    AuditAction.LESSON_DELETED,
+                    "COURSE",
+                    c.getId(),
+                    c.getTitle(),
+                    "Xóa bài giảng: " + title,
+                    c.getInstructor()
+            );
+        }
     }
 
     private LessonResponse mapToResponse(Lesson l) {

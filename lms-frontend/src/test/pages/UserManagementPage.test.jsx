@@ -149,5 +149,21 @@ describe('UserManagementPage Component & Pagination', () => {
       expect(screen.getByText(/user5@lms.com/i)).toBeInTheDocument();
     });
   });
+
+  it('điều hướng tới trang chi tiết /admin/users/:id khi bấm vào dòng người dùng', async () => {
+    const user = userEvent.setup();
+    renderUserManagementPage();
+
+    await waitFor(() => {
+      expect(screen.getByText(/student@lms.com/i)).toBeInTheDocument();
+    });
+
+    const studentRow = screen.getByText(/student@lms.com/i).closest('tr');
+    expect(studentRow).toBeInTheDocument();
+    await user.click(studentRow);
+
+    // Verify browser URL has navigated to /admin/users/
+    expect(window.location.pathname).toMatch(/\/admin\/users\/\d+/);
+  });
 });
 

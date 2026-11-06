@@ -23,6 +23,7 @@ public class CourseCreateRequest {
     private String description;
     private String thumbnailUrl;
     private Long categoryId;
+    private String customCategoryName;
 
     @Min(value = 0, message = "Giá khóa học không được âm")
     private BigDecimal price;
