@@ -38,6 +38,10 @@ jwt:
   refresh-expiration: ${JWT_REFRESH_EXPIRATION:604800000} # 7 ngày (Refresh Token)
 
 app:
+  auth:
+    cookie:
+      same-site: ${COOKIE_SAME_SITE:Lax}
+      secure: ${COOKIE_SECURE:false}
   upload:
     dir: ${UPLOAD_DIR:uploads}
     max-video-mb: ${UPLOAD_MAX_VIDEO_MB:200}

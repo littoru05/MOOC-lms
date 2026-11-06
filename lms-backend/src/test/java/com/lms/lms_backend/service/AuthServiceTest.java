@@ -278,4 +278,27 @@ class AuthServiceTest {
         assertTrue(token.getRevoked());
         verify(refreshTokenRepository, times(1)).save(token);
     }
+
+    @Test
+    @DisplayName("Cấu hình cookie refreshToken đọc SameSite và Secure từ thuộc tính")
+    void setRefreshTokenCookie_ConfiguredAttributes_AppliedToCookie() {
+        org.springframework.mock.web.MockHttpServletResponse response = new org.springframework.mock.web.MockHttpServletResponse();
+        when(jwtUtils.getJwtRefreshExpirationMs()).thenReturn(604800000L);
+
+        authService.setRefreshTokenCookie(response, "test-refresh-token");
+
+        String setCookieHeader = response.getHeader("Set-Cookie");
+        assertNotNull(setCookieHeader);
+        assertTrue(setCookieHeader.contains("refreshToken=test-refresh-token"));
+        assertTrue(setCookieHeader.contains("HttpOnly"));
+        assertTrue(setCookieHeader.contains("SameSite=Lax"));
+
+        // Test clear cookie
+        org.springframework.mock.web.MockHttpServletResponse clearResponse = new org.springframework.mock.web.MockHttpServletResponse();
+        authService.clearRefreshTokenCookie(clearResponse);
+        String clearHeader = clearResponse.getHeader("Set-Cookie");
+        assertNotNull(clearHeader);
+        assertTrue(clearHeader.contains("Max-Age=0"));
+        assertTrue(clearHeader.contains("SameSite=Lax"));
+    }
 }

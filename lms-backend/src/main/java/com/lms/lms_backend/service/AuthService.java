@@ -39,6 +39,12 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtils jwtUtils;
 
+    @org.springframework.beans.factory.annotation.Value("${app.auth.cookie.same-site:Lax}")
+    private String cookieSameSite = "Lax";
+
+    @org.springframework.beans.factory.annotation.Value("${app.auth.cookie.secure:false}")
+    private boolean cookieSecure = false;
+
     @Transactional
     public AuthResponse register(RegisterRequest req) {
         return register(req, null);
@@ -190,11 +196,10 @@ public class AuthService {
 
     public void setRefreshTokenCookie(HttpServletResponse response, String token) {
         if (response == null) return;
-        // TODO: khi deploy production với Frontend/Backend khác domain, cần đổi SameSite=Lax thành SameSite=None kèm bắt buộc Secure=true, nếu không trình duyệt sẽ chặn cookie hoàn toàn.
         ResponseCookie cookie = ResponseCookie.from("refreshToken", token)
                 .httpOnly(true)
-                .secure(false) // Đặt true khi chạy môi trường HTTPS production
-                .sameSite("Lax")
+                .secure(cookieSecure)
+                .sameSite(cookieSameSite)
                 .path("/api/v1/auth")
                 .maxAge(jwtUtils.getJwtRefreshExpirationMs() / 1000)
                 .build();
@@ -203,11 +208,10 @@ public class AuthService {
 
     public void clearRefreshTokenCookie(HttpServletResponse response) {
         if (response == null) return;
-        // TODO: khi deploy production với Frontend/Backend khác domain, cần đổi SameSite=Lax thành SameSite=None kèm bắt buộc Secure=true, nếu không trình duyệt sẽ chặn cookie hoàn toàn.
         ResponseCookie cookie = ResponseCookie.from("refreshToken", "")
                 .httpOnly(true)
-                .secure(false)
-                .sameSite("Lax")
+                .secure(cookieSecure)
+                .sameSite(cookieSameSite)
                 .path("/api/v1/auth")
                 .maxAge(0)
                 .build();

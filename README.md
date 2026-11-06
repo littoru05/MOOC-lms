@@ -116,6 +116,14 @@ cp .env.example .env
 ```
 *(Bạn có thể giữ nguyên các giá trị mặc định để chạy ở môi trường Local Development, hoặc tùy chỉnh các thông số DB_PASSWORD, JWT_SECRET khi triển khai)*
 
+#### 🍪 Cấu hình Cookie Cross-Domain (`COOKIE_SAME_SITE` & `COOKIE_SECURE`):
+Khi triển khai độc lập Frontend (ví dụ Vercel: `frontend.vercel.app`) và Backend (ví dụ Render: `backend.onrender.com`), trình duyệt sẽ coi request là Cross-Site (khác domain). Cần cấu hình:
+```bash
+COOKIE_SAME_SITE=None
+COOKIE_SECURE=true
+```
+- Môi trường phát triển cục bộ (Localhost / Docker compose): Giữ mặc định `COOKIE_SAME_SITE=Lax` và `COOKIE_SECURE=false`.
+
 #### 📱 Cấu hình `VITE_PUBLIC_HOST` (Mã QR thanh toán 2 thiết bị):
 Hệ thống hỗ trợ tính năng hiển thị mã QR chuyển khoản trên máy tính để học viên dùng điện thoại quét và mở trang thanh toán. Để điện thoại hoặc thiết bị khác truy cập được, cấu hình biến `VITE_PUBLIC_HOST` trong file `.env`:
 - **Phát triển qua mạng LAN (cùng Wi-Fi):** Điền địa chỉ IP LAN của máy bạn (chạy `ipconfig` trên Windows hoặc `ifconfig` trên Linux/macOS). Ví dụ: `VITE_PUBLIC_HOST=192.168.1.15`
