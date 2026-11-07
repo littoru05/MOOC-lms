@@ -6,6 +6,7 @@ build/
 dist/
 coverage/
 *.exe
+*.zip
 ngrok.yml
 lms-backend/uploads/*
 !lms-backend/uploads/.gitkeep
