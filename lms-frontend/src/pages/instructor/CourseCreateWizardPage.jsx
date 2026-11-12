@@ -170,7 +170,7 @@ export const CourseCreateWizardPage = ({ onBack, onCourseCreated }) => {
             </button>
             <div>
               <span className="text-xs font-semibold text-[#16324F] uppercase tracking-wider">Tác giả & Giáo trình</span>
-              <h1 className="text-2xl font-bold font-serif text-[#001D37] mt-0.5">
+              <h1 className="text-2xl font-bold  text-[#001D37] mt-0.5">
                 Khởi tạo Khóa học Mới
               </h1>
             </div>
@@ -183,7 +183,7 @@ export const CourseCreateWizardPage = ({ onBack, onCourseCreated }) => {
           {/* Section 1: Basic Info */}
           <div className="bg-white border border-[#E4E4E0] rounded-2xl p-6 sm:p-8 shadow-xs space-y-6">
             <div>
-              <h2 className="font-serif font-bold text-lg text-[#001D37] flex items-center gap-2">
+              <h2 className=" font-bold text-lg text-[#001D37] flex items-center gap-2">
                 <BookOpen className="w-5 h-5 text-[#16324F]" />
                 <span>1. Thông tin tổng quan khóa học</span>
               </h2>
@@ -331,7 +331,7 @@ export const CourseCreateWizardPage = ({ onBack, onCourseCreated }) => {
           {/* Section 2: Media & Thumbnail */}
           <div className="bg-white border border-[#E4E4E0] rounded-2xl p-6 sm:p-8 shadow-xs space-y-6">
             <div>
-              <h2 className="font-serif font-bold text-lg text-[#001D37] flex items-center gap-2">
+              <h2 className=" font-bold text-lg text-[#001D37] flex items-center gap-2">
                 <Image className="w-5 h-5 text-[#16324F]" />
                 <span>2. Ảnh bìa đại diện khóa học (Cover Thumbnail)</span>
               </h2>
@@ -390,7 +390,7 @@ export const CourseCreateWizardPage = ({ onBack, onCourseCreated }) => {
           {/* Section 3: Learning Outcomes & Prerequisites */}
           <div className="bg-white border border-[#E4E4E0] rounded-2xl p-6 sm:p-8 shadow-xs space-y-6">
             <div>
-              <h2 className="font-serif font-bold text-lg text-[#001D37] flex items-center gap-2">
+              <h2 className=" font-bold text-lg text-[#001D37] flex items-center gap-2">
                 <CheckCircle2 className="w-5 h-5 text-[#16324F]" />
                 <span>3. Mục tiêu đầu ra & Yêu cầu học viên</span>
               </h2>

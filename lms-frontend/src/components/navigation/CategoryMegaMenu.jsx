@@ -266,7 +266,7 @@ export const CategoryMegaMenu = ({ onSelectCategory, isMobile = false }) => {
                     <span className="text-[10px] font-bold text-[#5E5E5E] uppercase tracking-wider block">
                       {activeCategoryId === 'all' ? 'Toàn bộ chuyên mục' : 'Khóa học tiêu biểu'}
                     </span>
-                    <h4 className="font-serif font-bold text-sm text-[#001D37] mt-0.5 truncate">
+                    <h4 className=" font-bold text-sm text-[#001D37] mt-0.5 truncate">
                       {activeCategory?.name || 'Tất cả chương trình đào tạo'}
                     </h4>
                     <p className="text-[11px] text-[#5E5E5E] line-clamp-1 mt-0.5">
@@ -297,7 +297,7 @@ export const CategoryMegaMenu = ({ onSelectCategory, isMobile = false }) => {
                           className="w-16 h-11 rounded-lg object-cover bg-slate-100 shrink-0 group-hover:scale-102 transition-transform"
                         />
                         <div className="min-w-0 flex-1">
-                          <h5 className="font-serif text-xs font-bold text-[#001D37] group-hover:text-[#16324F] line-clamp-1">
+                          <h5 className=" text-xs font-bold text-[#001D37] group-hover:text-[#16324F] line-clamp-1">
                             {course.title}
                           </h5>
                           <div className="flex items-center gap-2 text-[10px] text-[#5E5E5E] mt-0.5">

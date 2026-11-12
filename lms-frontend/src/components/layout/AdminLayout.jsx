@@ -94,11 +94,11 @@ export const AdminLayout = ({ currentTab: currentTabProp, onNavigate, children }
         
         {/* Brand / Logo */}
         <div className="h-16 px-6 flex items-center gap-3 border-b border-white/10">
-          <div className="w-9 h-9 bg-blue-500 rounded-lg flex items-center justify-center text-white shadow-sm font-serif font-black text-xl">
+          <div className="w-9 h-9 bg-blue-500 rounded-lg flex items-center justify-center text-white shadow-sm font-bold text-xl">
             E
           </div>
           <div>
-            <span className="font-serif font-bold text-base tracking-tight text-white block">
+            <span className="font-bold text-base tracking-tight text-white block">
               EduMOOC
             </span>
             <span className="text-[10px] text-blue-300 font-medium uppercase tracking-wider block">

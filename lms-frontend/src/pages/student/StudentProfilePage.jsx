@@ -167,7 +167,7 @@ export const StudentProfilePage = () => {
         <div className="bg-white border border-[#E4E4E0] rounded-2xl p-6 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <span className="text-xs font-semibold text-[#16324F] uppercase tracking-wider">Tài khoản học tập</span>
-            <h1 className="text-2xl font-bold font-serif text-[#001D37] mt-1">
+            <h1 className="text-2xl font-bold  text-[#001D37] mt-1">
               Hồ sơ Cá nhân Học viên
             </h1>
             <p className="text-xs text-[#5E5E5E] mt-0.5">
@@ -197,7 +197,7 @@ export const StudentProfilePage = () => {
           </div>
 
           <div className="flex-1 text-center md:text-left space-y-1 w-full">
-            <h2 className="text-xl font-bold font-serif text-[#001D37]">{fullName}</h2>
+            <h2 className="text-xl font-bold  text-[#001D37]">{fullName}</h2>
             <p className="text-xs text-[#5E5E5E]">{email}</p>
             <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 pt-2">
               <span className="px-2.5 py-0.5 bg-[#FAF9FC] border border-[#E4E4E0] text-[11px] text-[#5E5E5E] rounded-md font-medium">
@@ -223,7 +223,7 @@ export const StudentProfilePage = () => {
 
         {/* Read-only Learning Stats */}
         <div>
-          <h3 className="font-serif font-bold text-base text-[#001D37] mb-3 flex items-center gap-2">
+          <h3 className=" font-bold text-base text-[#001D37] mb-3 flex items-center gap-2">
             <BookOpen className="w-4 h-4 text-[#16324F]" />
             <span>Thống kê học tập (Read-only)</span>
           </h3>
@@ -233,7 +233,7 @@ export const StudentProfilePage = () => {
                 <BookOpen className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-2xl font-bold font-serif text-[#001D37]">{stats.enrolled}</p>
+                <p className="text-2xl font-bold  text-[#001D37]">{stats.enrolled}</p>
                 <p className="text-xs text-[#5E5E5E] font-medium">Khóa học đã ghi danh</p>
               </div>
             </div>
@@ -243,7 +243,7 @@ export const StudentProfilePage = () => {
                 <CheckCircle2 className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-2xl font-bold font-serif text-[#001D37]">{stats.completed}</p>
+                <p className="text-2xl font-bold  text-[#001D37]">{stats.completed}</p>
                 <p className="text-xs text-[#5E5E5E] font-medium">Khóa học hoàn thành 100%</p>
               </div>
             </div>
@@ -253,7 +253,7 @@ export const StudentProfilePage = () => {
                 <Award className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-2xl font-bold font-serif text-[#001D37]">{stats.certificates}</p>
+                <p className="text-2xl font-bold  text-[#001D37]">{stats.certificates}</p>
                 <p className="text-xs text-[#5E5E5E] font-medium">Chứng chỉ số đạt được</p>
               </div>
             </div>
@@ -263,7 +263,7 @@ export const StudentProfilePage = () => {
         {/* Section 1: Personal Info Form */}
         <div className="bg-white border border-[#E4E4E0] rounded-2xl p-6 sm:p-8 shadow-xs space-y-6">
           <div>
-            <h3 className="font-serif font-bold text-lg text-[#001D37] flex items-center gap-2">
+            <h3 className=" font-bold text-lg text-[#001D37] flex items-center gap-2">
               <User className="w-5 h-5 text-[#16324F]" />
               <span>Thông tin cá nhân</span>
             </h3>
@@ -382,7 +382,7 @@ export const StudentProfilePage = () => {
         {/* Section 2: Password Change Form (Tách biệt) */}
         <div className="bg-white border border-[#E4E4E0] rounded-2xl p-6 sm:p-8 shadow-xs space-y-6">
           <div>
-            <h3 className="font-serif font-bold text-lg text-[#001D37] flex items-center gap-2">
+            <h3 className=" font-bold text-lg text-[#001D37] flex items-center gap-2">
               <KeyRound className="w-5 h-5 text-[#16324F]" />
               <span>Đổi mật khẩu tài khoản</span>
             </h3>

@@ -176,7 +176,7 @@ export const AdminCertificatesPage = () => {
         <div>
           <div className="flex items-center gap-2">
             <Award className="w-6 h-6 text-[#001D37]" />
-            <h1 className="text-2xl font-bold font-serif text-[#001D37]">
+            <h1 className="text-2xl font-bold  text-[#001D37]">
               Quản lý Chứng chỉ số (Certificate Governance)
             </h1>
           </div>
@@ -203,7 +203,7 @@ export const AdminCertificatesPage = () => {
               <p className="text-xs font-semibold text-[#5E5E5E] uppercase tracking-wider">
                 Tổng số chứng chỉ
               </p>
-              <h3 className="text-3xl font-extrabold text-[#001D37] mt-2 font-serif">
+              <h3 className="text-3xl font-bold text-[#001D37] mt-2 ">
                 {isSummaryLoading ? '...' : summary.total}
               </h3>
             </div>
@@ -230,7 +230,7 @@ export const AdminCertificatesPage = () => {
               <p className="text-xs font-semibold text-emerald-700 uppercase tracking-wider">
                 Còn hiệu lực (Hợp lệ)
               </p>
-              <h3 className="text-3xl font-extrabold text-emerald-600 mt-2 font-serif">
+              <h3 className="text-3xl font-bold text-emerald-600 mt-2 ">
                 {isSummaryLoading ? '...' : summary.valid}
               </h3>
             </div>
@@ -257,7 +257,7 @@ export const AdminCertificatesPage = () => {
               <p className="text-xs font-semibold text-red-700 uppercase tracking-wider">
                 Đã thu hồi (Vô hiệu hóa)
               </p>
-              <h3 className="text-3xl font-extrabold text-red-600 mt-2 font-serif">
+              <h3 className="text-3xl font-bold text-red-600 mt-2 ">
                 {isSummaryLoading ? '...' : summary.revoked}
               </h3>
             </div>
@@ -544,7 +544,7 @@ export const AdminCertificatesPage = () => {
             <div className="shrink-0 px-5 sm:px-6 py-3.5 border-b border-gray-100 flex items-center justify-between bg-white">
               <div className="flex items-center gap-2">
                 <ShieldCheck className="w-5 h-5 text-[#001D37]" />
-                <h3 className="font-serif font-bold text-sm sm:text-base text-[#001D37]">
+                <h3 className=" font-bold text-sm sm:text-base text-[#001D37]">
                   Chi tiết Chứng chỉ số Định danh (Admin Preview)
                 </h3>
               </div>
@@ -567,10 +567,10 @@ export const AdminCertificatesPage = () => {
                 <div className="border-b border-[#E4E4E0] pb-3">
                   <div className={`w-10 h-10 ${
                     previewTarget.status === 'REVOKED' ? 'bg-red-800' : 'bg-[#002D72]'
-                  } text-white rounded-xl mx-auto flex items-center justify-center font-bold text-lg font-serif mb-1.5 shadow-2xs`}>
+                  } text-white rounded-xl mx-auto flex items-center justify-center font-bold text-lg  mb-1.5 shadow-2xs`}>
                     E
                   </div>
-                  <h4 className="text-[11px] font-bold text-[#002D72] tracking-widest uppercase font-serif">
+                  <h4 className="text-[11px] font-bold text-[#002D72] tracking-widest uppercase ">
                     EDUMOOC ACADEMY
                   </h4>
                   <p className="text-[9px] text-[#4A5568] uppercase tracking-wider">
@@ -600,7 +600,7 @@ export const AdminCertificatesPage = () => {
                   <p className="text-[10px] text-[#5E5E5E] uppercase tracking-widest font-medium">
                     Chứng nhận cấp cho học viên
                   </p>
-                  <h3 className="text-xl sm:text-2xl font-bold font-serif text-[#001D37]">
+                  <h3 className="text-xl sm:text-2xl font-bold  text-[#001D37]">
                     {previewTarget.studentName}
                   </h3>
                   <p className="text-[11px] text-[#5E5E5E]">{previewTarget.studentEmail}</p>
@@ -609,7 +609,7 @@ export const AdminCertificatesPage = () => {
                     <p className="text-[11px] text-[#5E5E5E] italic">
                       đã hoàn thành khóa học
                     </p>
-                    <h4 className="text-base sm:text-lg font-bold font-serif text-[#002D72] mt-0.5">
+                    <h4 className="text-base sm:text-lg font-bold  text-[#002D72] mt-0.5">
                       {previewTarget.courseTitle}
                     </h4>
                   </div>

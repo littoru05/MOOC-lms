@@ -205,7 +205,7 @@ export const InstructorDashboard = ({ onEditCourse, onCreateCourse, onBuildQuiz 
             <BookOpen className="w-3.5 h-3.5" />
             <span>Không gian Giảng viên Chuyên môn</span>
           </div>
-          <h1 className="text-2xl font-extrabold text-[#001D37] tracking-tight">
+          <h1 className="text-2xl font-bold text-[#001D37] tracking-tight">
             Bảng điều khiển Giảng dạy & Khóa học
           </h1>
           <p className="text-xs text-[#5E5E5E]">
@@ -243,7 +243,7 @@ export const InstructorDashboard = ({ onEditCourse, onCreateCourse, onBuildQuiz 
               </span>
             )}
           </div>
-          <p className="text-2xl font-extrabold text-[#001D37] font-serif">{courses.length}</p>
+          <p className="text-2xl font-bold text-[#001D37] ">{courses.length}</p>
         </button>
 
         {/* Card 2: Đã xuất bản */}
@@ -265,7 +265,7 @@ export const InstructorDashboard = ({ onEditCourse, onCreateCourse, onBuildQuiz 
               </span>
             )}
           </div>
-          <p className="text-2xl font-extrabold text-emerald-600 font-serif">{publishedCount}</p>
+          <p className="text-2xl font-bold text-emerald-600 ">{publishedCount}</p>
         </button>
 
         {/* Card 3: Chờ xét duyệt */}
@@ -287,7 +287,7 @@ export const InstructorDashboard = ({ onEditCourse, onCreateCourse, onBuildQuiz 
               </span>
             )}
           </div>
-          <p className="text-2xl font-extrabold text-amber-600 font-serif">{pendingCount}</p>
+          <p className="text-2xl font-bold text-amber-600 ">{pendingCount}</p>
         </button>
 
         {/* Card 4: Đã lưu trữ */}
@@ -309,7 +309,7 @@ export const InstructorDashboard = ({ onEditCourse, onCreateCourse, onBuildQuiz 
               </span>
             )}
           </div>
-          <p className="text-2xl font-extrabold text-slate-700 font-serif">{archivedCount}</p>
+          <p className="text-2xl font-bold text-slate-700 ">{archivedCount}</p>
         </button>
 
         {/* Card 5: Bản nháp */}
@@ -331,7 +331,7 @@ export const InstructorDashboard = ({ onEditCourse, onCreateCourse, onBuildQuiz 
               </span>
             )}
           </div>
-          <p className="text-2xl font-extrabold text-[#5E5E5E] font-serif">{draftCount}</p>
+          <p className="text-2xl font-bold text-[#5E5E5E] ">{draftCount}</p>
         </button>
       </div>
 
@@ -339,7 +339,7 @@ export const InstructorDashboard = ({ onEditCourse, onCreateCourse, onBuildQuiz 
       <div className="bg-white border border-[#E4E4E0] rounded-2xl overflow-hidden shadow-sm">
         <div className="px-6 py-4 border-b border-[#E4E4E0] flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#FAF9FC]">
           <div className="flex items-center gap-3 flex-wrap">
-            <h3 className="font-serif font-extrabold text-[#001D37] text-base">
+            <h3 className=" font-bold text-[#001D37] text-base">
               Danh sách khóa học của bạn ({filteredCourses.length})
             </h3>
             {statusFilter !== 'ALL' && (
@@ -428,7 +428,7 @@ export const InstructorDashboard = ({ onEditCourse, onCreateCourse, onBuildQuiz 
                         </span>
                       )}
                     </div>
-                    <h4 className="font-serif font-bold text-base text-[#001D37] line-clamp-1">{c.title}</h4>
+                    <h4 className=" font-bold text-base text-[#001D37] line-clamp-1">{c.title}</h4>
                     <p className="text-xs text-[#5E5E5E] line-clamp-1">{c.description}</p>
                   </div>
                 </div>
@@ -512,7 +512,7 @@ export const InstructorDashboard = ({ onEditCourse, onCreateCourse, onBuildQuiz 
       <div className="bg-white border border-[#E4E4E0] rounded-xl overflow-hidden shadow-xs space-y-0">
         <div className="px-6 py-4 border-b border-[#E4E4E0] flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white">
           <div>
-            <h3 className="font-serif font-bold text-[#001D37] text-base flex items-center gap-2">
+            <h3 className=" font-bold text-[#001D37] text-base flex items-center gap-2">
               <HelpCircle className="w-4 h-4 text-[#16324F]" />
               <span>Danh sách Đề thi Trắc nghiệm Quiz đã biên soạn</span>
             </h3>

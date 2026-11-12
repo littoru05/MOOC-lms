@@ -158,7 +158,7 @@ export const Carousel = ({
               </span>
             )}
           </div>
-          <h2 className="text-xl sm:text-2xl font-bold font-serif text-[#001D37] flex items-center gap-2.5">
+          <h2 className="text-xl sm:text-2xl font-bold  text-[#001D37] flex items-center gap-2.5">
             {icon && <span className="text-[#16324F]">{icon}</span>}
             <span>{title}</span>
           </h2>

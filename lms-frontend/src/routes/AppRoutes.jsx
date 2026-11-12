@@ -55,8 +55,9 @@ import { NotificationsPage } from '../pages/common/NotificationsPage';
 export const AppRoutes = () => {
   return (
     <Routes>
-      {/* Auth Public Route */}
-      <Route path="/login" element={<LoginPage />} />
+      {/* Auth Public Routes */}
+      <Route path="/login" element={<LoginPage initialMode="login" />} />
+      <Route path="/register" element={<LoginPage initialMode="register" />} />
 
       {/* Student Portal Routes */}
       <Route element={<StudentLayout />}>

@@ -234,7 +234,7 @@ export const AdminUserDetailPage = () => {
           </button>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold font-serif text-[#001D37]">
+              <h1 className="text-2xl font-bold  text-[#001D37]">
                 Chi tiết Tài khoản Người dùng
               </h1>
               <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
@@ -299,7 +299,7 @@ export const AdminUserDetailPage = () => {
             </div>
 
             <div>
-              <h2 className="text-lg font-bold font-serif text-[#001D37]">
+              <h2 className="text-lg font-bold  text-[#001D37]">
                 {user.fullName}
               </h2>
               <p className="text-xs text-[#5E5E5E] font-mono">@{user.username || 'username_mac_dinh'}</p>
@@ -343,7 +343,7 @@ export const AdminUserDetailPage = () => {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E4E4E0] pb-4">
               <div className="flex items-center gap-2">
                 <ShieldCheck className="w-5 h-5 text-[#001D37]" />
-                <h3 className="font-serif font-bold text-base text-[#001D37]">
+                <h3 className=" font-bold text-base text-[#001D37]">
                   Thông tin Nhạy cảm & Xác thực Quản trị
                 </h3>
               </div>
@@ -454,7 +454,7 @@ export const AdminUserDetailPage = () => {
             <div className="bg-white border border-[#E4E4E0] rounded-2xl p-6 shadow-xs space-y-4">
               <div className="flex items-center gap-2 border-b border-[#E4E4E0] pb-3">
                 <TrendingUp className="w-5 h-5 text-[#001D37]" />
-                <h3 className="font-serif font-bold text-base text-[#001D37]">
+                <h3 className=" font-bold text-base text-[#001D37]">
                   {isStudent ? 'Số liệu Học tập & Giao dịch' : isInstructor ? 'Số liệu Giảng dạy & Khóa học' : 'Thống kê Quản trị'}
                 </h3>
               </div>
@@ -463,23 +463,23 @@ export const AdminUserDetailPage = () => {
                 <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                   <div className="p-3 bg-[#FAF9FC] border border-[#E4E4E0] rounded-xl text-center">
                     <span className="text-[10px] font-bold text-[#5E5E5E] uppercase block">Đang học</span>
-                    <span className="text-xl font-extrabold text-[#001D37] font-serif">{user.stats.enrolledCoursesCount || 0}</span>
+                    <span className="text-xl font-bold text-[#001D37] ">{user.stats.enrolledCoursesCount || 0}</span>
                   </div>
                   <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-center">
                     <span className="text-[10px] font-bold text-emerald-700 uppercase block">Hoàn thành</span>
-                    <span className="text-xl font-extrabold text-emerald-700 font-serif">{user.stats.completedCoursesCount || 0}</span>
+                    <span className="text-xl font-bold text-emerald-700 ">{user.stats.completedCoursesCount || 0}</span>
                   </div>
                   <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl text-center">
                     <span className="text-[10px] font-bold text-blue-700 uppercase block">Chứng chỉ</span>
-                    <span className="text-xl font-extrabold text-blue-700 font-serif">{user.stats.certificatesCount || 0}</span>
+                    <span className="text-xl font-bold text-blue-700 ">{user.stats.certificatesCount || 0}</span>
                   </div>
                   <div className="p-3 bg-[#FAF9FC] border border-[#E4E4E0] rounded-xl text-center">
                     <span className="text-[10px] font-bold text-[#5E5E5E] uppercase block">Đơn hàng</span>
-                    <span className="text-xl font-extrabold text-[#001D37] font-serif">{user.stats.ordersCount || 0}</span>
+                    <span className="text-xl font-bold text-[#001D37] ">{user.stats.ordersCount || 0}</span>
                   </div>
                   <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-center">
                     <span className="text-[10px] font-bold text-amber-700 uppercase block">Tổng chi</span>
-                    <span className="text-sm font-extrabold text-amber-800 font-serif block mt-1">
+                    <span className="text-sm font-bold text-amber-800  block mt-1">
                       {formatCurrency(user.stats.totalSpent || 0)}
                     </span>
                   </div>
@@ -490,27 +490,27 @@ export const AdminUserDetailPage = () => {
                 <div className="grid grid-cols-2 sm:grid-cols-6 gap-3">
                   <div className="p-3 bg-[#FAF9FC] border border-[#E4E4E0] rounded-xl text-center">
                     <span className="text-[10px] font-bold text-[#5E5E5E] uppercase block">Tổng khóa</span>
-                    <span className="text-xl font-extrabold text-[#001D37] font-serif">{user.stats.totalCoursesCount || 0}</span>
+                    <span className="text-xl font-bold text-[#001D37] ">{user.stats.totalCoursesCount || 0}</span>
                   </div>
                   <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-center">
                     <span className="text-[10px] font-bold text-emerald-700 uppercase block">Đã xuất bản</span>
-                    <span className="text-xl font-extrabold text-emerald-700 font-serif">{user.stats.publishedCoursesCount || 0}</span>
+                    <span className="text-xl font-bold text-emerald-700 ">{user.stats.publishedCoursesCount || 0}</span>
                   </div>
                   <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-center">
                     <span className="text-[10px] font-bold text-amber-700 uppercase block">Chờ duyệt</span>
-                    <span className="text-xl font-extrabold text-amber-700 font-serif">{user.stats.pendingCoursesCount || 0}</span>
+                    <span className="text-xl font-bold text-amber-700 ">{user.stats.pendingCoursesCount || 0}</span>
                   </div>
                   <div className="p-3 bg-gray-50 border border-gray-200 rounded-xl text-center">
                     <span className="text-[10px] font-bold text-gray-700 uppercase block">Bản nháp</span>
-                    <span className="text-xl font-extrabold text-gray-700 font-serif">{user.stats.draftCoursesCount || 0}</span>
+                    <span className="text-xl font-bold text-gray-700 ">{user.stats.draftCoursesCount || 0}</span>
                   </div>
                   <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-center">
                     <span className="text-[10px] font-bold text-slate-700 uppercase block">Lưu trữ</span>
-                    <span className="text-xl font-extrabold text-slate-700 font-serif">{user.stats.archivedCoursesCount || 0}</span>
+                    <span className="text-xl font-bold text-slate-700 ">{user.stats.archivedCoursesCount || 0}</span>
                   </div>
                   <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl text-center">
                     <span className="text-[10px] font-bold text-blue-700 uppercase block">Học viên</span>
-                    <span className="text-xl font-extrabold text-blue-700 font-serif">{user.stats.totalStudentsCount || 0}</span>
+                    <span className="text-xl font-bold text-blue-700 ">{user.stats.totalStudentsCount || 0}</span>
                   </div>
                 </div>
               )}
@@ -528,7 +528,7 @@ export const AdminUserDetailPage = () => {
           <div className="flex items-center justify-between border-b border-[#E4E4E0] pb-2.5">
             <div className="flex items-center gap-2">
               <BookOpen className="w-4 h-4 text-[#001D37]" />
-              <h4 className="font-serif font-bold text-sm text-[#001D37]">
+              <h4 className=" font-bold text-sm text-[#001D37]">
                 Khóa học đăng ký ({user.recentEnrollments?.length || 0})
               </h4>
             </div>
@@ -562,7 +562,7 @@ export const AdminUserDetailPage = () => {
           <div className="flex items-center justify-between border-b border-[#E4E4E0] pb-2.5">
             <div className="flex items-center gap-2">
               <ShoppingBag className="w-4 h-4 text-[#001D37]" />
-              <h4 className="font-serif font-bold text-sm text-[#001D37]">
+              <h4 className=" font-bold text-sm text-[#001D37]">
                 Đơn hàng gần đây ({user.recentOrders?.length || 0})
               </h4>
             </div>
@@ -595,7 +595,7 @@ export const AdminUserDetailPage = () => {
           <div className="flex items-center justify-between border-b border-[#E4E4E0] pb-2.5">
             <div className="flex items-center gap-2">
               {isInstructor ? <FileText className="w-4 h-4 text-[#001D37]" /> : <Award className="w-4 h-4 text-[#001D37]" />}
-              <h4 className="font-serif font-bold text-sm text-[#001D37]">
+              <h4 className=" font-bold text-sm text-[#001D37]">
                 {isInstructor ? `Khóa học đã tạo (${user.recentCourses?.length || 0})` : `Chứng chỉ số (${user.recentCertificates?.length || 0})`}
               </h4>
             </div>
@@ -648,7 +648,7 @@ export const AdminUserDetailPage = () => {
                   <ShieldCheck className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-serif font-bold text-base text-[#001D37]">
+                  <h3 className=" font-bold text-base text-[#001D37]">
                     Xác thực Quản trị viên
                   </h3>
                   <p className="text-[11px] text-[#5E5E5E]">
@@ -724,7 +724,7 @@ export const AdminUserDetailPage = () => {
                   <Key className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-serif font-bold text-base text-[#001D37]">
+                  <h3 className=" font-bold text-base text-[#001D37]">
                     Đặt lại Mật khẩu Người dùng
                   </h3>
                   <p className="text-[11px] text-[#5E5E5E]">
@@ -800,7 +800,7 @@ export const AdminUserDetailPage = () => {
                 <CheckCircle2 className="w-6 h-6 text-emerald-600" />
               </div>
               <div>
-                <h3 className="font-serif font-bold text-base text-[#001D37]">
+                <h3 className=" font-bold text-base text-[#001D37]">
                   Mật khẩu Tạm thời Mới
                 </h3>
                 <p className="text-[11px] text-[#5E5E5E]">
@@ -818,7 +818,7 @@ export const AdminUserDetailPage = () => {
             </div>
 
             <div className="p-4 bg-gray-50 border border-gray-200 rounded-xl flex items-center justify-between gap-3">
-              <span className="font-mono text-base font-extrabold text-[#001D37] tracking-wider select-all">
+              <span className="font-mono text-base font-bold text-[#001D37] tracking-wider select-all">
                 {tempPasswordData}
               </span>
               <button

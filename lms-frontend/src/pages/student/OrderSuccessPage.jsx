@@ -34,7 +34,7 @@ export const OrderSuccessPage = () => {
             <span className="inline-block text-xs font-bold uppercase tracking-wider text-emerald-300 bg-emerald-950/60 px-3 py-1 rounded-full border border-emerald-500/30">
               Giao dịch hoàn tất
             </span>
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold font-serif">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold ">
               Thanh toán thành công
             </h1>
             <p className="text-xs sm:text-sm text-blue-100/80 max-w-lg mx-auto">
@@ -82,7 +82,7 @@ export const OrderSuccessPage = () => {
 
               <div className="space-y-1">
                 <span className="text-[#5E5E5E]">Tổng thanh toán:</span>
-                <p className="font-serif font-bold text-base text-emerald-700">
+                <p className=" font-bold text-base text-emerald-700">
                   {formatCurrency(order.totalAmount)}
                 </p>
               </div>
@@ -90,7 +90,7 @@ export const OrderSuccessPage = () => {
 
             {/* Course List */}
             <div className="space-y-3">
-              <h2 className="font-serif font-bold text-sm text-[#001D37] flex items-center gap-2">
+              <h2 className=" font-bold text-sm text-[#001D37] flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-amber-500" />
                 <span>Khóa học đã mua ({items.length}):</span>
               </h2>
@@ -116,7 +116,7 @@ export const OrderSuccessPage = () => {
                     </div>
 
                     <div className="text-right shrink-0 flex sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto">
-                      <span className="font-serif font-bold text-xs text-[#001D37]">
+                      <span className=" font-bold text-xs text-[#001D37]">
                         {formatCurrency(item.price)}
                       </span>
                       {item.courseId && (
@@ -166,7 +166,7 @@ export const OrderSuccessPage = () => {
             <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-full mx-auto flex items-center justify-center">
               <CheckCircle2 className="w-6 h-6" />
             </div>
-            <h2 className="font-serif font-bold text-base text-[#001D37]">
+            <h2 className=" font-bold text-base text-[#001D37]">
               Thanh toán thành công
             </h2>
             <p className="text-xs text-[#5E5E5E] max-w-sm mx-auto">

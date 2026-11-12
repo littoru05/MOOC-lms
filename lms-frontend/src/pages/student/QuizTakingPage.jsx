@@ -209,7 +209,7 @@ export const QuizTakingPage = ({ quizId: quizIdProp, enrollmentId: enrollmentIdP
             <ArrowLeft className="w-4 h-4" />
           </button>
           <div>
-            <h1 className="text-sm font-bold font-serif text-[#001D37]">{quiz.title}</h1>
+            <h1 className="text-sm font-bold  text-[#001D37]">{quiz.title}</h1>
             <p className="text-[11px] text-[#5E5E5E]">
               Điểm đạt: {quiz.passingScore}% • Đã làm: {answeredCount}/{totalQuestions} câu
             </p>
@@ -236,7 +236,7 @@ export const QuizTakingPage = ({ quizId: quizIdProp, enrollmentId: enrollmentIdP
           >
             <div className="flex items-start justify-between gap-4 mb-4">
               <div className="flex items-center gap-2">
-                <span className="w-6 h-6 rounded-full bg-[#16324F] text-white text-xs font-bold flex items-center justify-center font-serif">
+                <span className="w-6 h-6 rounded-full bg-[#16324F] text-white text-xs font-bold flex items-center justify-center ">
                   {idx + 1}
                 </span>
                 <span className="text-xs font-semibold text-[#5E5E5E] uppercase tracking-wider">

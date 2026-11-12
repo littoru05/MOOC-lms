@@ -216,7 +216,7 @@ export const InstructorRevenuePage = () => {
             <Sparkles className="w-3.5 h-3.5 text-amber-600" />
             <span>Thu nhập & Quyền lợi Giảng viên</span>
           </div>
-          <h1 className="text-2xl md:text-3xl font-bold font-serif text-[#001D37]">
+          <h1 className="text-2xl md:text-3xl font-bold  text-[#001D37]">
             Thu nhập của bạn
           </h1>
           <p className="text-xs text-[#5E5E5E] mt-1">
@@ -258,7 +258,7 @@ export const InstructorRevenuePage = () => {
             {isSummaryLoading ? (
               <div className="h-9 w-24 bg-slate-200 animate-pulse rounded-lg" />
             ) : (
-              <h3 className="text-3xl font-extrabold font-serif text-[#001D37]">
+              <h3 className="text-3xl font-bold  text-[#001D37]">
                 {(summary?.totalCoursesSold || 0).toLocaleString('vi-VN')}
                 <span className="text-xs font-normal text-[#5E5E5E] ml-1.5 font-sans">lượt mua</span>
               </h3>
@@ -282,7 +282,7 @@ export const InstructorRevenuePage = () => {
             {isSummaryLoading ? (
               <div className="h-9 w-36 bg-white/20 animate-pulse rounded-lg" />
             ) : (
-              <h3 className="text-3xl font-extrabold font-serif text-white tracking-tight">
+              <h3 className="text-3xl font-bold  text-white tracking-tight">
                 {formatCurrency(summary?.totalNetRevenue || 0)}
               </h3>
             )}
@@ -304,7 +304,7 @@ export const InstructorRevenuePage = () => {
             {isSummaryLoading ? (
               <div className="h-9 w-20 bg-slate-200 animate-pulse rounded-lg" />
             ) : (
-              <h3 className="text-3xl font-extrabold font-serif text-[#001D37]">
+              <h3 className="text-3xl font-bold  text-[#001D37]">
                 {(summary?.totalStudentsCount || 0).toLocaleString('vi-VN')}
                 <span className="text-xs font-normal text-[#5E5E5E] ml-1.5 font-sans">học viên</span>
               </h3>
@@ -324,7 +324,7 @@ export const InstructorRevenuePage = () => {
         {/* Chart Controls Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#E4E4E0]">
           <div>
-            <h2 className="text-lg font-bold font-serif text-[#001D37] flex items-center gap-2">
+            <h2 className="text-lg font-bold  text-[#001D37] flex items-center gap-2">
               <BarChart3 className="w-5 h-5 text-[#16324F]" />
               <span>Biểu đồ tăng trưởng thu nhập</span>
             </h2>
@@ -497,7 +497,7 @@ export const InstructorRevenuePage = () => {
       <div className="bg-white border border-[#E4E4E0] rounded-2xl p-6 md:p-8 shadow-xs space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#E4E4E0]">
           <div>
-            <h2 className="text-lg font-bold font-serif text-[#001D37] flex items-center gap-2">
+            <h2 className="text-lg font-bold  text-[#001D37] flex items-center gap-2">
               <BookOpen className="w-5 h-5 text-[#16324F]" />
               <span>Chi tiết thu nhập theo từng khóa học</span>
             </h2>

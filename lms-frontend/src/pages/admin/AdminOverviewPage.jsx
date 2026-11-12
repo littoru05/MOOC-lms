@@ -45,7 +45,7 @@ export const AdminOverviewPage = ({ onNavigateSubTab }) => {
               <ShieldCheck className="w-3.5 h-3.5" />
               <span>Quản trị Hệ thống Toàn diện</span>
             </div>
-            <h1 className="text-2xl font-bold font-serif text-[#001D37]">
+            <h1 className="text-2xl font-bold  text-[#001D37]">
               Tổng quan Hệ sinh thái EduMOOC
             </h1>
             <p className="text-xs text-[#5E5E5E] mt-1">
@@ -93,7 +93,7 @@ export const AdminOverviewPage = ({ onNavigateSubTab }) => {
               <Users className="w-5 h-5 text-[#16324F]" />
             </div>
             <div>
-              <p className="text-3xl font-bold font-serif text-[#001D37]">{stats?.totalUsers || 0}</p>
+              <p className="text-3xl font-bold  text-[#001D37]">{stats?.totalUsers || 0}</p>
               <p className="text-[11px] text-[#6B6B6B] mt-1">
                 {stats?.totalStudents || 0} học viên • {stats?.totalInstructors || 0} giảng viên
               </p>
@@ -111,7 +111,7 @@ export const AdminOverviewPage = ({ onNavigateSubTab }) => {
               <BookOpen className="w-5 h-5 text-[#16324F]" />
             </div>
             <div>
-              <p className="text-3xl font-bold font-serif text-[#001D37]">{stats?.totalCourses || 0}</p>
+              <p className="text-3xl font-bold  text-[#001D37]">{stats?.totalCourses || 0}</p>
               <p className="text-[11px] text-[#6B6B6B] mt-1">
                 <span className="text-[#22C55E] font-semibold">{stats?.publishedCourses || 0} đã xuất bản</span> • {stats?.pendingCourses || 0} chờ duyệt
               </p>
@@ -129,7 +129,7 @@ export const AdminOverviewPage = ({ onNavigateSubTab }) => {
               <GraduationCap className="w-5 h-5 text-[#16324F]" />
             </div>
             <div>
-              <p className="text-3xl font-bold font-serif text-[#001D37]">{stats?.totalEnrollments || 0}</p>
+              <p className="text-3xl font-bold  text-[#001D37]">{stats?.totalEnrollments || 0}</p>
               <p className="text-[11px] text-[#6B6B6B] mt-1">
                 {stats?.completedEnrollments || 0} hoàn thành khóa
               </p>
@@ -147,7 +147,7 @@ export const AdminOverviewPage = ({ onNavigateSubTab }) => {
               <TrendingUp className="w-5 h-5 text-[#22C55E]" />
             </div>
             <div>
-              <p className="text-3xl font-bold font-serif text-[#22C55E]">{stats?.completionRate || 0}%</p>
+              <p className="text-3xl font-bold  text-[#22C55E]">{stats?.completionRate || 0}%</p>
               <p className="text-[11px] text-[#6B6B6B] mt-1">Học viên đạt chứng chỉ số</p>
             </div>
           </div>
@@ -157,7 +157,7 @@ export const AdminOverviewPage = ({ onNavigateSubTab }) => {
         {/* System Health / Status info */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="bg-white border border-[#E4E4E0] rounded-xl p-6 shadow-xs space-y-4">
-            <h3 className="font-serif font-bold text-base text-[#001D37]">Trạng thái Khóa học Cần kiểm duyệt</h3>
+            <h3 className=" font-bold text-base text-[#001D37]">Trạng thái Khóa học Cần kiểm duyệt</h3>
             {stats?.pendingCourses > 0 ? (
               <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -181,7 +181,7 @@ export const AdminOverviewPage = ({ onNavigateSubTab }) => {
 
           <div className="bg-white border border-[#E4E4E0] rounded-xl p-6 shadow-xs space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="font-serif font-bold text-base text-[#001D37]">Chỉ số Vận hành & Tài chính Nền tảng</h3>
+              <h3 className=" font-bold text-base text-[#001D37]">Chỉ số Vận hành & Tài chính Nền tảng</h3>
               <button
                 onClick={() => navigate('/admin/revenue')}
                 className="text-xs font-semibold text-[#16324F] hover:underline flex items-center gap-1 cursor-pointer"

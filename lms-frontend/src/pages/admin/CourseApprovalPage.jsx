@@ -201,7 +201,7 @@ export const CourseApprovalPage = ({ onBack }) => {
             <ArrowLeft className="w-4 h-4" />
           </button>
           <div>
-            <h1 className="text-xl font-bold font-serif text-[#001D37]">
+            <h1 className="text-xl font-bold  text-[#001D37]">
               Kiểm duyệt Khóa học (Course Quality Assurance)
             </h1>
             <p className="text-xs text-[#5E5E5E]">
@@ -223,7 +223,7 @@ export const CourseApprovalPage = ({ onBack }) => {
       ) : courses.length === 0 ? (
         <div className="text-center py-24 bg-white border border-[#E4E4E0] rounded-xl">
           <CheckCircle2 className="w-12 h-12 text-[#22C55E] mx-auto mb-3" />
-          <p className="font-serif font-bold text-base text-[#1A1C1E]">
+          <p className=" font-bold text-base text-[#1A1C1E]">
             Tất cả khóa học đã được kiểm duyệt hoàn tất!
           </p>
           <p className="text-xs text-[#5E5E5E] mt-1">Không có khóa học nào ở trạng thái chờ duyệt.</p>
@@ -324,7 +324,7 @@ export const CourseApprovalPage = ({ onBack }) => {
                       Gửi lúc: {formatDate(selectedCourse.createdAt)}
                     </span>
                   </div>
-                  <h2 className="text-xl font-bold font-serif text-[#001D37] leading-snug">
+                  <h2 className="text-xl font-bold  text-[#001D37] leading-snug">
                     {selectedCourse.title}
                   </h2>
                 </div>
@@ -397,22 +397,22 @@ export const CourseApprovalPage = ({ onBack }) => {
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                     <div className="p-3 bg-[#FAF9FC] border border-[#E4E4E0] rounded-xl text-center">
                       <span className="text-[10px] text-[#5E5E5E] uppercase font-semibold">Chương học</span>
-                      <p className="text-base font-bold font-serif text-[#001D37] mt-0.5">{sections.length}</p>
+                      <p className="text-base font-bold  text-[#001D37] mt-0.5">{sections.length}</p>
                     </div>
 
                     <div className="p-3 bg-[#FAF9FC] border border-[#E4E4E0] rounded-xl text-center">
                       <span className="text-[10px] text-[#5E5E5E] uppercase font-semibold">Bài giảng</span>
-                      <p className="text-base font-bold font-serif text-[#001D37] mt-0.5">{totalLessons}</p>
+                      <p className="text-base font-bold  text-[#001D37] mt-0.5">{totalLessons}</p>
                     </div>
 
                     <div className="p-3 bg-[#FAF9FC] border border-[#E4E4E0] rounded-xl text-center">
                       <span className="text-[10px] text-[#5E5E5E] uppercase font-semibold">Thời lượng</span>
-                      <p className="text-base font-bold font-serif text-[#001D37] mt-0.5">{totalDurationMinutes} phút</p>
+                      <p className="text-base font-bold  text-[#001D37] mt-0.5">{totalDurationMinutes} phút</p>
                     </div>
 
                     <div className="p-3 bg-[#FAF9FC] border border-[#E4E4E0] rounded-xl text-center">
                       <span className="text-[10px] text-[#5E5E5E] uppercase font-semibold">Học phí</span>
-                      <p className="text-base font-bold font-serif text-[#16324F] mt-0.5">{formatCurrency(selectedCourse.price)}</p>
+                      <p className="text-base font-bold  text-[#16324F] mt-0.5">{formatCurrency(selectedCourse.price)}</p>
                     </div>
                   </div>
 
@@ -459,7 +459,7 @@ export const CourseApprovalPage = ({ onBack }) => {
                       />
                       <div>
                         <span className="text-[10px] font-bold text-blue-700 uppercase tracking-wider">Hồ sơ Giảng viên</span>
-                        <h4 className="font-serif font-bold text-sm text-[#001D37]">
+                        <h4 className=" font-bold text-sm text-[#001D37]">
                           {selectedCourse.instructorName || selectedCourse.instructor?.fullName || 'Giảng viên chưa cập nhật'}
                         </h4>
                         <p className="text-[11px] text-[#5E5E5E]">{selectedCourse.instructor?.email || 'N/A'}</p>
@@ -553,7 +553,7 @@ export const CourseApprovalPage = ({ onBack }) => {
                       <div className="p-4 bg-[#FAF9FC] border border-[#E4E4E0] rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div>
                           <span className="text-[10px] font-bold text-amber-700 uppercase tracking-wider">Đề thi khảo thí kết thúc khóa</span>
-                          <h4 className="font-serif font-bold text-sm text-[#001D37] mt-0.5">{quiz.title}</h4>
+                          <h4 className=" font-bold text-sm text-[#001D37] mt-0.5">{quiz.title}</h4>
                         </div>
                         <div className="flex items-center gap-3 text-xs">
                           <span className="px-2.5 py-1 bg-white border border-[#E4E4E0] rounded-lg text-[#16324F] font-bold">
@@ -574,7 +574,7 @@ export const CourseApprovalPage = ({ onBack }) => {
                             <div key={q.id || qIdx} className="bg-white border border-[#E4E4E0] rounded-xl p-4 space-y-3 shadow-2xs">
                               <div className="flex items-start justify-between gap-2">
                                 <h5 className="text-xs font-bold text-[#001D37]">
-                                  <span className="text-[#16324F] mr-1.5 font-extrabold">Câu {qIdx + 1}:</span>
+                                  <span className="text-[#16324F] mr-1.5 font-bold">Câu {qIdx + 1}:</span>
                                   {q.questionText}
                                 </h5>
                                 <span className="text-[10px] font-bold px-2 py-0.5 bg-slate-100 text-slate-700 rounded shrink-0">
@@ -631,7 +631,7 @@ export const CourseApprovalPage = ({ onBack }) => {
                   <XCircle className="w-5 h-5 text-red-600" />
                 </div>
                 <div>
-                  <h3 className="font-serif font-bold text-base text-[#001D37]">
+                  <h3 className=" font-bold text-base text-[#001D37]">
                     {rejectTarget.status === 'PENDING_DELETE'
                       ? 'Từ chối yêu cầu xóa khóa học'
                       : 'Từ chối xuất bản khóa học'}

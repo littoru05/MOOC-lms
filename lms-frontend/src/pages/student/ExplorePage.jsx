@@ -198,7 +198,7 @@ export const ExplorePage = ({ onSelectCourse, initialFilterQuery = '' }) => {
               </div>
 
               {/* High-Impact Main Heading */}
-              <h1 className="text-3xl sm:text-4xl lg:text-[46px] font-black text-white tracking-tight leading-[1.18]">
+              <h1 className="text-3xl sm:text-4xl lg:text-[44px] font-bold text-white leading-snug">
                 Khám phá tri thức, làm chủ công nghệ tương lai
               </h1>
 
@@ -469,7 +469,7 @@ export const ExplorePage = ({ onSelectCourse, initialFilterQuery = '' }) => {
                 <Layers className="w-3.5 h-3.5 text-[#16324F]" />
                 <span>Lĩnh vực đào tạo</span>
               </div>
-              <h2 className="text-2xl font-bold font-serif text-[#001D37]">
+              <h2 className="text-2xl font-bold  text-[#001D37]">
                 Khám phá theo danh mục chuyên môn
               </h2>
               <p className="text-xs text-[#5E5E5E] mt-1">
@@ -551,7 +551,7 @@ export const ExplorePage = ({ onSelectCourse, initialFilterQuery = '' }) => {
                 </div>
 
                 <div>
-                  <h4 className="font-serif font-bold text-sm text-[#001D37] group-hover:text-[#16324F] transition-colors">
+                  <h4 className=" font-bold text-sm text-[#001D37] group-hover:text-[#16324F] transition-colors">
                     {inst.fullName}
                   </h4>
                   <p className="text-[11px] font-semibold text-[#16324F] mt-0.5 line-clamp-1">{inst.title}</p>
@@ -589,7 +589,7 @@ export const ExplorePage = ({ onSelectCourse, initialFilterQuery = '' }) => {
       <div id="course-catalog-section" className="max-w-[1280px] mx-auto px-6 pt-6">
         <div className="border-t border-[#E4E4E0] pt-8">
           <div className="space-y-1 mb-6">
-            <h2 className="text-xl sm:text-2xl font-bold font-serif text-[#001D37]">
+            <h2 className="text-xl sm:text-2xl font-bold  text-[#001D37]">
               Tất cả chương trình đào tạo
             </h2>
             <p className="text-xs text-[#5E5E5E]">
@@ -650,7 +650,7 @@ export const ExplorePage = ({ onSelectCourse, initialFilterQuery = '' }) => {
         {filteredCourses.length === 0 ? (
           <div className="text-center py-20 bg-white border border-[#E4E4E0] rounded-xl">
             <BookOpen className="w-12 h-12 text-[#6B6B6B] mx-auto mb-3 opacity-40" />
-            <p className="text-base font-bold font-serif text-[#1A1C1E]">Không tìm thấy khóa học phù hợp</p>
+            <p className="text-base font-bold  text-[#1A1C1E]">Không tìm thấy khóa học phù hợp</p>
             <p className="text-xs text-[#5E5E5E] mt-1">Vui lòng thử lại với từ khóa hoặc bộ lọc danh mục khác.</p>
           </div>
         ) : (

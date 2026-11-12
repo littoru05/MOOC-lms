@@ -133,7 +133,7 @@ export const UserManagementPage = ({ onBack }) => {
               <ArrowLeft className="w-4 h-4" />
             </button>
             <div>
-              <h1 className="text-xl font-bold font-serif text-[#001D37]">
+              <h1 className="text-xl font-bold  text-[#001D37]">
                 Quản lý Người dùng & Phân quyền Hệ thống
               </h1>
               <p className="text-xs text-[#5E5E5E]">

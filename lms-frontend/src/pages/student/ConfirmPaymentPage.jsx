@@ -72,7 +72,7 @@ export const ConfirmPaymentPage = () => {
             {isNetworkError ? <WifiOff className="w-7 h-7" /> : <AlertTriangle className="w-7 h-7" />}
           </div>
           <div className="space-y-1">
-            <h1 className="text-lg font-bold font-serif text-[#001D37]">
+            <h1 className="text-lg font-bold  text-[#001D37]">
               {isNetworkError ? 'Không thể kết nối máy chủ' : 'Phiên thanh toán không hợp lệ'}
             </h1>
             <p className="text-xs text-[#5E5E5E]">
@@ -120,7 +120,7 @@ export const ConfirmPaymentPage = () => {
           <span className="inline-block text-[10px] font-bold uppercase tracking-wider text-blue-700 bg-blue-50 px-2.5 py-1 rounded-full border border-blue-200">
             Thanh toán QR tự động
           </span>
-          <h1 className="text-xl font-bold font-serif text-[#001D37]">
+          <h1 className="text-xl font-bold  text-[#001D37]">
             {isConfirmed
               ? 'Xác nhận thành công!'
               : isExpired

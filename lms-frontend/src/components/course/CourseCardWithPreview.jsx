@@ -62,7 +62,7 @@ export const CourseCardWithPreview = ({
         {/* Body Content */}
         <div className="p-4 space-y-2">
           {/* Title */}
-          <h3 className="font-serif text-sm sm:text-base font-bold text-[#001D37] line-clamp-2 group-hover:text-[#16324F] leading-snug">
+          <h3 className=" text-sm sm:text-base font-bold text-[#001D37] line-clamp-2 group-hover:text-[#16324F] leading-snug">
             {course.title}
           </h3>
 

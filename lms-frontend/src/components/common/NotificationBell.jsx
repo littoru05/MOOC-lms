@@ -166,7 +166,7 @@ export const NotificationBell = () => {
           {/* Header */}
           <div className="px-4 py-3 bg-[#FAF9FC] border-b border-[#E4E4E0] flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="font-serif font-bold text-sm text-[#001D37]">Thông báo</span>
+              <span className=" font-bold text-sm text-[#001D37]">Thông báo</span>
               {effectiveUnreadCount > 0 && (
                 <span className="px-2 py-0.5 text-[10px] font-semibold bg-red-100 text-red-700 rounded-full">
                   {effectiveUnreadCount} mới

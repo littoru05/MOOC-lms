@@ -84,7 +84,7 @@ export const ToastProvider = ({ children }) => {
       {modalConfig && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-in fade-in duration-200">
           <div className="bg-white border border-[#E4E4E0] rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
-            <h3 className="font-serif font-bold text-lg text-[#001D37]">
+            <h3 className="font-bold text-lg text-[#001D37]">
               {modalConfig.title || 'Xác nhận thao tác'}
             </h3>
             <p className="text-xs text-[#5E5E5E] leading-relaxed">

@@ -141,7 +141,7 @@ export const QuizResultPage = ({ result: resultProp, onBackToCourse, onRetryQuiz
             )}
           </div>
 
-          <h2 className="text-xl font-bold font-serif text-[#001D37]">
+          <h2 className="text-xl font-bold  text-[#001D37]">
             {isPassed ? 'Chúc mừng bạn đã vượt qua bài kiểm tra!' : 'Rất tiếc, bạn chưa đạt điểm yêu cầu!'}
           </h2>
           <p className="text-xs text-[#5E5E5E] mt-2 max-w-md mx-auto leading-relaxed">
@@ -152,7 +152,7 @@ export const QuizResultPage = ({ result: resultProp, onBackToCourse, onRetryQuiz
 
           {/* Score Box */}
           <div className="my-6 p-4 bg-[#FAF9FC] border border-[#E4E4E0] rounded-xl inline-block min-w-[200px]">
-            <p className="text-3xl font-bold font-serif text-[#16324F]">
+            <p className="text-3xl font-bold  text-[#16324F]">
               {result.score} / {result.totalScore || 100}
             </p>
             <p className="text-xs font-semibold text-[#5E5E5E] mt-1">
@@ -188,7 +188,7 @@ export const QuizResultPage = ({ result: resultProp, onBackToCourse, onRetryQuiz
                 <Award className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="font-serif font-bold text-sm text-[#001D37]">Chứng chỉ hoàn thành khóa học</h3>
+                <h3 className=" font-bold text-sm text-[#001D37]">Chứng chỉ hoàn thành khóa học</h3>
                 <p className="text-[11px] text-[#5E5E5E]">Đã được hệ thống xác thực và cấp mã định danh số</p>
               </div>
             </div>

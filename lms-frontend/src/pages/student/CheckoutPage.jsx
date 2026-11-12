@@ -89,7 +89,7 @@ export const CheckoutPage = () => {
             <AlertTriangle className="w-8 h-8 text-amber-500" />
           </div>
           <div className="space-y-2">
-            <h2 className="text-xl font-bold font-serif text-[#001D37]">Giỏ hàng của bạn đang trống</h2>
+            <h2 className="text-xl font-bold  text-[#001D37]">Giỏ hàng của bạn đang trống</h2>
             <p className="text-xs text-[#5E5E5E]">Khám phá khóa học để bắt đầu.</p>
           </div>
           <button
@@ -122,7 +122,7 @@ export const CheckoutPage = () => {
               <QrCode className="w-6 h-6 text-amber-300" />
             </div>
             <div>
-              <h1 className="text-2xl lg:text-3xl font-bold font-serif">Thanh toán</h1>
+              <h1 className="text-2xl lg:text-3xl font-bold ">Thanh toán</h1>
               <p className="text-xs text-blue-100/70 mt-0.5">
                 Chuyển khoản bằng mã VietQR để hoàn tất đăng ký khóa học
               </p>
@@ -139,7 +139,7 @@ export const CheckoutPage = () => {
           <div className="lg:col-span-7">
             <div className="bg-white border border-[#E4E4E0] rounded-2xl p-6 sm:p-8 shadow-xs space-y-6">
               <div className="border-b border-[#E4E4E0] pb-4">
-                <h2 className="font-serif font-bold text-lg text-[#001D37] flex items-center gap-2">
+                <h2 className=" font-bold text-lg text-[#001D37] flex items-center gap-2">
                   <QrCode className="w-5 h-5 text-emerald-600" />
                   <span>Chuyển khoản qua mã QR</span>
                 </h2>
@@ -188,7 +188,7 @@ export const CheckoutPage = () => {
                   <p className="text-[11px] font-semibold text-[#5E5E5E] uppercase tracking-wider">
                     Số tiền thanh toán
                   </p>
-                  <p className="text-2xl font-serif font-extrabold text-emerald-700">
+                  <p className="text-2xl  font-bold text-emerald-700">
                     {formatCurrency(cart.totalPrice)}
                   </p>
                   <p className="text-xs text-[#5E5E5E]">
@@ -245,7 +245,7 @@ export const CheckoutPage = () => {
 
           {/* Right: Order Summary */}
           <div className="lg:col-span-5 bg-white border border-[#E4E4E0] rounded-2xl p-6 shadow-xs space-y-6 sticky top-24">
-            <h3 className="font-serif font-extrabold text-base text-[#001D37] border-b border-[#E4E4E0] pb-3">
+            <h3 className=" font-bold text-base text-[#001D37] border-b border-[#E4E4E0] pb-3">
               Tóm tắt đơn hàng ({items.length} khóa học)
             </h3>
 
@@ -290,7 +290,7 @@ export const CheckoutPage = () => {
               <div className="pt-3 border-t border-[#E4E4E0] flex items-baseline justify-between">
                 <span className="text-sm font-bold text-[#001D37]">Tổng thanh toán:</span>
                 <div className="text-right">
-                  <span className="text-2xl font-bold font-serif text-emerald-700">
+                  <span className="text-2xl font-bold  text-emerald-700">
                     {formatCurrency(cart.totalPrice)}
                   </span>
                   <p className="text-[10px] text-[#5E5E5E]">Đã bao gồm quyền truy cập khóa học</p>

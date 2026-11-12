@@ -78,11 +78,11 @@ export const StudentLayout = ({ currentTab: currentTabProp, onNavigate, onOpenAu
               to="/"
               className="flex items-center gap-2 text-left group cursor-pointer"
             >
-              <div className="w-9 h-9 bg-[#16324F] text-white rounded-lg flex items-center justify-center font-extrabold text-lg font-serif shadow-xs group-hover:bg-[#001D37] transition-colors">
+              <div className="w-9 h-9 bg-[#16324F] text-white rounded-lg flex items-center justify-center font-bold text-lg shadow-xs group-hover:bg-[#001D37] transition-colors">
                 E
               </div>
               <div className="flex items-center">
-                <span className="text-[22px] sm:text-2xl font-extrabold font-serif text-[#001D37] tracking-tight group-hover:text-[#16324F] transition-colors">
+                <span className="text-[22px] sm:text-2xl font-bold text-[#001D37] tracking-tight group-hover:text-[#16324F] transition-colors">
                   EduMOOC
                 </span>
                 <span className="hidden sm:inline-block ml-2.5 text-[10px] uppercase font-bold text-[#16324F] bg-[#EFEDF0] border border-[#E4E4E0] px-2 py-0.5 rounded-md">
@@ -162,7 +162,7 @@ export const StudentLayout = ({ currentTab: currentTabProp, onNavigate, onOpenAu
                   Đăng nhập
                 </Link>
                 <Link
-                  to="/login?mode=register"
+                  to="/register"
                   className="px-3.5 py-1.5 bg-[#16324F] hover:bg-[#001D37] text-white text-xs font-semibold rounded-md transition-colors shadow-2xs"
                 >
                   Đăng ký
@@ -184,7 +184,7 @@ export const StudentLayout = ({ currentTab: currentTabProp, onNavigate, onOpenAu
           {/* Drawer content */}
           <div className="relative w-4/5 max-w-xs bg-white h-full shadow-2xl flex flex-col z-10 animate-in slide-in-from-left duration-200">
             <div className="p-4 border-b border-[#E4E4E0] flex items-center justify-between">
-              <span className="font-serif font-bold text-lg text-[#001D37]">EduMOOC</span>
+              <span className="font-bold text-lg text-[#001D37]">EduMOOC</span>
               <button 
                 onClick={() => setMobileDrawerOpen(false)}
                 className="p-1 rounded-md text-[#5E5E5E] hover:bg-[#FAF9FC]"

@@ -66,7 +66,7 @@ export const CartPage = () => {
               <ShoppingCart className="w-6 h-6 text-amber-300" />
             </div>
             <div>
-              <h1 className="text-2xl lg:text-3xl font-bold font-serif">Giỏ hàng khóa học</h1>
+              <h1 className="text-2xl lg:text-3xl font-bold ">Giỏ hàng khóa học</h1>
               <p className="text-xs text-blue-100/70 mt-0.5">
                 {items.length > 0 ? `Bạn đang có ${items.length} khóa học trong giỏ hàng` : 'Giỏ hàng đang trống'}
               </p>
@@ -84,7 +84,7 @@ export const CartPage = () => {
               <ShoppingCart className="w-10 h-10 text-[#16324F]" />
             </div>
             <div className="space-y-2">
-              <h2 className="text-xl font-bold font-serif text-[#001D37]">
+              <h2 className="text-xl font-bold  text-[#001D37]">
                 Giỏ hàng của bạn đang trống
               </h2>
               <p className="text-xs text-[#5E5E5E] max-w-md mx-auto leading-relaxed">
@@ -106,7 +106,7 @@ export const CartPage = () => {
             {/* Left: Item List */}
             <div className="lg:col-span-8 space-y-4">
               <div className="flex items-center justify-between pb-2 border-b border-[#E4E4E0]">
-                <h2 className="font-serif font-bold text-base text-[#001D37]">
+                <h2 className=" font-bold text-base text-[#001D37]">
                   Danh sách khóa học ({items.length})
                 </h2>
                 <Link
@@ -150,7 +150,7 @@ export const CartPage = () => {
                     {/* Price + Action */}
                     <div className="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-t-0 border-[#E4E4E0]">
                       <div className="text-right">
-                        <p className="font-serif font-extrabold text-base text-[#001D37]">
+                        <p className=" font-bold text-base text-[#001D37]">
                           {formatCurrency(item.price)}
                         </p>
                       </div>
@@ -172,7 +172,7 @@ export const CartPage = () => {
 
             {/* Right: Order Summary */}
             <div className="lg:col-span-4 bg-white border border-[#E4E4E0] rounded-2xl p-6 shadow-xs space-y-6 sticky top-24">
-              <h3 className="font-serif font-extrabold text-base text-[#001D37] border-b border-[#E4E4E0] pb-3">
+              <h3 className=" font-bold text-base text-[#001D37] border-b border-[#E4E4E0] pb-3">
                 Tóm tắt đơn hàng
               </h3>
 
@@ -193,7 +193,7 @@ export const CartPage = () => {
                 <div className="pt-3 border-t border-[#E4E4E0] flex items-baseline justify-between">
                   <span className="text-sm font-bold text-[#001D37]">Tổng tiền:</span>
                   <div className="text-right">
-                    <span className="text-2xl font-bold font-serif text-emerald-700">
+                    <span className="text-2xl font-bold  text-emerald-700">
                       {formatCurrency(cart.totalPrice)}
                     </span>
                     <p className="text-[10px] text-[#5E5E5E]">Đã bao gồm thuế GTGT (nếu có)</p>

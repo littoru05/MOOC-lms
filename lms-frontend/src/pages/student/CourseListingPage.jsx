@@ -382,11 +382,11 @@ export const CourseListingPage = ({
                 <Tag className="w-3.5 h-3.5 text-amber-400" />
                 <span>Chuyên mục đào tạo tiêu chuẩn Quốc tế</span>
               </div>
-              <h1 className="text-3xl sm:text-4xl lg:text-[42px] font-extrabold font-serif text-white tracking-tight leading-tight">
+              <h1 className="text-3xl sm:text-4xl lg:text-[42px] font-bold text-white leading-tight">
                 {categoryInfo.title}
               </h1>
               <p className="text-xs sm:text-sm text-[#E0E7F1] leading-relaxed">
-                Khám phá các khóa học thực chiến từ các giảng viên đầu ngành. Tìm thấy <strong className="text-amber-400 font-extrabold">{filteredCourses.length}</strong> chương trình đào tạo chất lượng cao.
+                Khám phá các khóa học thực chiến từ các giảng viên đầu ngành. Tìm thấy <strong className="text-amber-400 font-bold">{filteredCourses.length}</strong> chương trình đào tạo chất lượng cao.
               </p>
             </div>
 
@@ -450,7 +450,7 @@ export const CourseListingPage = ({
             <div className="flex items-center justify-between border-b border-[#E4E4E0] pb-4">
               <div className="flex items-center gap-2">
                 <SlidersHorizontal className="w-4 h-4 text-[#16324F]" />
-                <h3 className="font-serif font-extrabold text-sm text-[#001D37]">Bộ lọc nâng cao</h3>
+                <h3 className=" font-bold text-sm text-[#001D37]">Bộ lọc nâng cao</h3>
               </div>
               
               <div className="flex items-center gap-2">
@@ -477,7 +477,7 @@ export const CourseListingPage = ({
             {/* Filter Group: Course Name (Tên khóa học) */}
             <div className="space-y-2.5">
               <div className="flex items-center justify-between">
-                <h4 className="font-extrabold text-xs text-[#001D37] uppercase tracking-wider flex items-center gap-1.5">
+                <h4 className="font-bold text-xs text-[#001D37] uppercase tracking-wider flex items-center gap-1.5">
                   <BookOpen className="w-3.5 h-3.5 text-[#16324F]" />
                   <span>Tên khóa học</span>
                 </h4>
@@ -511,7 +511,7 @@ export const CourseListingPage = ({
             {/* Filter Group: Category (Danh mục đào tạo) */}
             <div className="space-y-2.5 pt-4 border-t border-[#E4E4E0]">
               <div className="flex items-center justify-between">
-                <h4 className="font-extrabold text-xs text-[#001D37] uppercase tracking-wider flex items-center gap-1.5">
+                <h4 className="font-bold text-xs text-[#001D37] uppercase tracking-wider flex items-center gap-1.5">
                   <Layers className="w-3.5 h-3.5 text-[#16324F]" />
                   <span>Danh mục đào tạo</span>
                 </h4>
@@ -542,7 +542,7 @@ export const CourseListingPage = ({
             {/* Filter Group: Price (Học phí VNĐ) */}
             <div className="space-y-3 pt-4 border-t border-[#E4E4E0]">
               <div className="flex items-center justify-between">
-                <h4 className="font-extrabold text-xs text-[#001D37] uppercase tracking-wider flex items-center gap-1.5">
+                <h4 className="font-bold text-xs text-[#001D37] uppercase tracking-wider flex items-center gap-1.5">
                   <Banknote className="w-3.5 h-3.5 text-[#16324F]" />
                   <span>Học phí</span>
                 </h4>
@@ -771,7 +771,7 @@ export const CourseListingPage = ({
                   <BookOpen className="w-8 h-8 text-[#16324F]" />
                 </div>
                 <div className="space-y-1 max-w-md mx-auto">
-                  <h3 className="font-serif font-extrabold text-lg text-[#001D37]">
+                  <h3 className=" font-bold text-lg text-[#001D37]">
                     Chưa có khóa học nào trong chủ đề này
                   </h3>
                   <p className="text-xs text-[#5E5E5E] leading-relaxed">

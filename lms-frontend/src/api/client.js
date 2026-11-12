@@ -73,16 +73,6 @@ client.interceptors.response.use(
     if (isAuthEndpoint || originalRequest?._retry) {
       if (requestUrl.includes('/refresh')) {
         setAccessToken(null);
-        if (typeof window !== 'undefined') {
-          window.dispatchEvent(
-            new CustomEvent('auth:expired', {
-              detail: {
-                status: 401,
-                message: 'Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại.',
-              },
-            })
-          );
-        }
       }
       return Promise.reject(error);
     }

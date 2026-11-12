@@ -9,3 +9,4 @@ coverage/
 ngrok.yml
 lms-backend/uploads/*
 !lms-backend/uploads/.gitkeep
+*.zip

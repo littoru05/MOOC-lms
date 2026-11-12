@@ -300,7 +300,7 @@ export const CoursePlayerPage = ({ courseId: courseIdProp, onBack, onStartQuiz, 
                   ) : (
                     <div className="w-full h-full bg-white flex flex-col items-center justify-center p-8 text-center text-[#1A1C1E]">
                       <FileText className="w-16 h-16 text-[#16324F] mb-3 opacity-80" />
-                      <h4 className="text-base font-bold font-serif mb-2">Tài liệu học tập đính kèm</h4>
+                      <h4 className="text-base font-bold  mb-2">Tài liệu học tập đính kèm</h4>
                       <p className="text-xs text-[#5E5E5E] max-w-md mb-4 leading-relaxed">
                         Bài học này cung cấp tài liệu dạng PDF/Văn bản phục vụ ôn tập kiến thức chuyên sâu.
                       </p>
@@ -308,7 +308,7 @@ export const CoursePlayerPage = ({ courseId: courseIdProp, onBack, onStartQuiz, 
                   )
                 ) : (
                   <div className="w-full h-full bg-white p-8 text-[#1A1C1E] overflow-y-auto">
-                    <h3 className="text-lg font-bold font-serif mb-3">{activeLesson.title}</h3>
+                    <h3 className="text-lg font-bold  mb-3">{activeLesson.title}</h3>
                     <p className="text-xs text-[#5E5E5E] leading-relaxed whitespace-pre-line">
                       {activeLesson.notes || activeLesson.contentUrl || 'Nội dung bài học dạng văn bản hướng dẫn chi tiết.'}
                     </p>
@@ -322,7 +322,7 @@ export const CoursePlayerPage = ({ courseId: courseIdProp, onBack, onStartQuiz, 
                   <span className="text-[11px] font-semibold text-[#16324F] uppercase tracking-wider bg-[#F4F3F6] px-2 py-0.5 rounded">
                     {activeLesson.contentType || 'VIDEO'} • {activeLesson.durationMinutes || 15} phút
                   </span>
-                  <h2 className="text-xl font-bold font-serif text-[#001D37] mt-1.5">
+                  <h2 className="text-xl font-bold  text-[#001D37] mt-1.5">
                     {activeLesson.title}
                   </h2>
                 </div>
@@ -372,7 +372,7 @@ export const CoursePlayerPage = ({ courseId: courseIdProp, onBack, onStartQuiz, 
               {/* Lecture Detailed Notes & Key Takeaways */}
               {activeLesson.notes && (
                 <div className="bg-white border border-[#E4E4E0] rounded-xl p-6 shadow-xs space-y-3">
-                  <h3 className="font-serif font-bold text-base text-[#001D37] flex items-center gap-2">
+                  <h3 className=" font-bold text-base text-[#001D37] flex items-center gap-2">
                     <BookOpen className="w-4 h-4 text-[#16324F]" />
                     <span>Ghi chú & Tóm tắt kiến thức bài giảng</span>
                   </h3>
@@ -389,7 +389,7 @@ export const CoursePlayerPage = ({ courseId: courseIdProp, onBack, onStartQuiz, 
                 <BookOpen className="w-7 h-7" />
               </div>
               <div>
-                <h3 className="text-lg font-serif font-bold text-[#001D37]">Khóa học đang cập nhật nội dung bài giảng</h3>
+                <h3 className="text-lg  font-bold text-[#001D37]">Khóa học đang cập nhật nội dung bài giảng</h3>
                 <p className="text-xs text-[#5E5E5E] max-w-md mt-1 leading-relaxed">
                   Giáo trình và bài tập thực hành của khóa học này đang được ban chuyên môn biên soạn. Vui lòng quay lại sau!
                 </p>
@@ -413,7 +413,7 @@ export const CoursePlayerPage = ({ courseId: courseIdProp, onBack, onStartQuiz, 
         <aside className="bg-white border-l border-[#E4E4E0] p-4 overflow-y-auto max-h-[calc(100vh-3.5rem)] flex flex-col justify-between">
           <div>
             <div className="pb-3 border-b border-[#E4E4E0] mb-3">
-              <h3 className="font-serif font-bold text-[#001D37] text-sm">Nội dung khóa học</h3>
+              <h3 className=" font-bold text-[#001D37] text-sm">Nội dung khóa học</h3>
               <p className="text-[11px] text-[#5E5E5E] mt-0.5">
                 {completedCount} / {totalLessons} bài học hoàn thành
               </p>

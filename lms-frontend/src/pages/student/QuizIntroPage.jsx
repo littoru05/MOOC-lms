@@ -106,7 +106,7 @@ export const QuizIntroPage = ({ quizId: quizIdProp, enrollmentId: enrollmentIdPr
               <span className="text-[11px] font-bold text-[#16324F] uppercase tracking-wider bg-[#F4F3F6] px-2.5 py-1 rounded-md inline-block">
                 Hệ thống Khảo thí Đánh giá Năng lực
               </span>
-              <h1 className="text-2xl font-bold font-serif text-[#001D37] pt-1">
+              <h1 className="text-2xl font-bold  text-[#001D37] pt-1">
                 {quiz?.title || 'Bài kiểm tra Đánh giá Năng lực Cuối khóa'}
               </h1>
               {course && (
@@ -129,7 +129,7 @@ export const QuizIntroPage = ({ quizId: quizIdProp, enrollmentId: enrollmentIdPr
                 <Clock className="w-4 h-4 text-blue-600" />
                 <span>Thời gian làm bài</span>
               </div>
-              <p className="text-xl font-bold font-serif text-[#001D37] pt-1">{duration} Phút</p>
+              <p className="text-xl font-bold  text-[#001D37] pt-1">{duration} Phút</p>
               <p className="text-[10px] text-[#5E5E5E]">Đồng hồ đếm ngược tự động nộp</p>
             </div>
 
@@ -138,7 +138,7 @@ export const QuizIntroPage = ({ quizId: quizIdProp, enrollmentId: enrollmentIdPr
                 <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                 <span>Điểm đạt tối thiểu</span>
               </div>
-              <p className="text-xl font-bold font-serif text-[#001D37] pt-1">{passScore}%</p>
+              <p className="text-xl font-bold  text-[#001D37] pt-1">{passScore}%</p>
               <p className="text-[10px] text-[#5E5E5E]">Đạt điều kiện cấp chứng chỉ số</p>
             </div>
 
@@ -147,14 +147,14 @@ export const QuizIntroPage = ({ quizId: quizIdProp, enrollmentId: enrollmentIdPr
                 <Award className="w-4 h-4 text-amber-600" />
                 <span>Tổng số câu hỏi</span>
               </div>
-              <p className="text-xl font-bold font-serif text-[#001D37] pt-1">{totalQuestions} Câu</p>
+              <p className="text-xl font-bold  text-[#001D37] pt-1">{totalQuestions} Câu</p>
               <p className="text-[10px] text-[#5E5E5E]">Trắc nghiệm chọn 1 đáp án đúng</p>
             </div>
           </div>
 
           {/* Rules & Guidelines */}
           <div className="bg-amber-50/50 border border-amber-200/70 rounded-xl p-5 space-y-3">
-            <h3 className="font-serif font-bold text-sm text-[#001D37] flex items-center gap-2">
+            <h3 className=" font-bold text-sm text-[#001D37] flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 text-amber-600" />
               <span>Quy chế thi & Hướng dẫn làm bài quan trọng</span>
             </h3>

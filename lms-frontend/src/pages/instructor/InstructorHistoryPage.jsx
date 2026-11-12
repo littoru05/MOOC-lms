@@ -176,7 +176,7 @@ export const InstructorHistoryPage = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E4E4E0] pb-6">
         <div>
-          <h1 className="text-2xl font-bold font-serif text-[#001D37] flex items-center gap-2.5">
+          <h1 className="text-2xl font-bold  text-[#001D37] flex items-center gap-2.5">
             <History className="w-6 h-6 text-amber-500" />
             <span>Lịch sử khóa học</span>
           </h1>
@@ -297,7 +297,7 @@ export const InstructorHistoryPage = () => {
         ) : logs.length === 0 ? (
           <div className="py-24 text-center space-y-2">
             <History className="w-12 h-12 text-gray-300 mx-auto mb-2" />
-            <p className="font-serif font-bold text-base text-[#1A1C1E]">
+            <p className=" font-bold text-base text-[#1A1C1E]">
               {hasActiveFilters
                 ? 'Không tìm thấy nhật ký phù hợp'
                 : 'Chưa có lịch sử hoạt động'}

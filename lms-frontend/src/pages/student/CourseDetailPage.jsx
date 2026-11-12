@@ -277,7 +277,7 @@ export const CourseDetailPage = ({ courseSlug: courseSlugProp, onBack, onStartLe
             <AlertCircle className="w-7 h-7" />
           </div>
           <div>
-            <h2 className="text-lg font-serif font-bold text-[#001D37]">Không tìm thấy khóa học</h2>
+            <h2 className="text-lg  font-bold text-[#001D37]">Không tìm thấy khóa học</h2>
             <p className="text-xs text-[#5E5E5E] mt-1.5 leading-relaxed">
               Khóa học với mã định danh <code className="bg-[#F4F3F6] px-1.5 py-0.5 rounded text-[#16324F] font-mono">{String(courseSlug)}</code> không tồn tại trong hệ thống hoặc đã bị gỡ bỏ.
             </p>
@@ -337,7 +337,7 @@ export const CourseDetailPage = ({ courseSlug: courseSlugProp, onBack, onStartLe
             </div>
 
             {/* Title */}
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold font-serif text-white leading-tight tracking-tight">
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold  text-white leading-tight tracking-tight">
               {course.title}
             </h1>
 
@@ -419,7 +419,7 @@ export const CourseDetailPage = ({ courseSlug: courseSlugProp, onBack, onStartLe
               {isEnrolled ? (
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="text-xl font-bold font-serif text-emerald-700 flex items-center gap-1.5">
+                    <span className="text-xl font-bold  text-emerald-700 flex items-center gap-1.5">
                       <CheckCircle2 className="w-5 h-5 text-emerald-600" /> Bạn đã sở hữu khóa học
                     </span>
                   </div>
@@ -428,7 +428,7 @@ export const CourseDetailPage = ({ courseSlug: courseSlugProp, onBack, onStartLe
               ) : Number(course.price) > 0 ? (
                 <div>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-2xl font-bold font-serif text-[#001D37]">
+                    <span className="text-2xl font-bold  text-[#001D37]">
                       {formatCurrency(course.price)}
                     </span>
                   </div>
@@ -437,7 +437,7 @@ export const CourseDetailPage = ({ courseSlug: courseSlugProp, onBack, onStartLe
               ) : (
                 <div>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-2xl font-bold font-serif text-emerald-700">Miễn phí</span>
+                    <span className="text-2xl font-bold  text-emerald-700">Miễn phí</span>
                     <span className="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded">100% FREE</span>
                   </div>
                   <p className="text-[11px] text-[#6B6B6B] mt-0.5">Tài trợ học bổng học tập trực tuyến MOOC</p>
@@ -528,7 +528,7 @@ export const CourseDetailPage = ({ courseSlug: courseSlugProp, onBack, onStartLe
             
             {/* 1. "Bạn sẽ học được gì" (What you'll learn) */}
             <div className="bg-white border border-[#E4E4E0] rounded-xl p-7 shadow-xs space-y-4">
-              <h2 className="text-xl font-bold font-serif text-[#001D37] flex items-center gap-2">
+              <h2 className="text-xl font-bold  text-[#001D37] flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-amber-600" />
                 <span>Bạn sẽ học được gì trong khóa học này</span>
               </h2>
@@ -551,7 +551,7 @@ export const CourseDetailPage = ({ courseSlug: courseSlugProp, onBack, onStartLe
 
             {/* 2. "Yêu cầu tiên quyết" (Requirements) */}
             <div className="space-y-3">
-              <h2 className="text-xl font-bold font-serif text-[#001D37]">Yêu cầu trước khi học</h2>
+              <h2 className="text-xl font-bold  text-[#001D37]">Yêu cầu trước khi học</h2>
               <ul className="space-y-2 text-xs text-[#5E5E5E] pl-2">
                 {(course.requirements || [
                   "Kiến thức cơ bản về lập trình hướng đối tượng (OOP).",
@@ -569,7 +569,7 @@ export const CourseDetailPage = ({ courseSlug: courseSlugProp, onBack, onStartLe
             <div className="space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
-                  <h2 className="text-xl font-bold font-serif text-[#001D37]">Nội dung chương trình học</h2>
+                  <h2 className="text-xl font-bold  text-[#001D37]">Nội dung chương trình học</h2>
                   <p className="text-xs text-[#5E5E5E] mt-0.5">
                     {sections.length} chương • {totalLessons} bài học • {course.totalDuration || '36 giờ học'}
                   </p>
@@ -603,7 +603,7 @@ export const CourseDetailPage = ({ courseSlug: courseSlugProp, onBack, onStartLe
                           ) : (
                             <ChevronRight className="w-4 h-4 text-[#6B6B6B]" />
                           )}
-                          <span className="text-xs font-bold text-[#001D37] font-serif">
+                          <span className="text-xs font-bold text-[#001D37] ">
                             Chương {idx + 1}: {section.title}
                           </span>
                         </div>
@@ -652,7 +652,7 @@ export const CourseDetailPage = ({ courseSlug: courseSlugProp, onBack, onStartLe
 
             {/* 4. "Mô tả khóa học chi tiết" (Full Description) */}
             <div className="space-y-3">
-              <h2 className="text-xl font-bold font-serif text-[#001D37]">Mô tả chi tiết khóa học</h2>
+              <h2 className="text-xl font-bold  text-[#001D37]">Mô tả chi tiết khóa học</h2>
               <div className="text-xs text-[#5E5E5E] leading-relaxed space-y-3 whitespace-pre-line bg-white p-6 rounded-xl border border-[#E4E4E0]">
                 {course.fullDescription || course.description}
               </div>
@@ -660,7 +660,7 @@ export const CourseDetailPage = ({ courseSlug: courseSlugProp, onBack, onStartLe
 
             {/* 5. "Thông tin giảng viên" (Instructor Profile) */}
             <div className="space-y-4">
-              <h2 className="text-xl font-bold font-serif text-[#001D37]">Giảng viên phụ trách</h2>
+              <h2 className="text-xl font-bold  text-[#001D37]">Giảng viên phụ trách</h2>
               
               <div className="bg-white border border-[#E4E4E0] rounded-xl p-6 shadow-xs space-y-4">
                 <div className="flex items-start gap-4">
@@ -670,7 +670,7 @@ export const CourseDetailPage = ({ courseSlug: courseSlugProp, onBack, onStartLe
                     className="w-16 h-16 rounded-full object-cover border border-[#E4E4E0] shrink-0"
                   />
                   <div>
-                    <h3 className="text-base font-bold font-serif text-[#001D37]">
+                    <h3 className="text-base font-bold  text-[#001D37]">
                       {course.instructor?.fullName || 'Giảng viên EduMOOC'}
                     </h3>
                     <p className="text-xs text-[#16324F] font-medium mt-0.5">
@@ -700,12 +700,12 @@ export const CourseDetailPage = ({ courseSlug: courseSlugProp, onBack, onStartLe
 
             {/* 6. "Đánh giá của học viên" (Student Reviews) */}
             <div className="space-y-4">
-              <h2 className="text-xl font-bold font-serif text-[#001D37]">Đánh giá từ học viên</h2>
+              <h2 className="text-xl font-bold  text-[#001D37]">Đánh giá từ học viên</h2>
               
               {/* Rating Summary Card */}
               <div className="bg-white border border-[#E4E4E0] rounded-xl p-6 shadow-xs flex flex-col sm:flex-row items-center gap-8">
                 <div className="text-center sm:text-left shrink-0">
-                  <div className="text-5xl font-bold font-serif text-[#001D37]">{course.rating || 4.9}</div>
+                  <div className="text-5xl font-bold  text-[#001D37]">{course.rating || 4.9}</div>
                   <div className="flex text-amber-400 my-1 justify-center sm:justify-start">
                     {[...Array(5)].map((_, i) => (
                       <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />

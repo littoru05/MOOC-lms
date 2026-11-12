@@ -152,17 +152,19 @@ export const LoginPage = ({ initialMode = 'login' }) => {
   const { user, loading, login, register } = useAuth();
   const { showToast } = useToast();
 
-  // Mode synced with URL route
-  const currentMode = location.pathname === '/register' ? 'register' : initialMode;
-  const [mode, setMode] = useState(currentMode);
+  // Mode synced with URL route or search query parameter
+  const searchParams = new URLSearchParams(location.search);
+  const isRegisterMode = location.pathname === '/register' || searchParams.get('mode') === 'register' || initialMode === 'register';
+  const [mode, setMode] = useState(isRegisterMode ? 'register' : 'login');
 
   useEffect(() => {
-    if (location.pathname === '/register') {
+    const params = new URLSearchParams(location.search);
+    if (location.pathname === '/register' || params.get('mode') === 'register') {
       setMode('register');
-    } else if (location.pathname === '/login') {
+    } else if (location.pathname === '/login' && params.get('mode') !== 'register') {
       setMode('login');
     }
-  }, [location.pathname]);
+  }, [location.pathname, location.search]);
 
   // Rotating slogans in illustration panel
   const [sloganIndex, setSloganIndex] = useState(0);
@@ -363,6 +365,17 @@ export const LoginPage = ({ initialMode = 'login' }) => {
     setRegTouched({ fullName: true, email: true, password: true, confirmPassword: true });
 
     if (!isRegFormValid) {
+      if (!fullName.trim() || !regEmail.trim() || !regPassword || !confirmPassword) {
+        setServerError('Vui lòng điền đầy đủ tất cả các trường thông tin bắt buộc.');
+      } else if (!isValidEmail(regEmail)) {
+        setServerError('Email không đúng định dạng. Vui lòng kiểm tra lại.');
+      } else if (regPassword.length < 6) {
+        setServerError('Mật khẩu phải có tối thiểu 6 ký tự.');
+      } else if (regPassword !== confirmPassword) {
+        setServerError('Mật khẩu xác nhận không khớp với mật khẩu đã nhập.');
+      } else if (!agreeTerms) {
+        setServerError('Vui lòng tích chọn đồng ý với Điều khoản dịch vụ và Chính sách bảo mật để tiếp tục.');
+      }
       triggerShake();
       return;
     }
@@ -453,11 +466,11 @@ export const LoginPage = ({ initialMode = 'login' }) => {
           {/* Top: Brand Identity Header */}
           <div className="relative z-10 flex items-center justify-between">
             <Link to="/" className="flex items-center gap-3 group">
-              <div className="w-10 h-10 bg-white text-[#001D37] rounded-xl flex items-center justify-center font-bold text-xl font-serif shadow-md transition-transform group-hover:scale-105">
+              <div className="w-10 h-10 bg-white text-[#001D37] rounded-xl flex items-center justify-center font-bold text-xl shadow-md transition-transform group-hover:scale-105">
                 E
               </div>
               <div>
-                <span className="font-serif font-bold text-xl text-white tracking-wide block">
+                <span className="font-bold text-xl text-white tracking-wide block">
                   EduMOOC
                 </span>
                 <span className="text-[10px] text-[#A6C8FF] tracking-wider uppercase font-semibold block">
@@ -483,7 +496,7 @@ export const LoginPage = ({ initialMode = 'login' }) => {
               <span>Học tập theo năng lực • Đạt chuẩn tương lai</span>
             </div>
 
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-serif font-extrabold text-white leading-tight min-h-[76px] transition-all duration-300">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white leading-tight min-h-[76px] transition-all duration-300">
               {SLOGANS[sloganIndex].quote}
             </h2>
 
@@ -582,7 +595,7 @@ export const LoginPage = ({ initialMode = 'login' }) => {
 
             {/* Form Title & Subtitle */}
             <div className="mb-6">
-              <h1 className="text-2xl sm:text-3xl font-serif font-bold text-[#001D37] tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-bold text-[#001D37] tracking-tight">
                 {isLoginMode ? 'Chào mừng bạn trở lại' : 'Bắt đầu hành trình nâng tầm tri thức'}
               </h1>
               <p className="text-xs sm:text-sm text-[#5E5E5E] mt-1.5 leading-relaxed">
@@ -900,7 +913,7 @@ export const LoginPage = ({ initialMode = 'login' }) => {
                 {/* Submit Button */}
                 <button
                   type="submit"
-                  disabled={!isRegFormValid || isSubmitting}
+                  disabled={isSubmitting}
                   className={`w-full py-3 text-xs font-bold rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer mt-3 ${
                     isShaking ? 'animate-shake' : ''
                   } ${
@@ -937,7 +950,7 @@ export const LoginPage = ({ initialMode = 'login' }) => {
                   <button
                     type="button"
                     onClick={() => handleSwitchMode('register')}
-                    className="text-[#16324F] font-bold hover:underline cursor-pointer"
+                    className="text-[#16324F] font-bold hover:underline cursor-pointer outline-none focus:outline-none"
                   >
                     Đăng ký ngay
                   </button>
@@ -948,7 +961,7 @@ export const LoginPage = ({ initialMode = 'login' }) => {
                   <button
                     type="button"
                     onClick={() => handleSwitchMode('login')}
-                    className="text-[#16324F] font-bold hover:underline cursor-pointer"
+                    className="text-[#16324F] font-bold hover:underline cursor-pointer outline-none focus:outline-none"
                   >
                     Đăng nhập ngay
                   </button>

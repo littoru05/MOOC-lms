@@ -327,7 +327,7 @@ export const CourseEditorPage = ({ courseId: courseIdProp, onBack }) => {
           </button>
           <div>
             <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-xl font-bold font-serif text-[#001D37]">
+              <h1 className="text-xl font-bold  text-[#001D37]">
                 {courseId ? 'Chỉnh sửa Khóa học (Course Builder)' : 'Tạo mới khóa học'}
               </h1>
               {courseDetail?.status && (
@@ -475,7 +475,7 @@ export const CourseEditorPage = ({ courseId: courseIdProp, onBack }) => {
           <div className="w-16 h-16 bg-white border border-[#E4E4E0] rounded-2xl flex items-center justify-center mx-auto text-[#16324F] shadow-sm">
             <BookOpen className="w-8 h-8" />
           </div>
-          <h2 className="text-xl font-bold font-serif text-[#001D37]">Bạn chưa có khóa học nào</h2>
+          <h2 className="text-xl font-bold  text-[#001D37]">Bạn chưa có khóa học nào</h2>
           <p className="text-xs text-[#5E5E5E]">
             Vui lòng tạo khóa học đầu tiên để bắt đầu xây dựng nội dung bài học và đề cương giảng dạy.
           </p>
@@ -491,7 +491,7 @@ export const CourseEditorPage = ({ courseId: courseIdProp, onBack }) => {
           <div className="w-16 h-16 bg-red-50 text-[#BA1A1A] border border-red-100 rounded-2xl flex items-center justify-center mx-auto shadow-sm">
             <AlertCircle className="w-8 h-8" />
           </div>
-          <h2 className="text-xl font-bold font-serif text-[#001D37]">Không có quyền truy cập</h2>
+          <h2 className="text-xl font-bold  text-[#001D37]">Không có quyền truy cập</h2>
           <p className="text-xs text-[#5E5E5E]">
             Bạn không có quyền chỉnh sửa khóa học này hoặc khóa học không tồn tại. Vui lòng chọn một khóa học khác từ dropdown ở trên.
           </p>
@@ -517,7 +517,7 @@ export const CourseEditorPage = ({ courseId: courseIdProp, onBack }) => {
             
             {/* Basic Info */}
             <div className="bg-white border border-[#E4E4E0] rounded-xl p-6 shadow-xs space-y-3.5">
-              <h3 className="font-serif font-bold text-base text-[#001D37]">Thông tin cơ bản</h3>
+              <h3 className=" font-bold text-base text-[#001D37]">Thông tin cơ bản</h3>
 
               <div>
                 <label className="block text-xs font-medium text-[#1A1C1E] mb-1">Tên khóa học</label>
@@ -646,7 +646,7 @@ export const CourseEditorPage = ({ courseId: courseIdProp, onBack }) => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Sparkles className="w-4 h-4 text-amber-500" />
-                  <h3 className="font-serif font-bold text-sm text-[#001D37]">Kết quả đạt được</h3>
+                  <h3 className=" font-bold text-sm text-[#001D37]">Kết quả đạt được</h3>
                 </div>
                 <button
                   type="button"
@@ -687,7 +687,7 @@ export const CourseEditorPage = ({ courseId: courseIdProp, onBack }) => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <HelpCircle className="w-4 h-4 text-blue-500" />
-                  <h3 className="font-serif font-bold text-sm text-[#001D37]">Yêu cầu đầu vào</h3>
+                  <h3 className=" font-bold text-sm text-[#001D37]">Yêu cầu đầu vào</h3>
                 </div>
                 <button
                   type="button"
@@ -731,7 +731,7 @@ export const CourseEditorPage = ({ courseId: courseIdProp, onBack }) => {
             <div className="bg-white border border-[#E4E4E0] rounded-xl p-6 shadow-xs space-y-6">
               <div className="flex items-center justify-between border-b border-[#E4E4E0] pb-4">
                 <div>
-                  <h3 className="font-serif font-bold text-base text-[#001D37]">
+                  <h3 className=" font-bold text-base text-[#001D37]">
                     Đề cương chi tiết & Bài giảng ({sections.length} Chương)
                   </h3>
                   <p className="text-xs text-[#5E5E5E]">

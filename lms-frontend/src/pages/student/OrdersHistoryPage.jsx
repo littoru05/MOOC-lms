@@ -68,7 +68,7 @@ export const OrdersHistoryPage = () => {
               <Receipt className="w-6 h-6 text-amber-300" />
             </div>
             <div>
-              <h1 className="text-2xl lg:text-3xl font-bold font-serif">Lịch sử đơn hàng</h1>
+              <h1 className="text-2xl lg:text-3xl font-bold ">Lịch sử đơn hàng</h1>
               <p className="text-xs text-blue-100/70 mt-0.5">
                 {orders.length > 0 ? `Bạn có ${orders.length} đơn hàng đã mua` : 'Chưa có đơn hàng nào'}
               </p>
@@ -85,7 +85,7 @@ export const OrdersHistoryPage = () => {
               <ShoppingBag className="w-8 h-8 opacity-60" />
             </div>
             <div className="space-y-1.5">
-              <h2 className="font-serif font-bold text-base text-[#001D37]">
+              <h2 className=" font-bold text-base text-[#001D37]">
                 Bạn chưa có đơn hàng nào
               </h2>
               <p className="text-xs text-[#5E5E5E] max-w-sm mx-auto leading-relaxed">
@@ -153,7 +153,7 @@ export const OrdersHistoryPage = () => {
 
                       <div className="text-left sm:text-right space-y-0.5">
                         <span className="text-[11px] text-[#5E5E5E] block">TỔNG TIỀN</span>
-                        <span className="font-serif font-bold text-base text-emerald-700">
+                        <span className=" font-bold text-base text-emerald-700">
                           {formatCurrency(order.totalAmount)}
                         </span>
                       </div>

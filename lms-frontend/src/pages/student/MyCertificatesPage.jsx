@@ -95,7 +95,7 @@ export const MyCertificatesPage = ({ initialCode: initialCodeProp }) => {
             <ShieldCheck className="w-3.5 h-3.5" />
             <span>Tra cứu & Xác thực Chứng chỉ số Công khai</span>
           </div>
-          <h1 className="text-3xl font-bold font-serif text-[#001D37]">
+          <h1 className="text-3xl font-bold  text-[#001D37]">
             Chứng nhận Tốt nghiệp & Tra cứu Xác thực
           </h1>
           <p className="text-xs text-[#5E5E5E] mt-2 leading-relaxed">
@@ -135,10 +135,10 @@ export const MyCertificatesPage = ({ initialCode: initialCodeProp }) => {
             
             {/* Diploma Brand Header */}
             <div className="text-center border-b border-[#E4E4E0] pb-6">
-              <div className={`w-14 h-14 ${isRevoked ? 'bg-red-800' : 'bg-[#002D72]'} text-white rounded-2xl mx-auto flex items-center justify-center font-bold text-2xl font-serif mb-3 shadow-sm`}>
+              <div className={`w-14 h-14 ${isRevoked ? 'bg-red-800' : 'bg-[#002D72]'} text-white rounded-2xl mx-auto flex items-center justify-center font-bold text-2xl  mb-3 shadow-sm`}>
                 E
               </div>
-              <h2 className="text-base font-bold text-[#002D72] tracking-widest uppercase font-serif">
+              <h2 className="text-base font-bold text-[#002D72] tracking-widest uppercase ">
                 EDUMOOC ACADEMY
               </h2>
               <p className="text-[11px] text-[#4A5568] tracking-wider uppercase mt-0.5">
@@ -168,7 +168,7 @@ export const MyCertificatesPage = ({ initialCode: initialCodeProp }) => {
               <p className="text-xs text-[#5E5E5E] uppercase tracking-widest font-medium">
                 Chứng nhận cấp cho học viên
               </p>
-              <h3 className="text-3xl md:text-4xl font-bold font-serif text-[#001D37] tracking-tight">
+              <h3 className="text-3xl md:text-4xl font-bold  text-[#001D37] tracking-tight">
                 {verifiedCert.studentName}
               </h3>
               <p className="text-xs text-[#5E5E5E]">{verifiedCert.studentEmail}</p>
@@ -179,7 +179,7 @@ export const MyCertificatesPage = ({ initialCode: initialCodeProp }) => {
                     ? 'has successfully completed with distinction / đã hoàn thành xuất sắc khóa học'
                     : 'has successfully completed / đã hoàn thành khóa học'}
                 </p>
-                <h4 className="text-2xl md:text-3xl font-bold font-serif text-[#002D72] mt-2 leading-snug">
+                <h4 className="text-2xl md:text-3xl font-bold  text-[#002D72] mt-2 leading-snug">
                   {verifiedCert.courseTitle}
                 </h4>
               </div>
@@ -268,7 +268,7 @@ export const MyCertificatesPage = ({ initialCode: initialCodeProp }) => {
         {/* My Certificates List (If logged in as student) */}
         {user && !isAdmin && myCertificates.length > 0 && (
           <div className="bg-white border border-[#E4E4E0] rounded-xl p-6 shadow-xs">
-            <h3 className="text-base font-bold font-serif text-[#001D37] mb-4">
+            <h3 className="text-base font-bold  text-[#001D37] mb-4">
               Danh sách Chứng chỉ số của bạn ({myCertificates.length})
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -284,7 +284,7 @@ export const MyCertificatesPage = ({ initialCode: initialCodeProp }) => {
                   >
                     <div>
                       <div className="flex items-center gap-2">
-                        <h4 className="text-xs font-bold font-serif text-[#001D37] group-hover:text-[#16324F]">
+                        <h4 className="text-xs font-bold  text-[#001D37] group-hover:text-[#16324F]">
                           {cert.courseTitle}
                         </h4>
                         {certRevoked && (

@@ -130,7 +130,7 @@ export const AdminProfilePage = () => {
       <div className="bg-white border border-[#E4E4E0] rounded-2xl p-6 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <span className="text-xs font-semibold text-[#001D37] uppercase tracking-wider">Hệ thống Kiểm toán</span>
-          <h1 className="text-2xl font-bold font-serif text-[#001D37] mt-1">
+          <h1 className="text-2xl font-bold  text-[#001D37] mt-1">
             Hồ sơ Quản trị viên Cấp cao
           </h1>
           <p className="text-xs text-[#5E5E5E] mt-0.5">
@@ -160,7 +160,7 @@ export const AdminProfilePage = () => {
         </div>
 
         <div className="flex-1 text-center md:text-left space-y-1 w-full">
-          <h2 className="text-xl font-bold font-serif text-[#001D37]">{fullName}</h2>
+          <h2 className="text-xl font-bold  text-[#001D37]">{fullName}</h2>
           <p className="text-xs font-medium text-[#16324F]">{email}</p>
           <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 pt-2">
             <span className="px-2.5 py-0.5 bg-emerald-50 border border-emerald-200 text-[11px] text-emerald-700 rounded-md font-semibold flex items-center gap-1">
@@ -186,7 +186,7 @@ export const AdminProfilePage = () => {
 
       {/* System & Session Audit Info */}
       <div className="space-y-3">
-        <h3 className="font-serif font-bold text-base text-[#001D37] flex items-center gap-2">
+        <h3 className=" font-bold text-base text-[#001D37] flex items-center gap-2">
           <Activity className="w-4 h-4 text-[#001D37]" />
           <span>Thông tin phiên làm việc & Đặc quyền (System Audit)</span>
         </h3>
@@ -224,7 +224,7 @@ export const AdminProfilePage = () => {
       {/* Section 1: Admin Personal Info */}
       <div className="bg-white border border-[#E4E4E0] rounded-2xl p-6 sm:p-8 shadow-xs space-y-6">
         <div>
-          <h3 className="font-serif font-bold text-lg text-[#001D37] flex items-center gap-2">
+          <h3 className=" font-bold text-lg text-[#001D37] flex items-center gap-2">
             <User className="w-5 h-5 text-[#001D37]" />
             <span>Thông tin cá nhân Quản trị viên</span>
           </h3>
@@ -305,7 +305,7 @@ export const AdminProfilePage = () => {
       {/* Section 2: Password Change Form */}
       <div className="bg-white border border-[#E4E4E0] rounded-2xl p-6 sm:p-8 shadow-xs space-y-6">
         <div>
-          <h3 className="font-serif font-bold text-lg text-[#001D37] flex items-center gap-2">
+          <h3 className=" font-bold text-lg text-[#001D37] flex items-center gap-2">
             <KeyRound className="w-5 h-5 text-[#001D37]" />
             <span>Đổi mật khẩu Quản trị viên</span>
           </h3>

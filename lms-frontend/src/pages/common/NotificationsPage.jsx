@@ -114,7 +114,7 @@ export const NotificationsPage = ({ portal = 'instructor' }) => {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E4E4E0] pb-6">
         <div>
-          <h1 className="text-2xl font-bold font-serif text-[#001D37]">
+          <h1 className="text-2xl font-bold  text-[#001D37]">
             Trung tâm thông báo
           </h1>
           <p className="text-xs text-[#5E5E5E] mt-1">
@@ -177,7 +177,7 @@ export const NotificationsPage = ({ portal = 'instructor' }) => {
         ) : notifications.length === 0 ? (
           <div className="py-24 text-center space-y-2">
             <Bell className="w-12 h-12 text-gray-300 mx-auto mb-2" />
-            <p className="font-serif font-bold text-base text-[#1A1C1E]">
+            <p className=" font-bold text-base text-[#1A1C1E]">
               {filterUnreadOnly ? 'Không có thông báo chưa đọc nào' : 'Bạn chưa có thông báo nào'}
             </p>
             <p className="text-xs text-[#5E5E5E]">

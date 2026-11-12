@@ -348,7 +348,7 @@ export const AdminRevenuePage = () => {
             <ShieldCheck className="w-3.5 h-3.5 text-amber-600" />
             <span>Trung tâm Tài chính & Doanh thu Toàn sàn</span>
           </div>
-          <h1 className="text-2xl md:text-3xl font-bold font-serif text-[#001D37]">
+          <h1 className="text-2xl md:text-3xl font-bold  text-[#001D37]">
             Báo cáo Doanh thu & Thương mại
           </h1>
           <p className="text-xs text-[#5E5E5E] mt-1">
@@ -380,7 +380,7 @@ export const AdminRevenuePage = () => {
             </div>
           </div>
           <div>
-            <h3 className="text-xl font-bold font-serif text-[#001D37]">
+            <h3 className="text-xl font-bold  text-[#001D37]">
               {isSummaryLoading ? '...' : formatCurrency(summary?.totalGrossRevenue)}
             </h3>
             <span className="text-[10px] text-[#5E5E5E] font-medium">Toàn bộ đơn hoàn thành</span>
@@ -396,7 +396,7 @@ export const AdminRevenuePage = () => {
             </div>
           </div>
           <div>
-            <h3 className="text-xl font-bold font-serif text-emerald-600">
+            <h3 className="text-xl font-bold  text-emerald-600">
               {isSummaryLoading ? '...' : formatCurrency(summary?.totalPlatformCommission)}
             </h3>
             <span className="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.5 rounded">
@@ -414,7 +414,7 @@ export const AdminRevenuePage = () => {
             </div>
           </div>
           <div>
-            <h3 className="text-xl font-bold font-serif text-violet-700">
+            <h3 className="text-xl font-bold  text-violet-700">
               {isSummaryLoading ? '...' : formatCurrency(summary?.totalInstructorPayout)}
             </h3>
             <span className="text-[10px] text-violet-700 font-bold bg-violet-50 px-1.5 py-0.5 rounded">
@@ -432,7 +432,7 @@ export const AdminRevenuePage = () => {
             </div>
           </div>
           <div>
-            <h3 className="text-xl font-bold font-serif text-[#001D37]">
+            <h3 className="text-xl font-bold  text-[#001D37]">
               {isSummaryLoading ? '...' : (summary?.totalOrdersCount || 0)}
             </h3>
             <span className="text-[10px] text-[#5E5E5E] font-medium">Đơn thanh toán thành công</span>
@@ -448,7 +448,7 @@ export const AdminRevenuePage = () => {
             </div>
           </div>
           <div>
-            <h3 className="text-xl font-bold font-serif text-[#001D37]">
+            <h3 className="text-xl font-bold  text-[#001D37]">
               {isSummaryLoading ? '...' : (summary?.totalStudentsCount || 0)}
             </h3>
             <span className="text-[10px] text-[#5E5E5E] font-medium">Học viên trả phí (Distinct)</span>
@@ -462,7 +462,7 @@ export const AdminRevenuePage = () => {
           <div>
             <div className="flex items-center gap-2">
               <TrendingUp className="w-4 h-4 text-[#16324F]" />
-              <h3 className="text-base font-bold font-serif text-[#001D37]">
+              <h3 className="text-base font-bold  text-[#001D37]">
                 Biến động Doanh thu & Dòng tiền Sàn
               </h3>
               {activePointsCount <= 2 && chartType === 'auto' && (
@@ -637,7 +637,7 @@ export const AdminRevenuePage = () => {
         <div className="bg-white border border-[#E4E4E0] rounded-xl p-6 shadow-xs space-y-5 flex flex-col justify-between min-h-[420px]">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#E4E4E0]">
             <div>
-              <h3 className="text-base font-bold font-serif text-[#001D37] flex items-center gap-2">
+              <h3 className="text-base font-bold  text-[#001D37] flex items-center gap-2">
                 <Award className="w-4 h-4 text-amber-500" />
                 <span>Xếp hạng Doanh thu theo Giảng viên</span>
               </h3>
@@ -798,7 +798,7 @@ export const AdminRevenuePage = () => {
         {/* Right: Cơ cấu Doanh thu theo Danh mục (Donut / Pie Chart) */}
         <div className="bg-white border border-[#E4E4E0] rounded-xl p-6 shadow-xs space-y-5 flex flex-col justify-between min-h-[420px]">
           <div className="pb-3 border-b border-[#E4E4E0]">
-            <h3 className="text-base font-bold font-serif text-[#001D37] flex items-center gap-2">
+            <h3 className="text-base font-bold  text-[#001D37] flex items-center gap-2">
               <Layers className="w-4 h-4 text-[#16324F]" />
               <span>Cơ cấu Doanh thu theo Danh mục</span>
             </h3>
@@ -847,7 +847,7 @@ export const AdminRevenuePage = () => {
                 {/* Center Label in Donut */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                   <span className="text-[10px] uppercase font-bold text-[#6B6B6B]">Danh mục</span>
-                  <span className="text-xs font-extrabold text-[#001D37]">{categoryData.length} nhóm</span>
+                  <span className="text-xs font-bold text-[#001D37]">{categoryData.length} nhóm</span>
                 </div>
               </div>
 
@@ -895,7 +895,7 @@ export const AdminRevenuePage = () => {
         <div className="bg-white border border-[#E4E4E0] rounded-xl overflow-hidden shadow-xs min-h-[420px] flex flex-col justify-between">
           <div>
             <div className="px-6 py-4 border-b border-[#E4E4E0]">
-              <h3 className="text-base font-bold font-serif text-[#001D37] flex items-center gap-2">
+              <h3 className="text-base font-bold  text-[#001D37] flex items-center gap-2">
                 <BookOpen className="w-4 h-4 text-[#16324F]" />
                 <span>Top Khóa học Bán chạy nhất</span>
               </h3>
@@ -952,7 +952,7 @@ export const AdminRevenuePage = () => {
         <div className="bg-white border border-[#E4E4E0] rounded-xl p-6 shadow-xs space-y-5 min-h-[420px] flex flex-col justify-between">
           <div className="flex items-center justify-between pb-3 border-b border-[#E4E4E0]">
             <div>
-              <h3 className="text-base font-bold font-serif text-[#001D37] flex items-center gap-2">
+              <h3 className="text-base font-bold  text-[#001D37] flex items-center gap-2">
                 <Users className="w-4 h-4 text-blue-600" />
                 <span>Tăng trưởng Học viên Mới</span>
               </h3>

@@ -190,17 +190,17 @@ export const AuthModal = ({ isOpen, onClose, initialMode = 'login', onAuthSucces
 
           <div className="relative z-10 space-y-5">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-white text-[#001D37] rounded-xl flex items-center justify-center font-bold text-xl font-serif shadow-md">
+              <div className="w-10 h-10 bg-white text-[#001D37] rounded-xl flex items-center justify-center font-bold text-xl  shadow-md">
                 E
               </div>
               <div>
-                <span className="font-serif font-bold text-lg text-white tracking-wide block">EduMOOC</span>
+                <span className=" font-bold text-lg text-white tracking-wide block">EduMOOC</span>
                 <span className="text-[10px] text-[#A6C8FF] tracking-wider uppercase font-semibold">Nền tảng Học trực tuyến</span>
               </div>
             </div>
 
             <div className="space-y-2 pt-2">
-              <h2 className="text-xl lg:text-2xl font-serif font-bold leading-snug text-white">
+              <h2 className="text-xl lg:text-2xl  font-bold leading-snug text-white">
                 {mode === 'login' ? 'Chào mừng bạn trở lại với giảng đường số' : 'Bắt đầu hành trình nâng tầm tri thức'}
               </h2>
               <p className="text-xs text-[#CBD5E1] leading-relaxed">
@@ -237,7 +237,7 @@ export const AuthModal = ({ isOpen, onClose, initialMode = 'login', onAuthSucces
             
             {/* Form Title & Subtitle */}
             <div>
-              <h1 className="text-2xl font-serif font-bold text-[#001D37]">
+              <h1 className="text-2xl  font-bold text-[#001D37]">
                 {mode === 'login' ? 'Đăng nhập tài khoản' : 'Đăng ký tài khoản mới'}
               </h1>
               <p className="text-xs text-[#5E5E5E] mt-1">

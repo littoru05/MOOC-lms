@@ -86,7 +86,7 @@ export const StudentProgressPage = () => {
           <span className="text-xs font-semibold text-[#16324F] uppercase tracking-wider">
             Theo dõi Học tập
           </span>
-          <h1 className="text-2xl font-bold font-serif text-[#001D37] mt-1">
+          <h1 className="text-2xl font-bold  text-[#001D37] mt-1">
             Tiến độ & Kết quả Học viên
           </h1>
           <p className="text-xs text-[#5E5E5E] mt-1">
@@ -133,7 +133,7 @@ export const StudentProgressPage = () => {
           </div>
           <div>
             <p className="text-[11px] text-[#5E5E5E] font-medium">Tổng học viên</p>
-            <h3 className="text-xl font-bold font-serif text-[#001D37] mt-0.5">{totalStudents}</h3>
+            <h3 className="text-xl font-bold  text-[#001D37] mt-0.5">{totalStudents}</h3>
           </div>
         </div>
 
@@ -143,7 +143,7 @@ export const StudentProgressPage = () => {
           </div>
           <div>
             <p className="text-[11px] text-[#5E5E5E] font-medium">Đã tốt nghiệp</p>
-            <h3 className="text-xl font-bold font-serif text-emerald-600 mt-0.5">{completedCount}</h3>
+            <h3 className="text-xl font-bold  text-emerald-600 mt-0.5">{completedCount}</h3>
           </div>
         </div>
 
@@ -153,7 +153,7 @@ export const StudentProgressPage = () => {
           </div>
           <div>
             <p className="text-[11px] text-[#5E5E5E] font-medium">Đang học</p>
-            <h3 className="text-xl font-bold font-serif text-amber-600 mt-0.5">{inProgressCount}</h3>
+            <h3 className="text-xl font-bold  text-amber-600 mt-0.5">{inProgressCount}</h3>
           </div>
         </div>
 
@@ -163,7 +163,7 @@ export const StudentProgressPage = () => {
           </div>
           <div>
             <p className="text-[11px] text-[#5E5E5E] font-medium">Tiến độ trung bình</p>
-            <h3 className="text-xl font-bold font-serif text-indigo-600 mt-0.5">{avgProgress}%</h3>
+            <h3 className="text-xl font-bold  text-indigo-600 mt-0.5">{avgProgress}%</h3>
           </div>
         </div>
       </div>
@@ -171,7 +171,7 @@ export const StudentProgressPage = () => {
       {/* Student Progress Table */}
       <div className="bg-white border border-[#E4E4E0] rounded-xl overflow-hidden shadow-xs">
         <div className="px-6 py-4 border-b border-[#E4E4E0] flex items-center justify-between">
-          <h3 className="font-serif font-bold text-[#001D37] text-base">
+          <h3 className=" font-bold text-[#001D37] text-base">
             Danh sách học viên theo dõi ({filteredStudents.length})
           </h3>
           {loadingStudents && (

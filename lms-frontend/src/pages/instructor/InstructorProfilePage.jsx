@@ -143,7 +143,7 @@ export const InstructorProfilePage = () => {
         <div className="bg-white border border-[#E4E4E0] rounded-2xl p-6 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <span className="text-xs font-semibold text-[#16324F] uppercase tracking-wider">Hồ sơ Chuyên gia</span>
-            <h1 className="text-2xl font-bold font-serif text-[#001D37] mt-1">
+            <h1 className="text-2xl font-bold  text-[#001D37] mt-1">
               Hồ sơ Giảng viên & Học hàm
             </h1>
             <p className="text-xs text-[#5E5E5E] mt-0.5">
@@ -173,7 +173,7 @@ export const InstructorProfilePage = () => {
           </div>
 
           <div className="flex-1 text-center md:text-left space-y-1 w-full">
-            <h2 className="text-xl font-bold font-serif text-[#001D37]">{fullName}</h2>
+            <h2 className="text-xl font-bold  text-[#001D37]">{fullName}</h2>
             <p className="text-xs font-medium text-[#16324F]">{title}</p>
             <p className="text-xs text-[#5E5E5E]">{email}</p>
             <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 pt-2">
@@ -197,7 +197,7 @@ export const InstructorProfilePage = () => {
 
         {/* Read-only Teaching Stats */}
         <div>
-          <h3 className="font-serif font-bold text-base text-[#001D37] mb-3 flex items-center gap-2">
+          <h3 className=" font-bold text-base text-[#001D37] mb-3 flex items-center gap-2">
             <Briefcase className="w-4 h-4 text-[#16324F]" />
             <span>Thống kê giảng dạy (Read-only)</span>
           </h3>
@@ -207,7 +207,7 @@ export const InstructorProfilePage = () => {
                 <BookOpen className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-2xl font-bold font-serif text-[#001D37]">6</p>
+                <p className="text-2xl font-bold  text-[#001D37]">6</p>
                 <p className="text-xs text-[#5E5E5E] font-medium">Tổng khóa học đã tạo</p>
               </div>
             </div>
@@ -217,7 +217,7 @@ export const InstructorProfilePage = () => {
                 <Users className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-2xl font-bold font-serif text-[#001D37]">45.200+</p>
+                <p className="text-2xl font-bold  text-[#001D37]">45.200+</p>
                 <p className="text-xs text-[#5E5E5E] font-medium">Tổng học viên đăng ký</p>
               </div>
             </div>
@@ -227,7 +227,7 @@ export const InstructorProfilePage = () => {
                 <Star className="w-6 h-6 fill-amber-500 text-amber-500" />
               </div>
               <div>
-                <p className="text-2xl font-bold font-serif text-[#001D37]">4.92 / 5.0</p>
+                <p className="text-2xl font-bold  text-[#001D37]">4.92 / 5.0</p>
                 <p className="text-xs text-[#5E5E5E] font-medium">Đánh giá trung bình từ học viên</p>
               </div>
             </div>
@@ -237,7 +237,7 @@ export const InstructorProfilePage = () => {
         {/* Section 1: Professional Profile Form */}
         <div className="bg-white border border-[#E4E4E0] rounded-2xl p-6 sm:p-8 shadow-xs space-y-6">
           <div>
-            <h3 className="font-serif font-bold text-lg text-[#001D37] flex items-center gap-2">
+            <h3 className=" font-bold text-lg text-[#001D37] flex items-center gap-2">
               <User className="w-5 h-5 text-[#16324F]" />
               <span>Thông tin cá nhân & Nghề nghiệp</span>
             </h3>
@@ -368,7 +368,7 @@ export const InstructorProfilePage = () => {
         {/* Section 2: Password Change Form */}
         <div className="bg-white border border-[#E4E4E0] rounded-2xl p-6 sm:p-8 shadow-xs space-y-6">
           <div>
-            <h3 className="font-serif font-bold text-lg text-[#001D37] flex items-center gap-2">
+            <h3 className=" font-bold text-lg text-[#001D37] flex items-center gap-2">
               <KeyRound className="w-5 h-5 text-[#16324F]" />
               <span>Đổi mật khẩu tài khoản Giảng viên</span>
             </h3>

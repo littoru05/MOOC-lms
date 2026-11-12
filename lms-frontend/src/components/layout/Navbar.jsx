@@ -31,11 +31,11 @@ export const Navbar = ({ currentTab, onNavigate, onOpenAuthModal }) => {
             onClick={() => onNavigate('explore')}
             className="flex items-center gap-2 text-left group"
           >
-            <div className="w-9 h-9 bg-[#16324F] text-white rounded-lg flex items-center justify-center font-bold text-lg font-serif">
+            <div className="w-9 h-9 bg-[#16324F] text-white rounded-lg flex items-center justify-center font-bold text-lg ">
               E
             </div>
             <div>
-              <span className="text-2xl font-bold font-serif text-[#001D37] tracking-tight group-hover:text-[#16324F]">
+              <span className="text-2xl font-bold  text-[#001D37] tracking-tight group-hover:text-[#16324F]">
                 EduMOOC
               </span>
             </div>

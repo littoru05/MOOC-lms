@@ -185,7 +185,7 @@ export const QuizBuilderPage = ({ courseId: courseIdProp, onBack }) => {
               <ArrowLeft className="w-4 h-4" />
             </button>
             <div>
-              <h1 className="text-xl font-bold font-serif text-[#001D37]">
+              <h1 className="text-xl font-bold  text-[#001D37]">
                 Biên soạn Đề thi Khảo thí Trắc nghiệm (Quiz Builder)
               </h1>
               <p className="text-xs text-[#5E5E5E]">
@@ -230,7 +230,7 @@ export const QuizBuilderPage = ({ courseId: courseIdProp, onBack }) => {
             <div className="w-16 h-16 bg-white border border-[#E4E4E0] rounded-2xl flex items-center justify-center mx-auto text-[#16324F] shadow-sm">
               <BookOpen className="w-8 h-8" />
             </div>
-            <h2 className="text-xl font-bold font-serif text-[#001D37]">Bạn chưa có khóa học nào</h2>
+            <h2 className="text-xl font-bold  text-[#001D37]">Bạn chưa có khóa học nào</h2>
             <p className="text-xs text-[#5E5E5E]">
               Vui lòng tạo khóa học trước khi tiến hành xây dựng ngân hàng đề thi trắc nghiệm.
             </p>
@@ -285,7 +285,7 @@ export const QuizBuilderPage = ({ courseId: courseIdProp, onBack }) => {
             {/* Question List */}
             <div className="space-y-6">
               <div className="flex items-center justify-between">
-                <h3 className="font-serif font-bold text-base text-[#001D37]">
+                <h3 className=" font-bold text-base text-[#001D37]">
                   Danh sách câu hỏi ({questions.length})
                 </h3>
                 <button

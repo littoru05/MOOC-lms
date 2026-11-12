@@ -8,10 +8,10 @@ export const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-[#16324F] text-white rounded-lg flex items-center justify-center font-bold text-base font-serif">
+              <div className="w-8 h-8 bg-[#16324F] text-white rounded-lg flex items-center justify-center font-bold text-base">
                 E
               </div>
-              <span className="text-xl font-bold font-serif text-[#001D37]">EduMOOC</span>
+              <span className="text-xl font-bold text-[#001D37]">EduMOOC</span>
             </div>
             <p className="text-xs text-[#5E5E5E] leading-relaxed">
               Hệ thống quản lý đào tạo trực tuyến quy mô lớn (MOOC) chuẩn học thuật hiện đại. Học tập theo lộ trình, làm bài khảo thí và nhận chứng chỉ số có mã băm UUID xác thực công khai.
